@@ -18,31 +18,15 @@ const (
 type Player struct {
 	game *Game
 
-	position Vector
-	rotation float64
-	sprite   *ebiten.Image
+	tank *Tank
 
 	shootCooldown *Timer
 }
 
 func NewPlayer(game *Game) *Player {
-	sprite := game.assets.GetSprite("tankBody_red.png")
-	// var TracksSmallSprite = mustLoadImage("png/tracksSmall.png")
-
-	bounds := sprite.Bounds()
-	halfW := float64(bounds.Dx()) / 2
-	halfH := float64(bounds.Dy()) / 2
-
-	pos := Vector{
-		X: screenWidth/2 - halfW,
-		Y: screenHeight/2 - halfH,
-	}
-
 	return &Player{
 		game:          game,
-		position:      pos,
-		rotation:      0,
-		sprite:        sprite,
+		tank:          NewTank(game),
 		shootCooldown: NewTimer(shootCooldown),
 	}
 }
@@ -52,7 +36,17 @@ func (p *Player) Update() {
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
+	bounds := p.tank.body.Bounds()
+	halfW := float64(bounds.Dx()) / 2
+	halfH := float64(bounds.Dy()) / 2
+
+	position := Vector{
+		X: screenWidth/2 - halfW,
+		Y: screenHeight/2 - halfH,
+	}
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(p.position.X, p.position.Y)
-	screen.DrawImage(p.sprite, op)
+	op.GeoM.Translate(position.X, position.Y)
+	screen.DrawImage(p.tank.body, op)
+	op.GeoM.Translate(float64(p.tank.barrel.Bounds().Dx()-1), float64(-p.tank.barrel.Bounds().Dy()/2))
+	screen.DrawImage(p.tank.barrel, op)
 }
