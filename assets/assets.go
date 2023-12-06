@@ -3,7 +3,6 @@ package assets
 import (
 	"embed"
 	"encoding/xml"
-	"fmt"
 	"image"
 	_ "image/png"
 	"io/fs"
@@ -114,6 +113,6 @@ func mustLoadXMLSpriteMap(name string) SpriteMap {
 	if err := xml.Unmarshal(byteValue, &s); err != nil {
 		panic(err)
 	}
-	fmt.Println(s)
+	// fmt.Println(s)
 	return s
 }

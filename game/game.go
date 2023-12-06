@@ -52,6 +52,9 @@ func NewGame() *Game {
 }
 
 func (g *Game) Update() error {
+	for _, p := range g.players {
+		p.Update()
+	}
 	return nil
 }
 
