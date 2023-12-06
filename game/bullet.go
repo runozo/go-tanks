@@ -16,7 +16,7 @@ type Bullet struct {
 	shootCooldown *Timer
 }
 
-func NewBullet(game *Game) *Bullet {
+func NewBullet(game *Game, position Vector, rotation float64) *Bullet {
 	sprite := game.assets.GetSprite("bulletRed1.png")
 
 	bounds := sprite.Bounds()

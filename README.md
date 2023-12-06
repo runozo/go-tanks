@@ -4,7 +4,7 @@ A game with tanks
 ## Current achievements
 
     [x] Load assets
-    [ ] Draw tank
+    [x] Draw tank
     [ ] Move
     [ ] Rotate cannon
     [ ] Draw playfield
