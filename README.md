@@ -6,7 +6,7 @@ A game with tanks
     [x] Load assets
     [x] Draw tank
     [ ] Move
-    [ ] Rotate cannon
+    [ ] Fire
     [ ] Draw playfield
     [ ] Collisions
     [ ] ...

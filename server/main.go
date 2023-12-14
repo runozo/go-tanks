@@ -23,6 +23,7 @@ func NewGameServer(name string, host string, port int) *GameServer {
 		Port: port,
 	}
 }
+
 func (s *GameServer) startHTTP() {
 	log.Println("Starting HTTP server on port %d", g.Port)
 	go func() {
