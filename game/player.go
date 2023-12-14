@@ -12,6 +12,7 @@ import (
 const (
 	shootCooldown     = time.Millisecond * 500
 	rotationPerSecond = math.Pi
+	pixelPerSecond    = 100.0
 
 	bulletSpawnOffset = 50.0
 )
@@ -38,14 +39,15 @@ func NewPlayer(game *Game) *Player {
 }
 
 func (p *Player) Update() {
-	speed := rotationPerSecond / float64(ebiten.TPS())
+	rotationSpeed := rotationPerSecond / float64(ebiten.TPS())
+	movementSpeed := pixelPerSecond / float64(ebiten.TPS())
 
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		p.rotation -= speed
+		p.rotation -= rotationSpeed
 		fmt.Println(p.rotation, p.position)
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		p.rotation += speed
+		p.rotation += rotationSpeed
 		fmt.Println(p.rotation, p.position)
 	}
 
@@ -64,6 +66,29 @@ func (p *Player) Update() {
 
 		bullet := NewBullet(p.game, spawnPos, p.rotation)
 		p.bullets = append(p.bullets, bullet)
+	}
+
+	// move towards facing
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		//first get the direction the entity is pointed
+		dx := math.Sin(p.rotation)
+		dy := math.Cos(p.rotation)
+		// if direction.length() > 0 {
+		// 	direction = direction.normalise()
+		// }
+		p.position.X += dx * movementSpeed
+		p.position.Y -= dy * movementSpeed
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		//first get the direction the entity is pointed
+		dx := math.Sin(p.rotation)
+		dy := math.Cos(p.rotation)
+		// if direction.length() > 0 {
+		// 	direction = direction.normalise()
+		// }
+		p.position.X -= dx * movementSpeed
+		p.position.Y += dy * movementSpeed
 	}
 }
 
