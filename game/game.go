@@ -22,15 +22,11 @@ type Vector struct {
 // main is the entry point of the program
 
 type Game struct {
-	assets           *assets.Assets
-	players          []*Player
-	meteorSpawnTimer *Timer
-	playfield        *Playfield
-	bullets          []*Bullet
+	assets    *assets.Assets
+	players   []*Player
+	playfield *Playfield
+	bullets   []*Bullet
 
-	score int
-
-	baseVelocity  float64
 	velocityTimer *Timer
 }
 
