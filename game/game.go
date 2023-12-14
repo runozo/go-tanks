@@ -11,11 +11,7 @@ const (
 	screenWidth  = 800
 	screenHeight = 600
 
-	meteorSpawnTime = 1 * time.Second
-
-	baseMeteorVelocity  = 0.25
-	meteorSpeedUpAmount = 0.1
-	meteorSpeedUpTime   = 5 * time.Second
+	velocitySpeedUpTime = 5 * time.Second
 )
 
 type Vector struct {
@@ -40,10 +36,8 @@ type Game struct {
 
 func NewGame() *Game {
 	g := &Game{
-		assets:           assets.NewAssets(),
-		meteorSpawnTimer: NewTimer(meteorSpawnTime),
-		baseVelocity:     baseMeteorVelocity,
-		velocityTimer:    NewTimer(meteorSpeedUpTime),
+		assets:        assets.NewAssets(),
+		velocityTimer: NewTimer(velocitySpeedUpTime),
 	}
 
 	g.players = append(g.players, NewPlayer(g))
