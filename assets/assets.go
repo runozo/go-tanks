@@ -15,6 +15,11 @@ import (
 //go:embed spritesheet/*
 var assets embed.FS
 
+const (
+	spriteSheet  = "spritesheet/allSprites_default.png"
+	xmlSpriteMap = "spritesheet/allSprites_default.xml"
+)
+
 type Assets struct {
 	SpriteSheet       *ebiten.Image
 	SpriteSheetXMLMap SpriteMap
@@ -36,8 +41,8 @@ type SpriteMap struct {
 }
 
 func NewAssets() *Assets {
-	var spriteSheet = mustLoadImage("spritesheet/allSprites_default.png")
-	var spriteMap = mustLoadXMLSpriteMap("spritesheet/allSprites_default.xml")
+	var spriteSheet = mustLoadImage(spriteSheet)
+	var spriteMap = mustLoadXMLSpriteMap(xmlSpriteMap)
 
 	return &Assets{
 		SpriteSheet:       spriteSheet,

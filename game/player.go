@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	_ "image/png"
 	"math"
 	"time"
@@ -44,11 +43,10 @@ func (p *Player) Update() {
 
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		p.rotation -= rotationSpeed
-		fmt.Println(p.rotation, p.position)
 	}
+
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
 		p.rotation += rotationSpeed
-		fmt.Println(p.rotation, p.position)
 	}
 
 	p.shootCooldown.Update()
@@ -93,21 +91,5 @@ func (p *Player) Update() {
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
-	// Draw the tank
-	// body
-	bodyBounds := p.tank.body.Bounds()
-	op_body := &ebiten.DrawImageOptions{}
-	op_body.GeoM.Translate(-float64(bodyBounds.Dx())/2, -float64(bodyBounds.Dy())/2)
-	op_body.GeoM.Rotate(p.rotation)
-	op_body.GeoM.Translate(float64(bodyBounds.Dx())/2, float64(bodyBounds.Dy())/2)
-	op_body.GeoM.Translate(p.position.X, p.position.Y)
-	// barrel
-	barrellBounds := p.tank.barrel.Bounds()
-	op_barrell := &ebiten.DrawImageOptions{}
-	op_barrell.GeoM.Translate(-float64(barrellBounds.Dx())/2, -float64(barrellBounds.Dy()+1))
-	op_barrell.GeoM.Rotate(p.rotation)
-	op_barrell.GeoM.Translate(float64(barrellBounds.Dx())/2, float64(barrellBounds.Dy()+1))
-	op_barrell.GeoM.Translate(p.position.X+float64(p.tank.barrel.Bounds().Dx()-1), p.position.Y+float64(-p.tank.barrel.Bounds().Dy()/2))
-	screen.DrawImage(p.tank.body, op_body)
-	screen.DrawImage(p.tank.barrel, op_barrell)
+	p.tank.Draw(screen, p.position, p.rotation)
 }
