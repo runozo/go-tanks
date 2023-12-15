@@ -55,17 +55,15 @@ var allTiles = []string{
 }
 
 type Playfield struct {
-	game   *Game
-	tiles  []*ebiten.Image
-	width  int
-	height int
+	game  *Game
+	tiles []*ebiten.Image
 }
 
-func NewPlayfield(game *Game, width, height int) *Playfield {
+func NewPlayfield(game *Game) *Playfield {
 	var tiles []*ebiten.Image
 	var i int
-	for y := 0; y < height; y += tileHeight {
-		for x := 0; x < width; x += tileWidth {
+	for y := 0; y < game.height; y += tileHeight {
+		for x := 0; x < game.width; x += tileWidth {
 			if x%tileWidth == 0 && y%tileHeight == 0 {
 				tileName := allTiles[rand.Intn(len(allTiles))]
 				tiles = append(tiles, game.assets.GetSprite(tileName))
@@ -76,10 +74,8 @@ func NewPlayfield(game *Game, width, height int) *Playfield {
 	}
 	// var PlayfieldTile = mustLoadImage("png/tileGrass2.png")
 	return &Playfield{
-		game:   game,
-		tiles:  tiles,
-		width:  width,
-		height: height,
+		game:  game,
+		tiles: tiles,
 	}
 }
 
@@ -89,8 +85,8 @@ func (p *Playfield) Update() {
 
 func (p *Playfield) Draw(screen *ebiten.Image) {
 	var i int
-	for y := 0; y < p.height; y += tileHeight {
-		for x := 0; x < p.width; x += tileWidth {
+	for y := 0; y < p.game.height; y += tileHeight {
+		for x := 0; x < p.game.width; x += tileWidth {
 			if x%tileWidth == 0 && y%tileHeight == 0 {
 				ops := &ebiten.DrawImageOptions{}
 				ops.GeoM.Translate(float64(x), float64(y))
