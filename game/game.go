@@ -37,6 +37,7 @@ func NewGame() *Game {
 	}
 
 	g.players = append(g.players, NewPlayer(g))
+	g.playfield = NewPlayfield(g, screenWidth, screenHeight)
 
 	return g
 }
