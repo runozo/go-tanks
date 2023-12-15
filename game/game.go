@@ -22,6 +22,8 @@ type Vector struct {
 // main is the entry point of the program
 
 type Game struct {
+	width     int
+	height    int
 	assets    *assets.Assets
 	players   []*Player
 	playfield *Playfield
@@ -34,10 +36,12 @@ func NewGame() *Game {
 	g := &Game{
 		assets:        assets.NewAssets(),
 		velocityTimer: NewTimer(velocitySpeedUpTime),
+		width:         screenWidth,
+		height:        screenHeight,
 	}
 
 	g.players = append(g.players, NewPlayer(g))
-	g.playfield = NewPlayfield(g, screenWidth, screenHeight)
+	g.playfield = NewPlayfield(g)
 
 	return g
 }
