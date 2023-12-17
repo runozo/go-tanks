@@ -54,7 +54,13 @@ func (a *Assets) GetSprite(name string) *ebiten.Image {
 	for i := 0; i < len(a.SpriteSheetXMLMap.SubTextures); i++ {
 		subTexture := a.SpriteSheetXMLMap.SubTextures[i]
 		if subTexture.Name == name {
-			return a.SpriteSheet.SubImage(image.Rect(subTexture.X, subTexture.Y, subTexture.X+subTexture.Width, subTexture.Y+subTexture.Height)).(*ebiten.Image)
+			return a.SpriteSheet.SubImage(
+				image.Rect(
+					subTexture.X,
+					subTexture.Y,
+					subTexture.X+subTexture.Width,
+					subTexture.Y+subTexture.Height,
+				)).(*ebiten.Image)
 		}
 	}
 	return nil
