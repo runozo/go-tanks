@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	_ "image/png"
 	"math/rand"
 
@@ -173,7 +172,7 @@ func NewPlayfield(game *Game) *Playfield {
 				tile := allTiles[rand.Intn(len(allTiles))]
 				tile.image = game.assets.GetSprite(tile.name)
 				tiles = append(tiles, &tile)
-				fmt.Println(i, tile.name)
+				// fmt.Println(i, tile.name)
 				i++
 			}
 		}

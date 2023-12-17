@@ -9,20 +9,22 @@ import (
 )
 
 const (
-	shootCooldown     = time.Millisecond * 500
+	shootCooldown     = time.Millisecond * 250
 	rotationPerSecond = math.Pi
 	pixelPerSecond    = 100.0
 
-	bulletSpawnOffset = 50.0
+	bulletSpawnOffset = 40.0
+	bulletSpeed       = 10.0
 )
 
 type Player struct {
 	game *Game
 
-	tank     *Tank
-	rotation float64
-	position Vector
-	bullets  []*Bullet
+	tank         *Tank
+	rotation     float64
+	position     Vector
+	bulletSprite *ebiten.Image
+	bullets      []*Bullet
 
 	shootCooldown *Timer
 }
@@ -34,6 +36,7 @@ func NewPlayer(game *Game) *Player {
 		tank:          NewTank(game),
 		position:      Vector{X: screenWidth / 2, Y: screenHeight / 2},
 		shootCooldown: NewTimer(shootCooldown),
+		bulletSprite:  game.assets.GetSprite("bulletRed2.png"),
 	}
 }
 
@@ -53,17 +56,20 @@ func (p *Player) Update() {
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		p.shootCooldown.Reset()
 
-		bounds := p.tank.body.Bounds()
+		bounds := p.tank.BodySprite.Bounds()
+		bulletBounds := p.bulletSprite.Bounds()
+		halfWBullet := bulletBounds.Dx() / 2
+		halfHBullet := bulletBounds.Dy() / 2
 		halfW := float64(bounds.Dx()) / 2
 		halfH := float64(bounds.Dy()) / 2
 
 		spawnPos := Vector{
-			p.position.X + halfW + math.Sin(p.rotation)*bulletSpawnOffset,
-			p.position.Y + halfH + math.Cos(p.rotation)*-bulletSpawnOffset,
+			p.position.X + halfW - float64(halfWBullet) + math.Sin(p.rotation)*bulletSpawnOffset,
+			p.position.Y + halfH - float64(halfHBullet) + math.Cos(p.rotation)*-bulletSpawnOffset,
 		}
 
-		bullet := NewBullet(p.game, spawnPos, p.rotation)
-		p.bullets = append(p.bullets, bullet)
+		p.bullets = append(p.bullets, NewBullet(p.bulletSprite, spawnPos, p.rotation, bulletSpeed))
+
 	}
 
 	// move towards facing
@@ -88,8 +94,21 @@ func (p *Player) Update() {
 		p.position.X -= dx * movementSpeed
 		p.position.Y += dy * movementSpeed
 	}
+
+	var visibleBullets []*Bullet
+	for _, bullet := range p.bullets {
+		bullet.Update()
+		if bullet.position.X > 0 && bullet.position.X < float64(p.game.width) && bullet.position.Y > 0 && bullet.position.Y < float64(p.game.height) {
+			visibleBullets = append(visibleBullets, bullet)
+		}
+	}
+	p.bullets = visibleBullets
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
 	p.tank.Draw(screen, p.position, p.rotation)
+	for _, bullet := range p.bullets {
+		bullet.Draw(screen)
+	}
+	// fmt.Println("Bullets", len(p.bullets))
 }
