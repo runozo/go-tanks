@@ -7,7 +7,7 @@ A game with tanks, try it on https://runozo.github.io/go-tanks/
     [x] Load assets
     [x] Draw tank
     [x] Tank moves
-    [ ] Fire
+    [x] Tank fires
     [ ] Draw playfield
     [ ] Collisions
     [ ] ...
