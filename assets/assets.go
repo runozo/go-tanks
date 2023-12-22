@@ -6,6 +6,8 @@ import (
 	"image"
 	_ "image/png"
 	"io/fs"
+	"log"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/image/font"
@@ -64,6 +66,20 @@ func (a *Assets) GetSprite(name string) *ebiten.Image {
 		}
 	}
 	return nil
+}
+
+func (a *Assets) GetRandomTankBody() *ebiten.Image {
+	bodies := []string{"tankBody_bigRed.png", "tankBody_bigRed_outline.png", "tankBody_blue.png", "tankBody_blue_outline.png", "tankBody_dark.png", "tankBody_darkLarge.png", "tankBody_darkLarge_outline.png", "tankBody_dark_outline.png", "tankBody_green.png", "tankBody_green_outline.png", "tankBody_huge.png", "tankBody_huge_outline.png", "tankBody_red.png", "tankBody_red_outline.png", "tankBody_sand.png", "tankBody_sand_outline.png", "tank_bigRed.png", "tank_blue.png", "tank_dark.png", "tank_darkLarge.png", "tank_green.png", "tank_huge.png", "tank_red.png", "tank_sand.png"}
+	name := bodies[rand.Intn(len(bodies))]
+	log.Printf("new tank body: %s\n", name)
+	return a.GetSprite(name)
+}
+
+func (a *Assets) GetRandomTankBarrell() *ebiten.Image {
+	barrels := []string{"tankDark_barrel1.png", "tankDark_barrel1_outline.png", "tankDark_barrel2.png", "tankDark_barrel2_outline.png", "tankDark_barrel3.png", "tankDark_barrel3_outline.png", "tankGreen_barrel1.png", "tankGreen_barrel1_outline.png", "tankGreen_barrel2.png", "tankGreen_barrel2_outline.png", "tankGreen_barrel3.png", "tankGreen_barrel3_outline.png", "tankRed_barrel1.png", "tankRed_barrel1_outline.png", "tankRed_barrel2.png", "tankRed_barrel2_outline.png", "tankRed_barrel3.png", "tankRed_barrel3_outline.png", "tankSand_barrel1.png", "tankSand_barrel1_outline.png", "tankSand_barrel2.png", "tankSand_barrel2_outline.png", "tankSand_barrel3.png", "tankSand_barrel3_outline.png"}
+	name := barrels[rand.Intn(len(barrels))]
+	log.Printf("new tank barrell: %s\n", name)
+	return a.GetSprite(name)
 }
 
 func mustLoadImage(name string) *ebiten.Image {

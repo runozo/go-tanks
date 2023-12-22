@@ -9,13 +9,10 @@ type Tank struct {
 	BarrelSprite *ebiten.Image
 }
 
-func NewTank(game *Game) *Tank {
-	body := game.assets.GetSprite("tankBody_red.png")
-	barrel := game.assets.GetSprite("tankSand_barrel1_outline.png")
-
+func NewTank(game *Game, bodySprite, barrelSprite *ebiten.Image) *Tank {
 	return &Tank{
-		BodySprite:   body,
-		BarrelSprite: barrel,
+		BodySprite:   bodySprite,
+		BarrelSprite: barrelSprite,
 	}
 }
 
