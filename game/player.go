@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
 	shootCooldown     = time.Millisecond * 250
 	rotationPerSecond = math.Pi
-	pixelPerSecond    = 100.0
+	tankSpeed         = 100.0
 
 	bulletSpawnOffset = 40.0
 	bulletSpeed       = 10.0
@@ -30,19 +31,23 @@ type Player struct {
 }
 
 func NewPlayer(game *Game) *Player {
+	bodySprite := game.assets.GetRandomTankBody()
+	barrelSprite := game.assets.GetRandomTankBarrell()
+	bulletSprite := game.assets.GetSprite("bulletRed2.png")
+
 	return &Player{
 		game:          game,
 		rotation:      0,
-		tank:          NewTank(game),
+		tank:          NewTank(game, bodySprite, barrelSprite),
 		position:      Vector{X: screenWidth / 2, Y: screenHeight / 2},
 		shootCooldown: NewTimer(shootCooldown),
-		bulletSprite:  game.assets.GetSprite("bulletRed2.png"),
+		bulletSprite:  bulletSprite,
 	}
 }
 
 func (p *Player) Update() {
 	rotationSpeed := rotationPerSecond / float64(ebiten.TPS())
-	movementSpeed := pixelPerSecond / float64(ebiten.TPS())
+	movementSpeed := tankSpeed / float64(ebiten.TPS())
 
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		p.rotation -= rotationSpeed
@@ -93,6 +98,10 @@ func (p *Player) Update() {
 		// }
 		p.position.X -= dx * movementSpeed
 		p.position.Y += dy * movementSpeed
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
+		p.tank = NewTank(p.game, p.game.assets.GetRandomTankBody(), p.game.assets.GetRandomTankBarrell())
 	}
 
 	var visibleBullets []*Bullet
