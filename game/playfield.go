@@ -12,19 +12,56 @@ const (
 	tileHeight = 64
 )
 
+var tile_options = []string{
+	"tileGrass_roadCornerLL.png",
+	"tileGrass_roadCornerLR.png",
+	"tileGrass_roadCornerUL.png",
+	"tileGrass_roadCornerUR.png",
+	"tileGrass_roadCrossing.png",
+	"tileGrass_roadCrossingRound.png",
+	"tileGrass_roadEast.png",
+	"tileGrass_roadNorth.png",
+	"tileGrass_roadSplitE.png",
+	"tileGrass_roadSplitN.png",
+	"tileGrass_roadSplitS.png",
+	"tileGrass_roadSplitW.png",
+	"tileGrass_roadTransitionE.png",
+	"tileGrass_roadTransitionE_dirt.png",
+	"tileGrass_roadTransitionN.png",
+	"tileGrass_roadTransitionN_dirt.png",
+	"tileGrass_roadTransitionS.png",
+	"tileGrass_roadTransitionS_dirt.png",
+	"tileGrass_roadTransitionW.png",
+	"tileGrass_roadTransitionW_dirt.png",
+	"tileGrass_transitionE.png",
+	"tileGrass_transitionN.png",
+	"tileGrass_transitionS.png",
+	"tileGrass_transitionW.png",
+	"tileSand1.png",
+	"tileSand2.png",
+	"tileSand_roadCornerLL.png",
+	"tileSand_roadCornerLR.png",
+	"tileSand_roadCornerUL.png",
+	"tileSand_roadCornerUR.png",
+	"tileSand_roadCrossing.png",
+	"tileSand_roadCrossingRound.png",
+	"tileSand_roadEast.png",
+	"tileSand_roadNorth.png",
+	"tileSand_roadSplitE.png",
+	"tileSand_roadSplitN.png",
+	"tileSand_roadSplitS.png",
+	"tileSand_roadSplitW.png",
+}
+
 type Tile struct {
-	name         string
-	image        *ebiten.Image
-	upAllowed    []string
-	leftAllowed  []string
-	downAllowed  []string
-	rightAllowed []string
+	name    string
+	options []string
 }
 
 var allTiles = []Tile{
 	Tile{
 		name:        "tileGrass_roadCornerLL.png",
-		leftAllowed: []string{"tileGrass_roadSplitN.png", "tileGrass_roadCrossing.png", "11 tileGrass_roadCornerLR.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionW_dirt.png"},
+		leftAllowed: []string{"tileGrass_roadSplitN.png", "tileGrass_roadCrossing.png", "tileGrass_roadCornerLR.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionW_dirt.png"},
 	},
 	Tile{
 		name:         "tileGrass_roadCornerLR.png",
@@ -164,7 +201,21 @@ type Playfield struct {
 }
 
 func NewPlayfield(game *Game) *Playfield {
+	// Wave collapse algorithm
+	// Initialize playfield data structure
 	var tiles []*Tile
+	for y := 0; y < game.height; y += tileHeight {
+		for x := 0; x < game.width; x += tileWidth {
+			if x%tileWidth == 0 && y%tileHeight == 0 {
+				tile := Tile{
+					name:    "",
+					options: tile_options,
+				}
+				tiles = append(tiles, &tile)
+			}
+		}
+	}
+
 	var i int
 	for y := 0; y < game.height; y += tileHeight {
 		for x := 0; x < game.width; x += tileWidth {
