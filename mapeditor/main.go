@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	_ "image/png"
 	"log"
 	"os"
 
@@ -123,6 +124,7 @@ func mustLoadXMLSpriteMap(name string) SpriteMap {
 }
 
 func mustLoadImage(name string) *ebiten.Image {
+	fmt.Println(name)
 	f, err := os.Open(name)
 	if err != nil {
 		panic(err)
