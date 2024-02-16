@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log"
 	"math/rand"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/image/font"
@@ -83,32 +84,17 @@ func (a *Assets) GetRandomTankBarrell() *ebiten.Image {
 }
 
 func mustLoadImage(name string) *ebiten.Image {
-	f, err := assets.Open(name)
+	dat, err := os.Open(name)
 	if err != nil {
 		panic(err)
 	}
-	defer f.Close()
 
-	img, _, err := image.Decode(f)
+	img, _, err := image.Decode(dat)
 	if err != nil {
 		panic(err)
 	}
 
 	return ebiten.NewImageFromImage(img)
-}
-
-func mustLoadImages(path string) []*ebiten.Image {
-	matches, err := fs.Glob(assets, path)
-	if err != nil {
-		panic(err)
-	}
-
-	images := make([]*ebiten.Image, len(matches))
-	for i, match := range matches {
-		images[i] = mustLoadImage(match)
-	}
-
-	return images
 }
 
 func mustLoadFont(name string) font.Face {
