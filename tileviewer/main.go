@@ -8,6 +8,7 @@ import (
 	_ "image/png"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -19,14 +20,19 @@ import (
 const (
 	spriteSheet  = "../assets/spritesheet/allSprites_default.png"
 	xmlSpriteMap = "../assets/spritesheet/allSprites_default.xml"
-	screenWidth  = 800
-	screenHeight = 800
+	screenWidth  = 1024
+	screenHeight = 900
 	tileWidth    = 64
 	tileHeight   = 64
 )
 
 var mplusNormalFont font.Face
-var icons []*ebiten.Image
+var icons []Icon
+
+type Icon struct {
+	Name string
+	Img  *ebiten.Image
+}
 
 type SubTexture struct {
 	XMLName xml.Name `xml:"SubTexture"`
@@ -49,13 +55,16 @@ func init() {
 
 	for i := 0; i < len(xml.SubTextures); i++ {
 		subTexture := xml.SubTextures[i]
-		icons = append(icons, origin.SubImage(
-			image.Rect(
-				subTexture.X,
-				subTexture.Y,
-				subTexture.X+subTexture.Width,
-				subTexture.Y+subTexture.Height,
-			)).(*ebiten.Image))
+		icons = append(icons, Icon{
+			Name: subTexture.Name,
+			Img: origin.SubImage(
+				image.Rect(
+					subTexture.X,
+					subTexture.Y,
+					subTexture.X+subTexture.Width,
+					subTexture.Y+subTexture.Height,
+				)).(*ebiten.Image),
+		})
 	}
 
 	// Load fonts
@@ -65,7 +74,7 @@ func init() {
 		log.Fatal(err)
 	}
 	mplusNormalFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    24,
+		Size:    14,
 		DPI:     dpi,
 		Hinting: font.HintingVertical,
 	})
@@ -84,18 +93,27 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	const x = 20
+	x := 20
+	y := 20
 	// Draw info
-	msg := fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS())
-	text.Draw(screen, msg, mplusNormalFont, x, 20, color.White)
-	var i int
-	for y := 0; y < screenHeight; y += tileHeight {
-		for x := 0; x < screenWidth; x += tileWidth {
-			if x%tileWidth == 0 && y%tileHeight == 0 {
-				ops := &ebiten.DrawImageOptions{}
-				ops.GeoM.Translate(float64(x), float64(y))
-				screen.DrawImage(icons[i], ops)
-				i++
+	// msg := fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS())
+	// text.Draw(screen, msg, mplusNormalFont, x, 20, color.White)
+	for i, max_h := 0, 0; i < len(icons); i++ {
+		if strings.HasPrefix(icons[i].Name, "tile") {
+
+			w, h := icons[i].Img.Bounds().Dx()*2, icons[i].Img.Bounds().Dy()
+			if h > max_h {
+				max_h = h
+			}
+			ops := &ebiten.DrawImageOptions{}
+			ops.GeoM.Translate(float64(x), float64(y))
+			screen.DrawImage(icons[i].Img, ops)
+			text.Draw(screen, fmt.Sprintf("%.28s", icons[i].Name), mplusNormalFont, x, y, color.White)
+			x = x + w*2
+			if x > screenWidth {
+				x = 20
+				y = y + max_h + 10
+				max_h = 0
 			}
 		}
 	}

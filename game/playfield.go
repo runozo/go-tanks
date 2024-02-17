@@ -10,6 +10,10 @@ import (
 const (
 	tileWidth  = 64
 	tileHeight = 64
+	ruleUP     = 0
+	ruleRIGHT  = 1
+	ruleDOWN   = 2
+	ruleLEFT   = 3
 )
 
 var tile_options = []string{
@@ -58,141 +62,44 @@ type Tile struct {
 	options []string
 }
 
-var allTiles = []Tile{
-	Tile{
-		name:        "tileGrass_roadCornerLL.png",
-		leftAllowed: []string{"tileGrass_roadSplitN.png", "tileGrass_roadCrossing.png", "tileGrass_roadCornerLR.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionW_dirt.png"},
+var rules = map[string][][]string{
+	// up, right, down, left
+	"tileGrass1.png": {
+		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_transitionN.png"}, {"tileGrass1.png", "tileGrass2.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"}, {"tileGrass1.png", "tileGrass2.png", "tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"}, {"tileGrass1.png", "tileGrass2.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
 	},
-	Tile{
-		name:         "tileGrass_roadCornerLR.png",
-		rightAllowed: []string{"tileGrass_roadCornerUL.png"},
+	"tileGrass2.png": {
+		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_transitionN.png"}, {"tileGrass1.png", "tileGrass2.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"}, {"tileGrass1.png", "tileGrass2.png", "tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"}, {"tileGrass1.png", "tileGrass2.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
 	},
-	Tile{
-		name: "tileGrass_roadCornerUL.png",
+	"tileGrass_roadCornerLL.png": {
+		{"tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"},
+		{"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
+		{"tileGrass_roadCornerUL.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png",
+			"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"},
+		{"tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png",
+			"tileGrass_roadCrossingRound.png",
+			"tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionW_dirt.png", "tileGrass_roadTransitionW.png"},
 	},
-	Tile{
-		name: "tileGrass_roadCornerUR.png",
+	"tileGrass_roadCornerLR.png": {
+		{"tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"}, {"tileGrass_roadCornerLL.png", "tileGrass_roadCornerUL.png", "tileGrass_roadCrossing.png",
+			"tileGrass_roadCrossingRound.png",
+			"tileGrass_roadSplitW.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionE_dirt.png", "tileGrass_roadTransitionE.png"}, {"tileGrass_roadCornerUL.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png",
+			"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"}, {"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
 	},
-	Tile{
-		name: "tileGrass_roadCrossing.png",
+	"tileGrass_roadCornerUL.png": {
+		{"tileGrass_roadCornerUL.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png",
+			"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"}, {"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"}, {"tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"}, {"tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png",
+			"tileGrass_roadCrossingRound.png",
+			"tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionW_dirt.png", "tileGrass_roadTransitionW.png"},
+	}, "tileGrass_roadCornerUR.png": {
+		{"tileGrass_roadCornerUL.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png",
+			"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"}, {"tileGrass_roadCornerLL.png", "tileGrass_roadCornerUL.png", "tileGrass_roadCrossing.png",
+			"tileGrass_roadCrossingRound.png",
+			"tileGrass_roadSplitW.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionE_dirt.png", "tileGrass_roadTransitionE.png"}, {"tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"}, {"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
+	}, "tileGrass_roadCrossing.png": {
+		{"tileGrass_roadCornerLL.png", "tileGrass_roadCornerLR.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitW.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionN_dirt.png", "tileGrass_roadTransitionN.png"}, {"tileGrass_roadCornerUL.png", "tileGrass_roadCornerLL.png", "tileGrass_roadEast.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionE_dirt.png", "tileGrass_roadTransitionE.png"}, {"tileGrass_roadCornerUL.png", "tileGrass_roadCornerUR.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"}, {"tileGrass_roadCornerUR.png", "tileGrass_roadCornerLR.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionW_dirt.png", "tileGrass_roadTransitionW.png"},
 	},
-	Tile{
-		name: "tileGrass_roadCrossingRound.png",
-	},
-	Tile{
-		name: "tileGrass_roadEast.png",
-	},
-	Tile{
-		name:        "tileGrass_roadNorth.png",
-		upAllowed:   []string{"tileGrass_roadCrossing.png", "tileGrass_roadCrossing.png"},
-		downAllowed: []string{"tileGrass_roadCrossing.png", "tileGrass_roadCrossing.png"},
-	},
-	Tile{
-		name: "tileGrass_roadSplitE.png",
-	},
-	Tile{
-		name:         "tileGrass_roadSplitN.png",
-		leftAllowed:  []string{"tileGrass_roadSplitE.png", "tileGrass_roadTransitionE.png"},
-		rightAllowed: []string{},
-	},
-	Tile{
-		name: "tileGrass_roadSplitS.png",
-	},
-	Tile{
-		name: "tileGrass_roadSplitW.png",
-	},
-	Tile{
-		name: "tileGrass_roadTransitionE.png",
-	},
-	Tile{
-		name: "tileGrass_roadTransitionE_dirt.png",
-	},
-	Tile{
-		name: "tileGrass_roadTransitionN.png",
-	},
-	Tile{
-		name: "tileGrass_roadTransitionN_dirt.png",
-	},
-	Tile{
-		name: "tileGrass_roadTransitionS.png",
-	},
-	Tile{
-		name: "tileGrass_roadTransitionS_dirt.png",
-	},
-	Tile{
-		name: "tileGrass_roadTransitionW.png",
-	},
-	Tile{
-		name: "tileGrass_roadTransitionW_dirt.png",
-	},
-	Tile{
-		name: "tileGrass_transitionE.png",
-	},
-	Tile{
-		name: "tileGrass_transitionN.png",
-	},
-	Tile{
-		name: "tileGrass_transitionS.png",
-	},
-	Tile{
-		name: "tileGrass_transitionW.png",
-	},
-	Tile{
-		name:         "tileSand1.png",
-		leftAllowed:  []string{"tileGrass_transitionE.png", "tileSand1.png", "tileSand2.png"},
-		upAllowed:    []string{"tileGrass_transitionN.png", "tileSand1.png", "tileSand2.png"},
-		downAllowed:  []string{"tileGrass_transitionS.png", "tileSand1.png", "tileSand2.png"},
-		rightAllowed: []string{"tileGrass_transitionW.png", "tileSand1.png", "tileSand2.png"},
-	},
-	Tile{
-		name:         "tileSand2.png",
-		leftAllowed:  []string{"tileGrass_transitionE.png", "tileSand1.png", "tileSand2.png"},
-		upAllowed:    []string{"tileGrass_transitionN.png", "tileSand1.png", "tileSand2.png"},
-		downAllowed:  []string{"tileGrass_transitionS.png", "tileSand1.png", "tileSand2.png"},
-		rightAllowed: []string{"tileGrass_transitionW.png", "tileSand1.png", "tileSand2.png"},
-	},
-	Tile{
-		name: "tileSand_roadCornerLL.png",
-	},
-	Tile{
-		name: "tileSand_roadCornerLR.png",
-	},
-	Tile{
-		name: "tileSand_roadCornerUL.png",
-	},
-	Tile{
-		name: "tileSand_roadCornerUR.png",
-	},
-	Tile{
-		name: "tileSand_roadCrossing.png",
-	},
-	Tile{
-		name: "tileSand_roadCrossingRound.png",
-	},
-	Tile{
-		name: "tileSand_roadEast.png",
-	},
-	Tile{
-		name:      "tileSand_roadNorth.png",
-		upAllowed: []string{"tileSand_roadSplitS.png"},
-	},
-	Tile{
-		name:         "tileSand_roadSplitE.png",
-		rightAllowed: []string{"tileGrass_roadSplitS.png"},
-	},
-	Tile{
-		name:        "tileSand_roadSplitN.png",
-		upAllowed:   []string{"tileSand_roadSplitS.png"},
-		leftAllowed: []string{"tileGrass_roadTransitionW_dirt.png"},
-	},
-
-	Tile{
-		name:        "tileSand_roadSplitS.png",
-		downAllowed: []string{"tileSand_roadSplitN.png"},
-	},
-	Tile{
-		name: "tileSand_roadSplitW.png",
-	},
+	"tileGrass_roadCrossingRound.png": {{}, {}, {}, {}},
+	"tileGrass_roadEast.png":          {{}, {}, {}, {}}, "tileGrass_roadNorth.png": {{}, {}, {}, {}}, "tileGrass_roadSplitE.png": {{}, {}, {}, {}}, "tileGrass_roadSplitN.png": {{}, {}, {}, {}}, "tileGrass_roadSplitS.png": {{}, {}, {}, {}}, "tileGrass_roadSplitW.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionE.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionE_dirt.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionN.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionN_dirt.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionS.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionS_dirt.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionW.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionW_dirt.png": {{}, {}, {}, {}}, "tileGrass_transitionE.png": {{}, {}, {}, {}}, "tileGrass_transitionN.png": {{}, {}, {}, {}}, "tileGrass_transitionS.png": {{}, {}, {}, {}}, "tileGrass_transitionW.png": {{}, {}, {}, {}}, "tileSand1.png": {{}, {}, {}, {}}, "tileSand2.png": {{}, {}, {}, {}}, "tileSand_roadCornerLL.png": {{}, {}, {}, {}}, "tileSand_roadCornerLR.png": {{}, {}, {}, {}}, "tileSand_roadCornerUL.png": {{}, {}, {}, {}}, "tileSand_roadCornerUR.png": {{}, {}, {}, {}}, "tileSand_roadCrossing.png": {{}, {}, {}, {}}, "tileSand_roadCrossingRound.png": {{}, {}, {}, {}}, "tileSand_roadEast.png": {{}, {}, {}, {}}, "tileSand_roadNorth.png": {{}, {}, {}, {}}, "tileSand_roadSplitE.png": {{}, {}, {}, {}}, "tileSand_roadSplitN.png": {{}, {}, {}, {}}, "tileSand_roadSplitS.png": {{}, {}, {}, {}}, "tileSand_roadSplitW.png": {{}, {}, {}, {}},
 }
 
 type Playfield struct {
@@ -203,18 +110,7 @@ type Playfield struct {
 func NewPlayfield(game *Game) *Playfield {
 	// Wave collapse algorithm
 	// Initialize playfield data structure
-	var tiles []*Tile
-	for y := 0; y < game.height; y += tileHeight {
-		for x := 0; x < game.width; x += tileWidth {
-			if x%tileWidth == 0 && y%tileHeight == 0 {
-				tile := Tile{
-					name:    "",
-					options: tile_options,
-				}
-				tiles = append(tiles, &tile)
-			}
-		}
-	}
+	var tiles []*ebiten.Image
 
 	var i int
 	for y := 0; y < game.height; y += tileHeight {
