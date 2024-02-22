@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	_ "image/png"
 	"math/rand"
 
@@ -17,100 +16,47 @@ const (
 	ruleLEFT   = 3
 )
 
-var tile_options = []string{
-	"tileGrass_roadCornerLL.png",
-	"tileGrass_roadCornerLR.png",
-	"tileGrass_roadCornerUL.png",
-	"tileGrass_roadCornerUR.png",
-	"tileGrass_roadCrossing.png",
-	"tileGrass_roadCrossingRound.png",
-	"tileGrass_roadEast.png",
-	"tileGrass_roadNorth.png",
-	"tileGrass_roadSplitE.png",
-	"tileGrass_roadSplitN.png",
-	"tileGrass_roadSplitS.png",
-	"tileGrass_roadSplitW.png",
-	"tileGrass_roadTransitionE.png",
-	"tileGrass_roadTransitionE_dirt.png",
-	"tileGrass_roadTransitionN.png",
-	"tileGrass_roadTransitionN_dirt.png",
-	"tileGrass_roadTransitionS.png",
-	"tileGrass_roadTransitionS_dirt.png",
-	"tileGrass_roadTransitionW.png",
-	"tileGrass_roadTransitionW_dirt.png",
-	"tileGrass_transitionE.png",
-	"tileGrass_transitionN.png",
-	"tileGrass_transitionS.png",
-	"tileGrass_transitionW.png",
-	"tileSand1.png",
-	"tileSand2.png",
-	"tileSand_roadCornerLL.png",
-	"tileSand_roadCornerLR.png",
-	"tileSand_roadCornerUL.png",
-	"tileSand_roadCornerUR.png",
-	"tileSand_roadCrossing.png",
-	"tileSand_roadCrossingRound.png",
-	"tileSand_roadEast.png",
-	"tileSand_roadNorth.png",
-	"tileSand_roadSplitE.png",
-	"tileSand_roadSplitN.png",
-	"tileSand_roadSplitS.png",
-	"tileSand_roadSplitW.png",
-}
-
-var rules = map[string][][]string{
-	// up, right, down, left
-	"tileGrass1.png": {
-		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_transitionN.png"},
-		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
-		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"},
-		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
-	},
-	"tileGrass2.png": {
-		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_transitionN.png"},
-		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
-		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"},
-		{"tileGrass1.png", "tileGrass2.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
-	},
-	"tileGrass_roadCornerLL.png": {
-		{"tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"},
-		{"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
-		{"tileGrass_roadCornerUL.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"},
-		{"tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionW_dirt.png", "tileGrass_roadTransitionW.png"},
-	},
-	"tileGrass_roadCornerLR.png": {
-		{"tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"},
-		{"tileGrass_roadCornerLL.png", "tileGrass_roadCornerUL.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png", "tileGrass_roadSplitW.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionE_dirt.png", "tileGrass_roadTransitionE.png"},
-		{"tileGrass_roadCornerUL.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"},
-		{"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
-	},
-	"tileGrass_roadCornerUL.png": {
-		{"tileGrass_roadCornerUL.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"},
-		{"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
-		{"tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"},
-		{"tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionW_dirt.png", "tileGrass_roadTransitionW.png"},
-	},
-	"tileGrass_roadCornerUR.png": {
-		{"tileGrass_roadCornerLL.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"},
-		{"tileGrass_roadCornerLL.png", "tileGrass_roadCornerUL.png", "tileGrass_roadCrossing.png", "tileGrass_roadCrossingRound.png", "tileGrass_roadSplitW.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionE_dirt.png", "tileGrass_roadTransitionE.png"},
-		{"tileGrass_roadEast.png", "tileGrass_roadSplitN.png", "tileGrass_roadCornerUR.png", "tileGrass_roadCornerUL.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionN.png"},
-		{"tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadCornerLR.png", "tileGrass_roadCornerUR.png", "tileGrass1.png", "tileGrass2.png", "tileGrass_transitionE.png"},
-	},
-	"tileGrass_roadCrossing.png": {
-		{"tileGrass_roadCornerLL.png", "tileGrass_roadCornerLR.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitW.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionN_dirt.png", "tileGrass_roadTransitionN.png"},
-		{"tileGrass_roadCornerUL.png", "tileGrass_roadCornerLL.png", "tileGrass_roadEast.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionE_dirt.png", "tileGrass_roadTransitionE.png"},
-		{"tileGrass_roadCornerUL.png", "tileGrass_roadCornerUR.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitW.png", "tileGrass_roadTransitionS_dirt.png", "tileGrass_roadTransitionS.png"},
-		{"tileGrass_roadCornerUR.png", "tileGrass_roadCornerLR.png", "tileGrass_roadNorth.png", "tileGrass_roadSplitE.png", "tileGrass_roadSplitN.png", "tileGrass_roadSplitS.png", "tileGrass_roadTransitionW_dirt.png", "tileGrass_roadTransitionW.png"},
-	},
-	//"tileGrass_roadCrossingRound.png": {{}, {}, {}, {}},
-	//"tileGrass_roadEast.png":          {{}, {}, {}, {}},
-	//"tileGrass_roadNorth.png": {{}, {}, {}, {}},
-	//"tileGrass_roadSplitE.png": {{}, {}, {}, {}},
-	//"tileGrass_roadSplitN.png": {{}, {}, {}, {}},
-	//"tileGrass_roadSplitS.png": {{}, {}, {}, {}},
-	//"tileGrass_roadSplitW.png": {{}, {}, {}, {}},
-	//"tileGrass_roadTransitionE.png": {{}, {}, {}, {}},
-	//"tileGrass_roadTransitionE_dirt.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionN.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionN_dirt.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionS.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionS_dirt.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionW.png": {{}, {}, {}, {}}, "tileGrass_roadTransitionW_dirt.png": {{}, {}, {}, {}}, "tileGrass_transitionE.png": {{}, {}, {}, {}}, "tileGrass_transitionN.png": {{}, {}, {}, {}}, "tileGrass_transitionS.png": {{}, {}, {}, {}}, "tileGrass_transitionW.png": {{}, {}, {}, {}}, "tileSand1.png": {{}, {}, {}, {}}, "tileSand2.png": {{}, {}, {}, {}}, "tileSand_roadCornerLL.png": {{}, {}, {}, {}}, "tileSand_roadCornerLR.png": {{}, {}, {}, {}}, "tileSand_roadCornerUL.png": {{}, {}, {}, {}}, "tileSand_roadCornerUR.png": {{}, {}, {}, {}}, "tileSand_roadCrossing.png": {{}, {}, {}, {}}, "tileSand_roadCrossingRound.png": {{}, {}, {}, {}}, "tileSand_roadEast.png": {{}, {}, {}, {}}, "tileSand_roadNorth.png": {{}, {}, {}, {}}, "tileSand_roadSplitE.png": {{}, {}, {}, {}}, "tileSand_roadSplitN.png": {{}, {}, {}, {}}, "tileSand_roadSplitS.png": {{}, {}, {}, {}}, "tileSand_roadSplitW.png": {{}, {}, {}, {}},
+var tileOptions = map[string][]int{
+	"tileGrass1.png":                     {0, 0, 0, 0},
+	"tileGrass2.png":                     {0, 0, 0, 0},
+	"tileGrass_roadCornerLL.png":         {0, 0, 1, 1},
+	"tileGrass_roadCornerLR.png":         {0, 1, 1, 0},
+	"tileGrass_roadCornerUL.png":         {1, 0, 0, 1},
+	"tileGrass_roadCornerUR.png":         {1, 1, 0, 0},
+	"tileGrass_roadCrossing.png":         {1, 1, 1, 1},
+	"tileGrass_roadCrossingRound.png":    {1, 1, 1, 1},
+	"tileGrass_roadEast.png":             {0, 1, 0, 1},
+	"tileGrass_roadNorth.png":            {1, 0, 1, 0},
+	"tileGrass_roadSplitE.png":           {1, 1, 1, 0},
+	"tileGrass_roadSplitN.png":           {1, 1, 0, 1},
+	"tileGrass_roadSplitS.png":           {0, 1, 1, 1},
+	"tileGrass_roadSplitW.png":           {1, 0, 1, 1},
+	"tileGrass_roadTransitionE.png":      {4, 3, 4, 1},
+	"tileGrass_roadTransitionE_dirt.png": {4, 3, 4, 1},
+	"tileGrass_roadTransitionN.png":      {3, 6, 1, 6},
+	"tileGrass_roadTransitionN_dirt.png": {3, 6, 1, 6},
+	"tileGrass_roadTransitionS.png":      {1, 6, 3, 6},
+	"tileGrass_roadTransitionS_dirt.png": {1, 6, 3, 6},
+	"tileGrass_roadTransitionW.png":      {4, 1, 4, 3},
+	"tileGrass_roadTransitionW_dirt.png": {4, 1, 4, 3},
+	"tileGrass_transitionE.png":          {4, 2, 4, 0},
+	"tileGrass_transitionN.png":          {2, 6, 0, 6},
+	"tileGrass_transitionS.png":          {0, 4, 2, 4},
+	"tileGrass_transitionW.png":          {4, 0, 4, 2},
+	"tileSand1.png":                      {2, 2, 2, 2},
+	"tileSand2.png":                      {2, 2, 2, 2},
+	"tileSand_roadCornerLL.png":          {2, 2, 3, 3},
+	"tileSand_roadCornerLR.png":          {2, 3, 3, 2},
+	"tileSand_roadCornerUL.png":          {3, 2, 2, 3},
+	"tileSand_roadCornerUR.png":          {3, 3, 2, 2},
+	"tileSand_roadCrossing.png":          {3, 3, 3, 3},
+	"tileSand_roadCrossingRound.png":     {3, 3, 3, 3},
+	"tileSand_roadEast.png":              {2, 3, 2, 3},
+	"tileSand_roadNorth.png":             {3, 2, 3, 2},
+	"tileSand_roadSplitE.png":            {3, 3, 3, 2},
+	"tileSand_roadSplitN.png":            {3, 3, 2, 3},
+	"tileSand_roadSplitS.png":            {2, 3, 3, 3},
+	"tileSand_roadSplitW.png":            {3, 2, 3, 3},
 }
 
 type Tile struct {
@@ -122,6 +68,8 @@ type Playfield struct {
 	tiles []*Tile
 }
 
+var cells [][]string
+
 func NewPlayfield(game *Game) *Playfield {
 	// Wave function collapse algorithm
 	// https://pvs-studio.com/en/blog/posts/csharp/1027/
@@ -131,9 +79,9 @@ func NewPlayfield(game *Game) *Playfield {
 	// setup cells with all the options
 	var initialOptions []string
 
-	for k, r := range rules {
-		if len(r[ruleUP]) > 0 && len(r[ruleRIGHT]) > 0 && len(r[ruleDOWN]) > 0 && len(r[ruleLEFT]) > 0 {
-			fmt.Println(r)
+	for k, o := range tileOptions {
+		if len(o) == 4 {
+			// fmt.Println(o)
 			initialOptions = append(initialOptions, k)
 		}
 	}
@@ -141,83 +89,23 @@ func NewPlayfield(game *Game) *Playfield {
 	tilesX := game.width/tileWidth + 1
 	tilesY := game.height/tileHeight + 1
 
-	var cells [][]string
-
 	for j := 0; j < tilesY; j++ {
 		for i := 0; i < tilesX; i++ {
 			cells = append(cells, initialOptions)
 		}
 	}
 
+	for i := 0; i < len(cells); i++ {
+		tiles = append(tiles, &Tile{
+			name:  "tileGrass1.png",
+			image: game.assets.GetSprite("tileGrass1.png"),
+		})
+	}
+
 	// collapse a random cell with random options
 	index := rand.Intn(len(cells))
 	cells[index] = []string{cells[index][rand.Intn(len(cells[index]))]}
 
-	for {
-		// update the cells
-		for j := 0; j < tilesY; j++ {
-			for i := 0; i < tilesX; i++ {
-				index = j*tilesX + i
-				if len(cells[index]) == 1 { // cell is collapsed
-					// Look UP
-					if j > 0 {
-						upindex := (j-1)*tilesX + i
-						cells[upindex] = rules[cells[index][0]][ruleUP]
-					}
-					// Look RIGHT
-					if i < tilesX {
-						rightindex := j*tilesX + i + 1
-						cells[rightindex] = rules[cells[index][0]][ruleRIGHT]
-					}
-					// Look DOWN
-					if j < tilesY {
-						downindex := (j+1)*tilesX + i
-						cells[downindex] = rules[cells[index][0]][ruleDOWN]
-					}
-					// Look LEFT
-					if i > 0 {
-						leftindex := j*tilesX + i - 1
-						cells[leftindex] = rules[cells[index][0]][ruleLEFT]
-					}
-				}
-			}
-		}
-
-		// pick least entropy
-		entropy := len(cells[0])
-		for j := 0; j < tilesY; j++ {
-			for i := 0; i < tilesX; i++ {
-				index := j*tilesX + i
-				if len(cells[index]) > 1 && len(cells[index]) < entropy {
-					entropy = len(cells[index])
-				}
-			}
-		}
-
-		if entropy <= 1 {
-			break
-		}
-		// pick cells with least entropy
-		var leastEntropyIndexes []int
-		for j := 0; j < tilesY; j++ {
-			for i := 0; i < tilesX; i++ {
-				index := j*tilesX + i
-				if len(cells[index]) == entropy {
-					leastEntropyIndexes = append(leastEntropyIndexes, index)
-				}
-			}
-		}
-		// collapse random cell
-		index = leastEntropyIndexes[rand.Intn(len(leastEntropyIndexes))]
-		cells[index] = []string{cells[index][rand.Intn(len(cells[index]))]}
-	}
-
-	for i := 0; i < len(cells); i++ {
-		tiles = append(tiles, &Tile{
-			name:  cells[i][0],
-			image: game.assets.GetSprite(cells[i][0]),
-		})
-	}
 	// var PlayfieldTile = mustLoadImage("png/tileGrass2.png")
 	return &Playfield{
 		game:  game,
@@ -226,6 +114,102 @@ func NewPlayfield(game *Game) *Playfield {
 }
 
 func (p *Playfield) Update() {
+	tilesX := p.game.width/tileWidth + 1
+	tilesY := p.game.height/tileHeight + 1
+	var index int
+	// update the cells
+	for j := 0; j < tilesY; j++ {
+		for i := 0; i < tilesX; i++ {
+			index = j*tilesX + i
+			if len(cells[index]) == 1 { // cell is collapsed
+				// Look UP
+				if j > 0 {
+					upindex := (j-1)*tilesX + i
+					optup := tileOptions[cells[index][0]][ruleUP]
+					var options []string
+					for k, v := range tileOptions {
+						if v[ruleDOWN] == optup {
+							options = append(options, k)
+						}
+					}
+					cells[upindex] = options
+
+				}
+				// Look RIGHT
+				if i < tilesX-1 {
+					rightindex := j*tilesX + i + 1
+					optright := tileOptions[cells[index][0]][ruleRIGHT]
+					var options []string
+					for k, v := range tileOptions {
+						if v[ruleLEFT] == optright {
+							options = append(options, k)
+						}
+					}
+					cells[rightindex] = options
+				}
+				// Look DOWN
+				if j < tilesY-1 {
+					downindex := (j+1)*tilesX + i
+					optdown := tileOptions[cells[index][0]][ruleDOWN]
+					var options []string
+					for k, v := range tileOptions {
+						if v[ruleUP] == optdown {
+							options = append(options, k)
+						}
+					}
+					cells[downindex] = options
+				}
+				// Look LEFT
+				if i > 0 {
+					leftindex := j*tilesX + i - 1
+					optleft := tileOptions[cells[index][0]][ruleLEFT]
+					var options []string
+					for k, v := range tileOptions {
+						if v[ruleRIGHT] == optleft {
+							options = append(options, k)
+						}
+					}
+					cells[leftindex] = options
+				}
+			}
+		}
+		var tiles []*Tile
+		for i := 0; i < len(cells); i++ {
+			tiles = append(tiles, &Tile{
+				name:  cells[i][0],
+				image: p.game.assets.GetSprite(cells[i][0]),
+			})
+		}
+		p.tiles = tiles
+	}
+
+	// pick least entropy
+	entropy := len(cells[0])
+	for j := 0; j < tilesY; j++ {
+		for i := 0; i < tilesX; i++ {
+			index := j*tilesX + i
+			if len(cells[index]) > 1 && len(cells[index]) < entropy {
+				entropy = len(cells[index])
+			}
+		}
+	}
+
+	if entropy <= 1 {
+		return
+	}
+	// pick cells with least entropy
+	var leastEntropyIndexes []int
+	for j := 0; j < tilesY; j++ {
+		for i := 0; i < tilesX; i++ {
+			index := j*tilesX + i
+			if len(cells[index]) == entropy {
+				leastEntropyIndexes = append(leastEntropyIndexes, index)
+			}
+		}
+	}
+	// collapse random cell
+	index = leastEntropyIndexes[rand.Intn(len(leastEntropyIndexes))]
+	cells[index] = []string{cells[index][rand.Intn(len(cells[index]))]}
 
 }
 
