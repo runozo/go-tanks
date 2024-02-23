@@ -49,6 +49,12 @@ func NewGame() *Game {
 }
 
 func (g *Game) Update() error {
+
+	if g.players[0].shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeyP) {
+		g.playfield = NewPlayfield(g)
+		g.players[0].shootCooldown.Reset()
+	}
+
 	for _, p := range g.players {
 		p.Update()
 	}
@@ -63,7 +69,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// text.Draw(screen, fmt.Sprintf("CURSOR KEYS: move tank. SPACE: shoot. T: new random tank"), nil, 10, 10, color.Black)
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("CURSOR KEYS: move tank. SPACE: shoot. T: new random tank"))
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("CURSOR KEYS: move tank, SPACE: shoot, T: new random tank, P: generate new playfield"))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
