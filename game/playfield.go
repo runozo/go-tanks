@@ -81,9 +81,9 @@ func filterOptions(orig, options []string) []string {
 	return filtered
 }
 
-var cells [][]string
-
 func NewPlayfield(game *Game) *Playfield {
+	var cells [][]string
+
 	// Wave function collapse algorithm
 	// https://pvs-studio.com/en/blog/posts/csharp/1027/
 
