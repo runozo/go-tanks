@@ -182,7 +182,6 @@ func NewPlayfield(game *Game) *Playfield {
 					// Look UP
 					if y > 0 {
 						upindex := (y-1)*tilesX + x
-						//if len(cells[upindex]) > 1 {
 						rules := []int{}
 						for i := 0; i < len(cells[upindex]); i++ {
 							rule := tileOptions[cells[upindex][i]][ruleDOWN]
@@ -204,8 +203,6 @@ func NewPlayfield(game *Game) *Playfield {
 					// Look RIGHT
 					if x < tilesX-1 {
 						rightindex := y*tilesX + x + 1
-						// if len(cells[rightindex]) > 1 { // if it's not collapsed
-
 						rules := []int{}
 						for i := 0; i < len(cells[rightindex]); i++ {
 							rule := tileOptions[cells[rightindex][i]][ruleLEFT]
@@ -222,12 +219,11 @@ func NewPlayfield(game *Game) *Playfield {
 						}
 
 						cells[index] = filterOptions(cells[index], optright)
-
 					}
+
 					// Look DOWN
 					if y < tilesY-1 {
 						downindex := (y+1)*tilesX + x
-						// if len(cells[downindex]) > 1 { // if it's not collapsed
 						rules := []int{}
 						for i := 0; i < len(cells[downindex]); i++ {
 							rule := tileOptions[cells[downindex][i]][ruleUP]
@@ -248,7 +244,6 @@ func NewPlayfield(game *Game) *Playfield {
 					// Look LEFT
 					if x > 0 {
 						leftindex := y*tilesX + x - 1
-						//if len(cells[leftindex]) > 1 { // if it's not collapsed
 						rules := []int{}
 						for i := 0; i < len(cells[leftindex]); i++ {
 							rule := tileOptions[cells[leftindex][i]][ruleRIGHT]
@@ -270,7 +265,6 @@ func NewPlayfield(game *Game) *Playfield {
 				}
 			}
 		}
-
 	}
 
 	var tiles []*Tile
