@@ -155,9 +155,6 @@ func NewPlayfield(game *Game) *Playfield {
 			fmt.Println("Ended with", u, "iterations")
 			break
 		}
-		// else {
-		// 	fmt.Println("leastEntropyIndexes", leastEntropyIndexes)
-		// }
 
 		// collapse random cell with least entropy
 		index := leastEntropyIndexes[rand.Intn(len(leastEntropyIndexes))]
@@ -178,7 +175,8 @@ func NewPlayfield(game *Game) *Playfield {
 					// we did not found any options, let's restart
 					return NewPlayfield(game)
 				}
-				if len(cells[index]) > 1 { // if it's not collapsed
+
+				if len(cells[index]) > 1 { // if the cell it's not collapsed
 					// Look UP
 					if y > 0 {
 						upindex := (y-1)*tilesX + x
@@ -260,7 +258,6 @@ func NewPlayfield(game *Game) *Playfield {
 						}
 
 						cells[index] = filterOptions(cells[index], optleft)
-						//}
 					}
 				}
 			}
