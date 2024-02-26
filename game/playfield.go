@@ -69,6 +69,12 @@ type Playfield struct {
 	tiles []*Tile
 }
 
+// filterOptions filters the original options based on the provided options slice.
+//
+// It takes in two parameters:
+// - orig []string: the original options slice
+// - options []string: the options to filter by
+// Returns []string: the filtered options slice
 func filterOptions(orig, options []string) []string {
 	var filtered []string
 	for _, o := range orig {
@@ -79,6 +85,9 @@ func filterOptions(orig, options []string) []string {
 	return filtered
 }
 
+// stringInSlice checks if a string is present in a slice of strings.
+//
+// It takes a string to search for and a slice of strings to search in and returns a boolean.
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -88,6 +97,11 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
+// intInSlice checks if an integer is in a slice of integers.
+//
+// a int - the integer to check for in the slice
+// list []int - the slice of integers to search
+// bool - true if the integer is found in the slice, false otherwise
 func intInSlice(a int, list []int) bool {
 	for _, b := range list {
 		if b == a {
@@ -103,18 +117,14 @@ func NewPlayfield(game *Game) *Playfield {
 	// Wave function collapse algorithm
 	// https://pvs-studio.com/en/blog/posts/csharp/1027/
 
-	// setup cells with all the options
-	var initialOptions []string
-
-	for k, o := range tileOptions {
-		if len(o) == 4 {
-			// fmt.Println(o)
-			initialOptions = append(initialOptions, k)
-		}
-	}
-
 	tilesX := game.width/tileWidth + 1
 	tilesY := game.height/tileHeight + 1
+
+	// setup cells with all the options
+	var initialOptions []string
+	for k, _ := range tileOptions {
+		initialOptions = append(initialOptions, k)
+	}
 
 	for j := 0; j < tilesY; j++ {
 		for i := 0; i < tilesX; i++ {
@@ -144,11 +154,12 @@ func NewPlayfield(game *Game) *Playfield {
 		if len(leastEntropyIndexes) <= 0 {
 			fmt.Println("Ended with", u, "iterations")
 			break
-		} else {
-			fmt.Println("leastEntropyIndexes", leastEntropyIndexes)
 		}
+		// else {
+		// 	fmt.Println("leastEntropyIndexes", leastEntropyIndexes)
+		// }
 
-		// collapse random cell
+		// collapse random cell with least entropy
 		index := leastEntropyIndexes[rand.Intn(len(leastEntropyIndexes))]
 		fmt.Println("Collapse cell:", index)
 		cells[index] = []string{cells[index][rand.Intn(len(cells[index]))]}
@@ -163,6 +174,10 @@ func NewPlayfield(game *Game) *Playfield {
 		for y := 0; y < tilesY; y++ {
 			for x := 0; x < tilesX; x++ {
 				index := y*tilesX + x
+				if len(cells[index]) == 0 {
+					// we did not found any options, let's restart
+					return NewPlayfield(game)
+				}
 				if len(cells[index]) > 1 { // if it's not collapsed
 					// Look UP
 					if y > 0 {
