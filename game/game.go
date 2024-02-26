@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/runozo/go-tanks/assets"
 )
 
@@ -49,10 +50,8 @@ func NewGame() *Game {
 }
 
 func (g *Game) Update() error {
-
-	if g.players[0].shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeyP) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.playfield = NewPlayfield(g)
-		g.players[0].shootCooldown.Reset()
 	}
 
 	for _, p := range g.players {
