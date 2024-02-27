@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -11,10 +10,10 @@ import (
 )
 
 const (
-	screenWidth  = 800
-	screenHeight = 600
+	screenWidth  = 1960
+	screenHeight = 1088
 
-	velocitySpeedUpTime = 5 * time.Second
+	// velocitySpeedUpTime = 5 * time.Second
 )
 
 type Vector struct {
@@ -22,25 +21,25 @@ type Vector struct {
 	Y float64
 }
 
-// main is the entry point of the program
-
 type Game struct {
 	width     int
 	height    int
 	assets    *assets.Assets
 	players   []*Player
 	playfield *Playfield
-	bullets   []*Bullet
+	// bullets   []*Bullet
 
-	velocityTimer *Timer
+	// velocityTimer *Timer
 }
 
 func NewGame() *Game {
+	// ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetFullscreen(true)
 	g := &Game{
-		assets:        assets.NewAssets(),
-		velocityTimer: NewTimer(velocitySpeedUpTime),
-		width:         screenWidth,
-		height:        screenHeight,
+		assets: assets.NewAssets(),
+		// velocityTimer: NewTimer(velocitySpeedUpTime),
+		width:  screenWidth,
+		height: screenHeight,
 	}
 
 	g.players = append(g.players, NewPlayer(g))
