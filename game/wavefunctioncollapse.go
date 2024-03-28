@@ -84,3 +84,17 @@ func intInSlice(a int, list []int) bool {
 	}
 	return false
 }
+
+func getLeastEntropyIndexes(cells [][]string) []int {
+	// pick least leastEntropy
+	leastEntropy := 32767
+	var leastEntropyIndexes []int
+	for i := 0; i < len(cells); i++ {
+		if len(cells[i]) > 1 && len(cells[i]) < leastEntropy {
+			leastEntropyIndexes = []int{i}
+		} else if len(cells[i]) > 1 && len(cells[i]) == leastEntropy {
+			leastEntropyIndexes = append(leastEntropyIndexes, i)
+		}
+	}
+	return leastEntropyIndexes
+}
