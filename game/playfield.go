@@ -49,7 +49,7 @@ func NewPlayfield(game *Game) *Playfield {
 
 	for u := 0; ; u++ { // update the cells
 		// pick cells with least entropy
-		leastEntropyIndexes := getLeastEntropyIndexes(cells)
+		leastEntropyIndexes := getSmallestEntropyIndexes(cells)
 
 		if len(leastEntropyIndexes) <= 0 {
 			fmt.Println("Ended with", u, "iterations")
