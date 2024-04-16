@@ -34,7 +34,7 @@ type Game struct {
 
 func NewGame() *Game {
 	// ebiten.SetWindowSize(screenWidth, screenHeight)
-	ebiten.SetFullscreen(true)
+	// ebiten.SetFullscreen(true)
 	g := &Game{
 		assets: assets.NewAssets(),
 		// velocityTimer: NewTimer(velocitySpeedUpTime),

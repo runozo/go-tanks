@@ -4,6 +4,7 @@ import (
 	"fmt"
 	_ "image/png"
 	"math/rand"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -27,6 +28,7 @@ type Playfield struct {
 }
 
 func NewPlayfield(game *Game) *Playfield {
+	start := time.Now()
 	var cells [][]string
 
 	// Wave function collapse algorithm
@@ -55,7 +57,7 @@ func NewPlayfield(game *Game) *Playfield {
 				leastEntropy = len(cells[i])
 			}
 		}
-		fmt.Println("Least entropy:", leastEntropy)
+		// fmt.Println("Least entropy:", leastEntropy)
 
 		// pick cells with least entropy
 		var leastEntropyIndexes []int
@@ -63,17 +65,18 @@ func NewPlayfield(game *Game) *Playfield {
 			if len(cells[i]) == leastEntropy {
 				leastEntropyIndexes = append(leastEntropyIndexes, i)
 			}
-
 		}
 
 		if len(leastEntropyIndexes) <= 0 {
 			fmt.Println("Ended with", u, "iterations")
+			elapsed := time.Since(start)
+			fmt.Println("Elapsed:", elapsed)
 			break
 		}
 
 		// collapse random cell with least entropy
 		index := leastEntropyIndexes[rand.Intn(len(leastEntropyIndexes))]
-		fmt.Println("Collapse cell:", index)
+		// fmt.Println("Collapse cell:", index)
 		cells[index] = []string{cells[index][rand.Intn(len(cells[index]))]}
 		cnt := 0
 		for i := 0; i < len(cells); i++ {
@@ -182,7 +185,6 @@ func NewPlayfield(game *Game) *Playfield {
 	var tiles []*Tile
 	for i := 0; i < len(cells); i++ {
 		if len(cells[i]) >= 1 {
-
 			tiles = append(tiles, &Tile{
 				name:  cells[i][0],
 				image: game.assets.GetSprite(cells[i][0]),
