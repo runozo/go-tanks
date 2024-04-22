@@ -2,6 +2,8 @@ package game
 
 import (
 	"fmt"
+	"log/slog"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -43,14 +45,21 @@ func NewGame() *Game {
 	}
 
 	g.players = append(g.players, NewPlayer(g))
+
+	start := time.Now()
 	g.playfield = NewPlayfield(g)
+	elapsed := time.Since(start)
+	slog.Info("Time", "seconds", elapsed)
 
 	return g
 }
 
 func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		start := time.Now()
 		g.playfield = NewPlayfield(g)
+		elapsed := time.Since(start)
+		slog.Info("Time", "seconds", elapsed)
 	}
 
 	for _, p := range g.players {
