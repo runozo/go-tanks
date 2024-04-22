@@ -1,10 +1,9 @@
 package game
 
 import (
-	"fmt"
 	_ "image/png"
+	"log/slog"
 	"math/rand"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -28,7 +27,6 @@ type Playfield struct {
 }
 
 func NewPlayfield(game *Game) *Playfield {
-	start := time.Now()
 	var cells [][]string
 
 	// Wave function collapse algorithm
@@ -65,9 +63,7 @@ func NewPlayfield(game *Game) *Playfield {
 		// fmt.Println("Least entropy:", leastEntropy)
 
 		if len(minEntropyIndexes) <= 0 {
-			fmt.Println("Ended with", u, "iterations")
-			elapsed := time.Since(start)
-			fmt.Println("Elapsed:", elapsed)
+			slog.Info("Ended with", "iterations", u)
 			break
 		}
 
@@ -81,7 +77,7 @@ func NewPlayfield(game *Game) *Playfield {
 				cnt++
 			}
 		}
-		fmt.Println("Total of collapsed:", cnt, "of", len(cells))
+		slog.Info("Cells", "collapsed", cnt, "of", len(cells))
 
 		for y := 0; y < tilesY; y++ {
 			for x := 0; x < tilesX; x++ {
