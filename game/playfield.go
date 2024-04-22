@@ -50,24 +50,21 @@ func NewPlayfield(game *Game) *Playfield {
 	}
 
 	for u := 0; ; u++ { // update the cells
-		// pick least leastEntropy
-		leastEntropy := len(initialOptions)
+
+		// pick the minimum entropy indexes
+		minEntropy := len(initialOptions)
+		var minEntropyIndexes []int
 		for i := 0; i < len(cells); i++ {
-			if len(cells[i]) > 1 && len(cells[i]) < leastEntropy {
-				leastEntropy = len(cells[i])
+			if len(cells[i]) > 1 && len(cells[i]) < minEntropy {
+				minEntropy = len(cells[i])
+				minEntropyIndexes = []int{i}
+			} else if len(cells[i]) == minEntropy {
+				minEntropyIndexes = append(minEntropyIndexes, i)
 			}
 		}
 		// fmt.Println("Least entropy:", leastEntropy)
 
-		// pick cells with least entropy
-		var leastEntropyIndexes []int
-		for i := 0; i < len(cells); i++ {
-			if len(cells[i]) == leastEntropy {
-				leastEntropyIndexes = append(leastEntropyIndexes, i)
-			}
-		}
-
-		if len(leastEntropyIndexes) <= 0 {
+		if len(minEntropyIndexes) <= 0 {
 			fmt.Println("Ended with", u, "iterations")
 			elapsed := time.Since(start)
 			fmt.Println("Elapsed:", elapsed)
@@ -75,7 +72,7 @@ func NewPlayfield(game *Game) *Playfield {
 		}
 
 		// collapse random cell with least entropy
-		index := leastEntropyIndexes[rand.Intn(len(leastEntropyIndexes))]
+		index := minEntropyIndexes[rand.Intn(len(minEntropyIndexes))]
 		// fmt.Println("Collapse cell:", index)
 		cells[index] = []string{cells[index][rand.Intn(len(cells[index]))]}
 		cnt := 0
