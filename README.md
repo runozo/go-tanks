@@ -8,6 +8,7 @@ A game with tanks, try it on https://runozo.github.io/go-tanks/
 |Arrow keys|Move tank|
 |Spacebar|Fire|
 |T|New random tank|
+|P|Redraw random playfield
 
 ## Current achievements
 
@@ -15,6 +16,7 @@ A game with tanks, try it on https://runozo.github.io/go-tanks/
     [x] Draw tank
     [x] Tank moves
     [x] Tank fires
-    [ ] Draw playfield
+    [x] Draw playfield
+    [ ] Draw playfield obstacles
     [ ] Collisions
     [ ] ...
