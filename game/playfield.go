@@ -47,23 +47,13 @@ func NewPlayfield(game *Game) *Playfield {
 		}
 	}
 
-	for u := 0; ; u++ { // update the cells
+	for iterations := 0; ; iterations++ { // update the cells
 
 		// pick the minimum entropy indexes
-		minEntropy := len(initialOptions)
-		var minEntropyIndexes []int
-		for i := 0; i < len(cells); i++ {
-			if len(cells[i]) > 1 && len(cells[i]) < minEntropy {
-				minEntropy = len(cells[i])
-				minEntropyIndexes = []int{i}
-			} else if len(cells[i]) == minEntropy {
-				minEntropyIndexes = append(minEntropyIndexes, i)
-			}
-		}
-		// fmt.Println("Least entropy:", leastEntropy)
+		minEntropyIndexes := getMinEntropyIndexes(&cells)
 
 		if len(minEntropyIndexes) <= 0 {
-			slog.Info("Ended with", "iterations", u)
+			slog.Info("Ended with", "iterations", iterations)
 			break
 		}
 
