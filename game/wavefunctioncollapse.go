@@ -85,16 +85,29 @@ func intInSlice(a int, list []int) bool {
 	return false
 }
 
-func getSmallestEntropyIndexes(cells [][]string) []int {
-	// pick least smallestEntropy
-	smallestEntropy := 32767
-	var smallestEntropyIndexes []int
-	for i, cell := range cells {
-		if len(cell) > 1 && len(cell) < smallestEntropy {
-			smallestEntropyIndexes = []int{i}
-		} else if len(cell) > 1 && len(cell) == smallestEntropy {
-			smallestEntropyIndexes = append(smallestEntropyIndexes, i)
+// getMinEntropyIndexes returns the indexes of cells with the minimum entropy.
+//
+// It takes a pointer to a 2D slice of strings, cells, as input.
+// The function iterates through each cell in the cells slice and checks if the length of the cell is greater than 1 and less than the current minimum entropy.
+// If so, it updates the minimum entropy and resets the minEntropyIndexes slice to contain only the current index.
+// If the length of the cell is equal to the current minimum entropy, the index is appended to the minEntropyIndexes slice.
+// Finally, the function returns the minEntropyIndexes slice.
+//
+// Parameters:
+// - cells: a pointer to a 2D slice of strings representing the cells
+//
+// Return type:
+// - []int: a slice of integers representing the indexes of cells with the minimum entropy
+func getMinEntropyIndexes(cells *[][]string) []int {
+	minEntropy := 32767
+	var minEntropyIndexes []int
+	for i, cell := range *cells {
+		if len(cell) > 1 && len(cell) < minEntropy {
+			minEntropy = len(cell)
+			minEntropyIndexes = []int{i}
+		} else if len(cell) > 1 && len(cell) == minEntropy {
+			minEntropyIndexes = append(minEntropyIndexes, i)
 		}
 	}
-	return smallestEntropyIndexes
+	return minEntropyIndexes
 }
