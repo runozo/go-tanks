@@ -102,10 +102,11 @@ func getMinEntropyIndexes(cells *[][]string) []int {
 	minEntropy := 32767
 	var minEntropyIndexes []int
 	for i, cell := range *cells {
-		if len(cell) > 1 && len(cell) < minEntropy {
-			minEntropy = len(cell)
+		cellEntropy := len(cell)
+		if cellEntropy > 1 && cellEntropy < minEntropy {
+			minEntropy = cellEntropy
 			minEntropyIndexes = []int{i}
-		} else if len(cell) > 1 && len(cell) == minEntropy {
+		} else if cellEntropy > 1 && cellEntropy == minEntropy {
 			minEntropyIndexes = append(minEntropyIndexes, i)
 		}
 	}

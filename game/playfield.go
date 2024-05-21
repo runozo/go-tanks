@@ -61,13 +61,13 @@ func NewPlayfield(game *Game) *Playfield {
 		index := minEntropyIndexes[rand.Intn(len(minEntropyIndexes))]
 		// fmt.Println("Collapse cell:", index)
 		cells[index] = []string{cells[index][rand.Intn(len(cells[index]))]}
-		cnt := 0
-		for i := 0; i < len(cells); i++ {
-			if len(cells[i]) == 1 {
-				cnt++
-			}
-		}
-		slog.Info("Cells", "collapsed", cnt, "of", len(cells))
+		// cnt := 0
+		// for i := 0; i < len(cells); i++ {
+		// 	if len(cells[i]) == 1 {
+		// 		cnt++
+		// 	}
+		// }
+		// slog.Info("Cells", "collapsed", cnt, "of", len(cells))
 
 		for y := 0; y < tilesY; y++ {
 			for x := 0; x < tilesX; x++ {
