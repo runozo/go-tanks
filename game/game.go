@@ -14,8 +14,6 @@ import (
 const (
 	screenWidth  = 1960
 	screenHeight = 1088
-
-	// velocitySpeedUpTime = 5 * time.Second
 )
 
 type Vector struct {
