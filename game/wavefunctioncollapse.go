@@ -62,9 +62,9 @@ func filterOptions(orig, options []string) []string {
 // stringInSlice checks if a string is present in a slice of strings.
 //
 // It takes a string to search for and a slice of strings to search in and returns a boolean.
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
+func stringInSlice(a string, slice []string) bool {
+	for i := 0; i < len(slice); i++ {
+		if slice[i] == a {
 			return true
 		}
 	}
@@ -76,8 +76,8 @@ func stringInSlice(a string, list []string) bool {
 // a int - the integer to check for in the slice
 // list []int - the slice of integers to search
 // bool - true if the integer is found in the slice, false otherwise
-func intInSlice(a int, list []int) bool {
-	for _, b := range list {
+func intInSlice(a int, slice []int) bool {
+	for _, b := range slice {
 		if b == a {
 			return true
 		}

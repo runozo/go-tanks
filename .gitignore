@@ -20,3 +20,4 @@ archives
 
 # Go workspace file
 go.work
+cmd/*
