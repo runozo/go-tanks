@@ -45,7 +45,7 @@ func NewGame() *Game {
 	g.players = append(g.players, NewPlayer(g))
 
 	start := time.Now()
-	g.playfield = NewPlayfield(g)
+	g.playfield = NewPlayfield(g.width, g.height, g.assets)
 	elapsed := time.Since(start)
 	slog.Info("Time", "seconds", elapsed)
 
@@ -55,11 +55,11 @@ func NewGame() *Game {
 func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		start := time.Now()
-		g.playfield = NewPlayfield(g)
+		g.playfield = NewPlayfield(g.width, g.height, g.assets)
 		elapsed := time.Since(start)
 		slog.Info("Time", "seconds", elapsed)
 	}
-
+	g.playfield.Update()
 	for _, p := range g.players {
 		p.Update()
 	}

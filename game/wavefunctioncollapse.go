@@ -1,7 +1,6 @@
 package game
 
 import (
-	"log/slog"
 	"math/rand"
 )
 
@@ -103,11 +102,12 @@ func intInSlice(a int, slice []int) bool {
 //
 // Return type:
 // - []int: a slice of integers representing the indexes of cells with the minimum entropy
-func getMinEntropyIndexes(cells *[][]string) []int {
+func getMinEntropyIndexes(tiles *[]Tile) []int {
 	minEntropy := 32767
 	var minEntropyIndexes []int
-	for i, cell := range *cells {
-		cellEntropy := len(cell)
+	for i, tile := range *tiles {
+		cellEntropy := len(tile.options)
+		// slog.Info("Entropy", "index", i, "entropy", cellEntropy)
 		if cellEntropy > 1 && cellEntropy < minEntropy {
 			minEntropy = cellEntropy
 			minEntropyIndexes = []int{i}
@@ -118,13 +118,10 @@ func getMinEntropyIndexes(cells *[][]string) []int {
 	return minEntropyIndexes
 }
 
-func collapseRandomCellWithMinEntropy(cells *[][]string, minEntropyIndexes *[]int) {
-	if len(*minEntropyIndexes) <= 0 {
-		slog.Info("No more collapsable cells")
-	}
-
+func collapseRandomCellWithMinEntropy(tiles *[]Tile, minEntropyIndexes *[]int) int {
 	// collapse random cell with least entropy
 	index := (*minEntropyIndexes)[rand.Intn(len(*minEntropyIndexes))]
 
-	(*cells)[index] = []string{(*cells)[index][rand.Intn(len((*cells)[index]))]}
+	(*tiles)[index].options = []string{(*tiles)[index].options[rand.Intn(len((*tiles)[index].options))]}
+	return index
 }
