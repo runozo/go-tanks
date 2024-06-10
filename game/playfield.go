@@ -77,11 +77,18 @@ func (p *Playfield) Update() {
 
 		if len(minEntropyIndexes) <= 0 {
 			slog.Info("Playfiled is rendered. No more collapsable cells.")
+			for i := 0; i < len(p.tiles); i++ {
+				if !p.tiles[i].collapsed {
+					p.tiles[i].image = p.assets.GetSprite(p.tiles[i].options[0])
+					p.tiles[i].collapsed = true
+				}
+			}
 			p.isRendered = true
+
 		} else {
 
 			collapsedIndex := collapseRandomCellWithMinEntropy(&p.tiles, &minEntropyIndexes)
-			slog.Info("Collapsed", "index", collapsedIndex, "name", p.tiles[collapsedIndex].options[0])
+			// slog.Info("Collapsed", "index", collapsedIndex, "name", p.tiles[collapsedIndex].options[0])
 			p.tiles[collapsedIndex].image = p.assets.GetSprite(p.tiles[collapsedIndex].options[0])
 			p.tiles[collapsedIndex].collapsed = true
 
