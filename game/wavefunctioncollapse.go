@@ -1,5 +1,10 @@
 package game
 
+import (
+	"log/slog"
+	"math/rand"
+)
+
 var tileOptions = map[string][]int{
 	"tileGrass1.png":                     {0, 0, 0, 0}, // 0 grass
 	"tileGrass2.png":                     {0, 0, 0, 0},
@@ -111,4 +116,15 @@ func getMinEntropyIndexes(cells *[][]string) []int {
 		}
 	}
 	return minEntropyIndexes
+}
+
+func collapseRandomCellWithMinEntropy(cells *[][]string, minEntropyIndexes *[]int) {
+	if len(*minEntropyIndexes) <= 0 {
+		slog.Info("No more collapsable cells")
+	}
+
+	// collapse random cell with least entropy
+	index := (*minEntropyIndexes)[rand.Intn(len(*minEntropyIndexes))]
+
+	(*cells)[index] = []string{(*cells)[index][rand.Intn(len((*cells)[index]))]}
 }

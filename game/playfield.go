@@ -3,7 +3,6 @@ package game
 import (
 	_ "image/png"
 	"log/slog"
-	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -57,10 +56,7 @@ func NewPlayfield(game *Game) *Playfield {
 			break
 		}
 
-		// collapse random cell with least entropy
-		index := minEntropyIndexes[rand.Intn(len(minEntropyIndexes))]
-		// fmt.Println("Collapse cell:", index)
-		cells[index] = []string{cells[index][rand.Intn(len(cells[index]))]}
+		collapseRandomCellWithMinEntropy(&cells, &minEntropyIndexes)
 		// cnt := 0
 		// for i := 0; i < len(cells); i++ {
 		// 	if len(cells[i]) == 1 {
