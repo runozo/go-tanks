@@ -106,11 +106,9 @@ func (p *Playfield) Update() {
 						if y > 0 {
 							upindex := (y-1)*p.numOfTilesX + x
 							rules := []int{}
-							for i := 0; i < len(p.tiles[upindex].options); i++ {
-								rule := tileOptions[p.tiles[upindex].options[i]][ruleDOWN]
-								if !intInSlice(rule, rules) {
-									rules = append(rules, rule)
-								}
+							for _, optname := range p.tiles[upindex].options {
+								rule := tileOptions[optname][ruleDOWN]
+								rules = append(rules, rule)
 							}
 
 							optsup := []string{}
@@ -129,9 +127,7 @@ func (p *Playfield) Update() {
 							rules := []int{}
 							for i := 0; i < len(p.tiles[rightindex].options); i++ {
 								rule := tileOptions[p.tiles[rightindex].options[i]][ruleLEFT]
-								if !intInSlice(rule, rules) {
-									rules = append(rules, rule)
-								}
+								rules = append(rules, rule)
 							}
 
 							optright := []string{}
@@ -150,9 +146,7 @@ func (p *Playfield) Update() {
 							rules := []int{}
 							for i := 0; i < len(p.tiles[downindex].options); i++ {
 								rule := tileOptions[p.tiles[downindex].options[i]][ruleUP]
-								if !intInSlice(rule, rules) {
-									rules = append(rules, rule)
-								}
+								rules = append(rules, rule)
 							}
 
 							optdown := []string{}
@@ -170,9 +164,7 @@ func (p *Playfield) Update() {
 							rules := []int{}
 							for i := 0; i < len(p.tiles[leftindex].options); i++ {
 								rule := tileOptions[p.tiles[leftindex].options[i]][ruleRIGHT]
-								if !intInSlice(rule, rules) {
-									rules = append(rules, rule)
-								}
+								rules = append(rules, rule)
 							}
 
 							optleft := []string{}
