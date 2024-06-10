@@ -104,15 +104,17 @@ func intInSlice(a int, slice []int) bool {
 // - []int: a slice of integers representing the indexes of cells with the minimum entropy
 func getMinEntropyIndexes(tiles *[]Tile) []int {
 	minEntropy := 32767
-	var minEntropyIndexes []int
+	minEntropyIndexes := make([]int, 0)
 	for i, tile := range *tiles {
-		cellEntropy := len(tile.options)
-		// slog.Info("Entropy", "index", i, "entropy", cellEntropy)
-		if cellEntropy > 1 && cellEntropy < minEntropy {
-			minEntropy = cellEntropy
-			minEntropyIndexes = []int{i}
-		} else if cellEntropy > 1 && cellEntropy == minEntropy {
-			minEntropyIndexes = append(minEntropyIndexes, i)
+		if !tile.collapsed {
+			cellEntropy := len(tile.options)
+			// slog.Info("Entropy", "index", i, "entropy", cellEntropy)
+			if cellEntropy > 1 && cellEntropy < minEntropy {
+				minEntropy = cellEntropy
+				minEntropyIndexes = []int{i}
+			} else if cellEntropy > 1 && cellEntropy == minEntropy {
+				minEntropyIndexes = append(minEntropyIndexes, i)
+			}
 		}
 	}
 	return minEntropyIndexes
