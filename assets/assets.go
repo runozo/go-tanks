@@ -7,6 +7,7 @@ import (
 	_ "image/png"
 	"io/fs"
 	"log"
+	"log/slog"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -65,6 +66,7 @@ func (a *Assets) GetSprite(name string) *ebiten.Image {
 				)).(*ebiten.Image)
 		}
 	}
+	slog.Info("Sprite not found", "name", name)
 	return nil
 }
 
