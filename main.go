@@ -24,7 +24,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	g := game.NewGame()
-
+	ebiten.SetFullscreen(true)
 	err := ebiten.RunGame(g)
 	if err != nil {
 		panic(err)
