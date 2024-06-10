@@ -43,11 +43,7 @@ func NewGame() *Game {
 	}
 
 	g.players = append(g.players, NewPlayer(g))
-
-	start := time.Now()
 	g.playfield = NewPlayfield(g.width, g.height, g.assets)
-	elapsed := time.Since(start)
-	slog.Info("Time", "seconds", elapsed)
 
 	return g
 }
