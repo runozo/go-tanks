@@ -6,7 +6,7 @@ webasm:
 .PHONY: profile
 
 profile:
-	go run main.go -profile
+	go run main.go -cpuprofile
 
 .PHONY: build
 
