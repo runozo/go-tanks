@@ -58,7 +58,7 @@ func NewPlayfield(width, height int, assets *assets.Assets) *Playfield {
 	tiles := make([]Tile, tilesX*tilesY)
 	resetTilesOptions(&tiles)
 
-	return &Playfield{
+	playfield := &Playfield{
 		width:       width,
 		height:      height,
 		tiles:       tiles,
@@ -67,11 +67,30 @@ func NewPlayfield(width, height int, assets *assets.Assets) *Playfield {
 		numOfTilesY: tilesY,
 		assets:      assets,
 	}
+	go renderPlayfield(playfield)
+
+	return playfield
 }
 
 func (p *Playfield) Update() {
+}
 
-	if !p.isRendered {
+func (p *Playfield) Draw(screen *ebiten.Image) {
+	var i int
+	for y := 0; y < p.height; y += tileHeight {
+		for x := 0; x < p.width; x += tileWidth {
+			if x%tileWidth == 0 && y%tileHeight == 0 && i < len(p.tiles) {
+				ops := &ebiten.DrawImageOptions{}
+				ops.GeoM.Translate(float64(x), float64(y))
+				screen.DrawImage(p.tiles[i].image, ops)
+				i++
+			}
+		}
+	}
+}
+
+func renderPlayfield(p *Playfield) {
+	for !p.isRendered {
 		// pick the minimum entropy indexes
 		minEntropyIndexes := getMinEntropyIndexes(&p.tiles)
 
@@ -86,7 +105,6 @@ func (p *Playfield) Update() {
 			p.isRendered = true
 		} else {
 			collapsedIndex := collapseRandomCellWithMinEntropy(&p.tiles, &minEntropyIndexes)
-			// slog.Info("Collapsed", "index", collapsedIndex, "name", p.tiles[collapsedIndex].options[0])
 			p.tiles[collapsedIndex].image = p.assets.GetSprite(p.tiles[collapsedIndex].options[0])
 			p.tiles[collapsedIndex].collapsed = true
 
@@ -108,7 +126,6 @@ func (p *Playfield) Update() {
 						if x < p.numOfTilesX-1 {
 							p.tiles[index].options = lookAndFilter(ruleRIGHT, ruleLEFT, p.tiles[index].options, p.tiles[y*p.numOfTilesX+x+1].options)
 						}
-
 						// Look DOWN
 						if y < p.numOfTilesY-1 {
 							p.tiles[index].options = lookAndFilter(ruleDOWN, ruleUP, p.tiles[index].options, p.tiles[(y+1)*p.numOfTilesX+x].options)
@@ -119,22 +136,6 @@ func (p *Playfield) Update() {
 						}
 					}
 				}
-
-			}
-		}
-
-	}
-}
-
-func (p *Playfield) Draw(screen *ebiten.Image) {
-	var i int
-	for y := 0; y < p.height; y += tileHeight {
-		for x := 0; x < p.width; x += tileWidth {
-			if x%tileWidth == 0 && y%tileHeight == 0 && i < len(p.tiles) {
-				ops := &ebiten.DrawImageOptions{}
-				ops.GeoM.Translate(float64(x), float64(y))
-				screen.DrawImage(p.tiles[i].image, ops)
-				i++
 			}
 		}
 	}
