@@ -67,8 +67,8 @@ func filterOptions(orig, options []string) []string {
 //
 // It takes a string to search for and a slice of strings to search in and returns a boolean.
 func stringInSlice(a string, slice []string) bool {
-	for i := 0; i < len(slice); i++ {
-		if slice[i] == a {
+	for _, b := range slice {
+		if b == a {
 			return true
 		}
 	}
@@ -126,4 +126,21 @@ func collapseRandomCellWithMinEntropy(tiles *[]Tile, minEntropyIndexes *[]int) i
 
 	(*tiles)[index].options = []string{(*tiles)[index].options[rand.Intn(len((*tiles)[index].options))]}
 	return index
+}
+
+func lookAndFilter(ruleIndexToProcess, ruleIndexToWatch int, optionsToProcess, optionsToWatch []string) []string {
+	rules := []int{}
+	for _, optname := range optionsToWatch {
+		rule := tileOptions[optname][ruleIndexToWatch]
+		rules = append(rules, rule)
+	}
+
+	newoptions := make([]string, 0, 4)
+	for k, v := range tileOptions {
+		if intInSlice(v[ruleIndexToProcess], rules) {
+			newoptions = append(newoptions, k)
+		}
+	}
+
+	return filterOptions(optionsToProcess, newoptions)
 }

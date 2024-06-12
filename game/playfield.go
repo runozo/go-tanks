@@ -76,7 +76,7 @@ func (p *Playfield) Update() {
 		minEntropyIndexes := getMinEntropyIndexes(&p.tiles)
 
 		if len(minEntropyIndexes) <= 0 {
-			slog.Info("Playfiled is rendered. No more collapsable cells.")
+			slog.Info("Playfiled is rendered. No more collapsable cells.", "tiles", len(p.tiles))
 			for i := 0; i < len(p.tiles); i++ {
 				if !p.tiles[i].collapsed {
 					p.tiles[i].image = p.assets.GetSprite(p.tiles[i].options[0])
@@ -84,9 +84,7 @@ func (p *Playfield) Update() {
 				}
 			}
 			p.isRendered = true
-
 		} else {
-
 			collapsedIndex := collapseRandomCellWithMinEntropy(&p.tiles, &minEntropyIndexes)
 			// slog.Info("Collapsed", "index", collapsedIndex, "name", p.tiles[collapsedIndex].options[0])
 			p.tiles[collapsedIndex].image = p.assets.GetSprite(p.tiles[collapsedIndex].options[0])
@@ -104,77 +102,20 @@ func (p *Playfield) Update() {
 					if !p.tiles[index].collapsed {
 						// Look UP
 						if y > 0 {
-							upindex := (y-1)*p.numOfTilesX + x
-							rules := []int{}
-							for _, optname := range p.tiles[upindex].options {
-								rule := tileOptions[optname][ruleDOWN]
-								rules = append(rules, rule)
-							}
-
-							optsup := []string{}
-							for k, v := range tileOptions {
-								if intInSlice(v[ruleUP], rules) {
-									optsup = append(optsup, k)
-								}
-							}
-
-							p.tiles[index].options = filterOptions(p.tiles[index].options, optsup)
+							p.tiles[index].options = lookAndFilter(ruleUP, ruleDOWN, p.tiles[index].options, p.tiles[(y-1)*p.numOfTilesX+x].options)
 						}
-
 						// Look RIGHT
-						if x < p.numOfTilesY-1 {
-							rightindex := y*p.numOfTilesX + x + 1
-							rules := []int{}
-							for i := 0; i < len(p.tiles[rightindex].options); i++ {
-								rule := tileOptions[p.tiles[rightindex].options[i]][ruleLEFT]
-								rules = append(rules, rule)
-							}
-
-							optright := []string{}
-							for k, v := range tileOptions {
-								if intInSlice(v[ruleRIGHT], rules) {
-									optright = append(optright, k)
-								}
-							}
-
-							p.tiles[index].options = filterOptions(p.tiles[index].options, optright)
+						if x < p.numOfTilesX-1 {
+							p.tiles[index].options = lookAndFilter(ruleRIGHT, ruleLEFT, p.tiles[index].options, p.tiles[y*p.numOfTilesX+x+1].options)
 						}
 
 						// Look DOWN
 						if y < p.numOfTilesY-1 {
-							downindex := (y+1)*p.numOfTilesX + x
-							rules := []int{}
-							for i := 0; i < len(p.tiles[downindex].options); i++ {
-								rule := tileOptions[p.tiles[downindex].options[i]][ruleUP]
-								rules = append(rules, rule)
-							}
-
-							optdown := []string{}
-							for k, v := range tileOptions {
-								if intInSlice(v[ruleDOWN], rules) {
-									optdown = append(optdown, k)
-								}
-							}
-
-							p.tiles[index].options = filterOptions(p.tiles[index].options, optdown)
+							p.tiles[index].options = lookAndFilter(ruleDOWN, ruleUP, p.tiles[index].options, p.tiles[(y+1)*p.numOfTilesX+x].options)
 						}
 						// Look LEFT
 						if x > 0 {
-							leftindex := y*p.numOfTilesX + x - 1
-							rules := []int{}
-							for i := 0; i < len(p.tiles[leftindex].options); i++ {
-								rule := tileOptions[p.tiles[leftindex].options[i]][ruleRIGHT]
-								rules = append(rules, rule)
-							}
-
-							optleft := []string{}
-							for k, v := range tileOptions {
-								if intInSlice(v[ruleLEFT], rules) {
-									optleft = append(optleft, k)
-								}
-							}
-
-							p.tiles[index].options = filterOptions(p.tiles[index].options, optleft)
+							p.tiles[index].options = lookAndFilter(ruleLEFT, ruleRIGHT, p.tiles[index].options, p.tiles[y*p.numOfTilesX+x-1].options)
 						}
 					}
 				}
