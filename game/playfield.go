@@ -41,7 +41,7 @@ func resetTilesOptions(tiles *[]Tile) {
 		i++
 	}
 
-	// setup tiles with all the options enabled
+	// setup tiles with all the options enabled and a black square as image
 	for i := 0; i < len(*tiles); i++ {
 		(*tiles)[i].options = initialOptions
 		(*tiles)[i].image = ebiten.NewImage(tileWidth, tileHeight)
@@ -49,6 +49,15 @@ func resetTilesOptions(tiles *[]Tile) {
 	}
 }
 
+// NewPlayfield creates a new Playfield with the specified width, height, and assets.
+//
+// Parameters:
+// - width: the width of the Playfield in pixels.
+// - height: the height of the Playfield in pixels.
+// - assets: a pointer to the Assets struct containing the necessary assets for the Playfield.
+//
+// Returns:
+// - a pointer to the newly created Playfield.
 func NewPlayfield(width, height int, assets *assets.Assets) *Playfield {
 
 	tilesX := width/tileWidth + 1

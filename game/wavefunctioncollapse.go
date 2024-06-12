@@ -120,6 +120,14 @@ func getMinEntropyIndexes(tiles *[]Tile) []int {
 	return minEntropyIndexes
 }
 
+// collapseRandomCellWithMinEntropy collapses a random cell with the minimum entropy.
+//
+// Parameters:
+// - tiles: a pointer to a slice of Tile representing the game tiles
+// - minEntropyIndexes: a pointer to a slice of integers representing the indexes of cells with the minimum entropy
+//
+// Return type:
+// - int: the index of the collapsed cell
 func collapseRandomCellWithMinEntropy(tiles *[]Tile, minEntropyIndexes *[]int) int {
 	// collapse random cell with least entropy
 	index := (*minEntropyIndexes)[rand.Intn(len(*minEntropyIndexes))]
@@ -128,14 +136,18 @@ func collapseRandomCellWithMinEntropy(tiles *[]Tile, minEntropyIndexes *[]int) i
 	return index
 }
 
+// lookAndFilter applies a rule-based filtering to the optionsToProcess slice
+//
+// It takes two integer rule indexes, two slices of strings (optionsToProcess and optionsToWatch) as parameters
+// Returns a slice of strings
 func lookAndFilter(ruleIndexToProcess, ruleIndexToWatch int, optionsToProcess, optionsToWatch []string) []string {
-	rules := []int{}
+	rules := make([]int, 0, 5) // random capacity
 	for _, optname := range optionsToWatch {
 		rule := tileOptions[optname][ruleIndexToWatch]
 		rules = append(rules, rule)
 	}
 
-	newoptions := make([]string, 0, 4)
+	newoptions := make([]string, 0, 5) // random capacity
 	for k, v := range tileOptions {
 		if intInSlice(v[ruleIndexToProcess], rules) {
 			newoptions = append(newoptions, k)
