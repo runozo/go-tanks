@@ -3,6 +3,7 @@ package game
 import (
 	_ "image/png"
 	"log/slog"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/runozo/go-tanks/assets"
@@ -99,6 +100,13 @@ func (p *Playfield) Draw(screen *ebiten.Image) {
 }
 
 func renderPlayfield(p *Playfield) {
+	startTime := time.Now()
+	defer func() {
+		endTime := time.Now()
+		duration := endTime.Sub(startTime)
+		slog.Info("Rendering of playfield took", "duration", duration)
+	}()
+
 	for !p.isRendered {
 		// pick the minimum entropy indexes
 		minEntropyIndexes := getMinEntropyIndexes(&p.tiles)
