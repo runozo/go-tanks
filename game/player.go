@@ -12,7 +12,7 @@ import (
 const (
 	shootCooldown     = time.Millisecond * 250
 	rotationPerSecond = math.Pi
-	tankSpeed         = 100.0
+	tankSpeed         = 120.0
 
 	bulletSpawnOffset = 40.0
 	bulletSpeed       = 10.0
@@ -79,23 +79,19 @@ func (p *Player) Update() {
 
 	// move towards facing
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		//first get the direction the entity is pointed
+		// first get the direction the entity is pointed
 		dx := math.Sin(p.rotation)
 		dy := math.Cos(p.rotation)
-		// if direction.length() > 0 {
-		// 	direction = direction.normalise()
-		// }
+
 		p.position.X += dx * movementSpeed
 		p.position.Y -= dy * movementSpeed
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		//first get the direction the entity is pointed
+		// first get the direction the entity is pointed
 		dx := math.Sin(p.rotation)
 		dy := math.Cos(p.rotation)
-		// if direction.length() > 0 {
-		// 	direction = direction.normalise()
-		// }
+		// then move in that direction
 		p.position.X -= dx * movementSpeed
 		p.position.Y += dy * movementSpeed
 	}
