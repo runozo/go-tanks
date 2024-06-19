@@ -2,50 +2,18 @@ package game
 
 import (
 	"math/rand"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/runozo/go-tanks/assets"
 )
 
-var tileOptions = map[string][]int{
-	"tileGrass1.png":                     {0, 0, 0, 0}, // 0 grass
-	"tileGrass2.png":                     {0, 0, 0, 0},
-	"tileGrass_roadCornerLL.png":         {0, 0, 1, 1}, // 1 road with grass
-	"tileGrass_roadCornerLR.png":         {0, 1, 1, 0},
-	"tileGrass_roadCornerUL.png":         {1, 0, 0, 1},
-	"tileGrass_roadCornerUR.png":         {1, 1, 0, 0},
-	"tileGrass_roadCrossing.png":         {1, 1, 1, 1},
-	"tileGrass_roadCrossingRound.png":    {1, 1, 1, 1},
-	"tileGrass_roadEast.png":             {0, 1, 0, 1},
-	"tileGrass_roadNorth.png":            {1, 0, 1, 0},
-	"tileGrass_roadSplitE.png":           {1, 1, 1, 0},
-	"tileGrass_roadSplitN.png":           {1, 1, 0, 1},
-	"tileGrass_roadSplitS.png":           {0, 1, 1, 1},
-	"tileGrass_roadSplitW.png":           {1, 0, 1, 1},
-	"tileGrass_roadTransitionE.png":      {4, 3, 4, 1}, //
-	"tileGrass_roadTransitionE_dirt.png": {4, 3, 4, 1},
-	"tileGrass_roadTransitionN.png":      {3, 6, 1, 6},
-	"tileGrass_roadTransitionN_dirt.png": {3, 6, 1, 6},
-	"tileGrass_roadTransitionS.png":      {1, 8, 3, 8},
-	"tileGrass_roadTransitionS_dirt.png": {1, 8, 3, 8},
-	"tileGrass_roadTransitionW.png":      {5, 1, 5, 3},
-	"tileGrass_roadTransitionW_dirt.png": {5, 1, 5, 3},
-	"tileGrass_transitionE.png":          {4, 2, 4, 0},
-	"tileGrass_transitionN.png":          {2, 6, 0, 6},
-	"tileGrass_transitionS.png":          {0, 8, 2, 8},
-	"tileGrass_transitionW.png":          {5, 0, 5, 2},
-	"tileSand1.png":                      {2, 2, 2, 2},
-	"tileSand2.png":                      {2, 2, 2, 2},
-	"tileSand_roadCornerLL.png":          {2, 2, 3, 3},
-	"tileSand_roadCornerLR.png":          {2, 3, 3, 2},
-	"tileSand_roadCornerUL.png":          {3, 2, 2, 3},
-	"tileSand_roadCornerUR.png":          {3, 3, 2, 2},
-	"tileSand_roadCrossing.png":          {3, 3, 3, 3},
-	"tileSand_roadCrossingRound.png":     {3, 3, 3, 3},
-	"tileSand_roadEast.png":              {2, 3, 2, 3},
-	"tileSand_roadNorth.png":             {3, 2, 3, 2},
-	"tileSand_roadSplitE.png":            {3, 3, 3, 2},
-	"tileSand_roadSplitN.png":            {3, 3, 2, 3},
-	"tileSand_roadSplitS.png":            {2, 3, 3, 3},
-	"tileSand_roadSplitW.png":            {3, 2, 3, 3},
-}
+const (
+	ruleUP = iota
+	ruleRIGHT
+	ruleDOWN
+	ruleLEFT
+	ruleWEIGHT
+)
 
 // filterOptions filters the original options based on the provided options slice.
 //
@@ -60,6 +28,7 @@ func filterOptions(orig, options []string) []string {
 			filtered = append(filtered, o)
 		}
 	}
+	// slog.Info("Filtered options", "filtered", filtered)
 	return filtered
 }
 
@@ -143,16 +112,39 @@ func collapseRandomCellWithMinEntropy(tiles *[]Tile, minEntropyIndexes *[]int) i
 func lookAndFilter(ruleIndexToProcess, ruleIndexToWatch int, optionsToProcess, optionsToWatch []string) []string {
 	rules := make([]int, 0, 5) // random capacity
 	for _, optname := range optionsToWatch {
-		rule := tileOptions[optname][ruleIndexToWatch]
+		rule := assets.RulesGround[optname][ruleIndexToWatch]
 		rules = append(rules, rule)
 	}
 
 	newoptions := make([]string, 0, 5) // random capacity
-	for k, v := range tileOptions {
+	for k, v := range assets.RulesGround {
 		if intInSlice(v[ruleIndexToProcess], rules) {
 			newoptions = append(newoptions, k)
 		}
 	}
 
 	return filterOptions(optionsToProcess, newoptions)
+}
+
+func resetTilesOptions(tiles *[]Tile) {
+	// create a slice of all the options available
+	totaloptions := 0
+	for _, v := range assets.RulesGround {
+		totaloptions += v[ruleWEIGHT]
+	}
+	initialOptions := make([]string, totaloptions)
+	i := 0
+	for k, v := range assets.RulesGround {
+		for j := 0; j < v[ruleWEIGHT]; j++ {
+			initialOptions[i] = k
+			i++
+		}
+	}
+
+	// setup tiles with all the options enabled and a black square as image
+	for i := 0; i < len(*tiles); i++ {
+		(*tiles)[i].options = initialOptions
+		(*tiles)[i].image = ebiten.NewImage(tileWidth, tileHeight)
+		(*tiles)[i].collapsed = false
+	}
 }

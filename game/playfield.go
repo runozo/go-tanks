@@ -12,10 +12,6 @@ import (
 const (
 	tileWidth  = 64
 	tileHeight = 64
-	ruleUP     = 0
-	ruleRIGHT  = 1
-	ruleDOWN   = 2
-	ruleLEFT   = 3
 )
 
 type Tile struct {
@@ -31,23 +27,6 @@ type Playfield struct {
 	numOfTilesY int
 	isRendered  bool
 	assets      *assets.Assets
-}
-
-func resetTilesOptions(tiles *[]Tile) {
-	// create a slice of all the options available
-	initialOptions := make([]string, len(tileOptions))
-	i := 0
-	for k := range tileOptions {
-		initialOptions[i] = k
-		i++
-	}
-
-	// setup tiles with all the options enabled and a black square as image
-	for i := 0; i < len(*tiles); i++ {
-		(*tiles)[i].options = initialOptions
-		(*tiles)[i].image = ebiten.NewImage(tileWidth, tileHeight)
-		(*tiles)[i].collapsed = false
-	}
 }
 
 // NewPlayfield creates a new Playfield with the specified width, height, and assets.
