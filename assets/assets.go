@@ -43,6 +43,49 @@ type SpriteMap struct {
 	SubTextures []SubTexture `xml:"SubTexture"`
 }
 
+var RulesGround = map[string][]int{ // up, right, down, left, weight
+	"tileGrass1.png":                     {0, 0, 0, 0, 50}, // 0 grass
+	"tileGrass2.png":                     {0, 0, 0, 0, 50},
+	"tileGrass_roadCornerLL.png":         {0, 0, 1, 1, 20}, // 1 road with grass
+	"tileGrass_roadCornerLR.png":         {0, 1, 1, 0, 20},
+	"tileGrass_roadCornerUL.png":         {1, 0, 0, 1, 20},
+	"tileGrass_roadCornerUR.png":         {1, 1, 0, 0, 20},
+	"tileGrass_roadCrossing.png":         {1, 1, 1, 1, 1},
+	"tileGrass_roadCrossingRound.png":    {1, 1, 1, 1, 1},
+	"tileGrass_roadEast.png":             {0, 1, 0, 1, 20},
+	"tileGrass_roadNorth.png":            {1, 0, 1, 0, 20},
+	"tileGrass_roadSplitE.png":           {1, 1, 1, 0, 1},
+	"tileGrass_roadSplitN.png":           {1, 1, 0, 1, 1},
+	"tileGrass_roadSplitS.png":           {0, 1, 1, 1, 1},
+	"tileGrass_roadSplitW.png":           {1, 0, 1, 1, 1},
+	"tileGrass_roadTransitionE.png":      {4, 3, 4, 1, 10}, //
+	"tileGrass_roadTransitionE_dirt.png": {4, 3, 4, 1, 10},
+	"tileGrass_roadTransitionN.png":      {3, 6, 1, 6, 10},
+	"tileGrass_roadTransitionN_dirt.png": {3, 6, 1, 6, 10},
+	"tileGrass_roadTransitionS.png":      {1, 8, 3, 8, 10},
+	"tileGrass_roadTransitionS_dirt.png": {1, 8, 3, 8, 10},
+	"tileGrass_roadTransitionW.png":      {5, 1, 5, 3, 10},
+	"tileGrass_roadTransitionW_dirt.png": {5, 1, 5, 3, 10},
+	"tileGrass_transitionE.png":          {4, 2, 4, 0, 10},
+	"tileGrass_transitionN.png":          {2, 6, 0, 6, 10},
+	"tileGrass_transitionS.png":          {0, 8, 2, 8, 10},
+	"tileGrass_transitionW.png":          {5, 0, 5, 2, 10},
+	"tileSand1.png":                      {2, 2, 2, 2, 60},
+	"tileSand2.png":                      {2, 2, 2, 2, 60},
+	"tileSand_roadCornerLL.png":          {2, 2, 3, 3, 10},
+	"tileSand_roadCornerLR.png":          {2, 3, 3, 2, 10},
+	"tileSand_roadCornerUL.png":          {3, 2, 2, 3, 10},
+	"tileSand_roadCornerUR.png":          {3, 3, 2, 2, 10},
+	"tileSand_roadCrossing.png":          {3, 3, 3, 3, 10},
+	"tileSand_roadCrossingRound.png":     {3, 3, 3, 3, 1},
+	"tileSand_roadEast.png":              {2, 3, 2, 3, 10},
+	"tileSand_roadNorth.png":             {3, 2, 3, 2, 10},
+	"tileSand_roadSplitE.png":            {3, 3, 3, 2, 1},
+	"tileSand_roadSplitN.png":            {3, 3, 2, 3, 1},
+	"tileSand_roadSplitS.png":            {2, 3, 3, 3, 1},
+	"tileSand_roadSplitW.png":            {3, 2, 3, 3, 1},
+}
+
 func NewAssets() *Assets {
 	var spriteSheet = mustLoadImage(spriteSheet)
 	var spriteMap = mustLoadXMLSpriteMap(xmlSpriteMap)
