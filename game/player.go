@@ -31,14 +31,12 @@ type Player struct {
 }
 
 func NewPlayer(game *Game) *Player {
-	bodySprite := game.assets.GetRandomTankBody()
-	barrelSprite := game.assets.GetRandomTankBarrell()
-	bulletSprite := game.assets.GetSprite("bulletRed2.png")
+	bulletSprite := game.assets.GetSprite("bulletRed2")
 
 	return &Player{
 		game:          game,
 		rotation:      0,
-		tank:          NewTank(game, bodySprite, barrelSprite),
+		tank:          NewRandomTank(game),
 		position:      Vector{X: screenWidth / 2, Y: screenHeight / 2},
 		shootCooldown: NewTimer(shootCooldown),
 		bulletSprite:  bulletSprite,
@@ -97,7 +95,7 @@ func (p *Player) Update() {
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		p.tank = NewTank(p.game, p.game.assets.GetRandomTankBody(), p.game.assets.GetRandomTankBarrell())
+		p.tank = NewRandomTank(p.game)
 	}
 
 	var visibleBullets []*Bullet
