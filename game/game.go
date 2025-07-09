@@ -1,12 +1,12 @@
 package game
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/runozo/go-tanks/assets"
+	"github.com/runozo/go-wave-function-collapse/assets"
 )
 
 const (
@@ -33,22 +33,26 @@ type Game struct {
 func NewGame() *Game {
 	// ebiten.SetWindowSize(screenWidth, screenHeight)
 	// ebiten.SetFullscreen(true)
+	ass := assets.NewAssets(
+		"data"+string(os.PathSeparator)+"allSprites_default.png",
+		"data"+string(os.PathSeparator)+"mapped_tiles.json",
+	)
 	g := &Game{
-		assets: assets.NewAssets(),
+		assets: ass,
 		// velocityTimer: NewTimer(velocitySpeedUpTime),
-		width:  screenWidth,
-		height: screenHeight,
+		width:     screenWidth,
+		height:    screenHeight,
+		playfield: NewPlayfield(screenWidth, screenHeight, ass),
 	}
 
 	g.players = append(g.players, NewPlayer(g))
-	g.playfield = NewPlayfield(g.width, g.height, g.assets)
 
 	return g
 }
 
 func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		g.playfield = NewPlayfield(g.width, g.height, g.assets)
+		g = NewGame()
 	}
 	g.playfield.Update()
 	for _, p := range g.players {
@@ -65,7 +69,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// text.Draw(screen, fmt.Sprintf("CURSOR KEYS: move tank. SPACE: shoot. T: new random tank"), nil, 10, 10, color.Black)
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("CURSOR KEYS: move tank, SPACE: shoot, T: new random tank, P: generate new playfield"))
+	ebitenutil.DebugPrint(screen, "CURSOR KEYS: move tank, SPACE: shoot, T: new random tank, P: generate new playfield")
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
