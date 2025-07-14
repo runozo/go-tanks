@@ -59,12 +59,12 @@ func (p *Player) Update() {
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		p.shootCooldown.Reset()
 
-		bounds := p.tank.BodySprite.Bounds()
+		tankBounds := p.tank.BodySprite.Bounds()
 		bulletBounds := p.bulletSprite.Bounds()
 		halfWBullet := bulletBounds.Dx() / 2
 		halfHBullet := bulletBounds.Dy() / 2
-		halfW := float64(bounds.Dx()) / 2
-		halfH := float64(bounds.Dy()) / 2
+		halfW := float64(tankBounds.Dx()) / 2
+		halfH := float64(tankBounds.Dy()) / 2
 
 		spawnPos := Vector{
 			p.position.X + halfW - float64(halfWBullet) + math.Sin(p.rotation)*bulletSpawnOffset,
