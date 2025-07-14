@@ -52,7 +52,7 @@ func NewGame() *Game {
 
 func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		g = NewGame()
+		g.playfield = NewPlayfield(screenWidth, screenHeight, g.assets)
 	}
 	g.playfield.Update()
 	for _, p := range g.players {
