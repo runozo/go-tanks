@@ -1,6 +1,6 @@
 # go-tanks
 
-A game with tanks, try it on https://runozo.github.io/go-tanks/
+A game with tanks<!-- >, try it on https://runozo.github.io/go-tanks/ -->
 
 ## Controls
 |Key|Function
