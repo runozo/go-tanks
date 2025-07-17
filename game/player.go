@@ -15,7 +15,7 @@ const (
 	rotationPerSecond = math.Pi
 	tankSpeed         = 120.0
 
-	bulletSpawnOffset = 40.0
+	bulletSpawnOffset = 20.0
 	bulletSpeed       = 10.0
 	maxSlope          = 1.0
 )
@@ -107,8 +107,8 @@ func (p *Player) Update() {
 		halfH := float64(tankBounds.Dy()) / 2
 
 		spawnPos := Vector{
-			p.position.X + halfW - float64(halfWBullet) + math.Sin(p.barrelRotation)*bulletSpawnOffset,
-			p.position.Y + halfH - float64(halfHBullet) + math.Cos(p.barrelRotation)*-bulletSpawnOffset,
+			p.position.X + halfW - math.Cos(p.barrelRotation)*float64(halfWBullet) + math.Sin(p.barrelRotation)*bulletSpawnOffset,
+			p.position.Y + halfH - math.Sin(p.barrelRotation)*float64(halfHBullet) + math.Cos(p.barrelRotation)*-bulletSpawnOffset,
 		}
 
 		p.bullets = append(p.bullets, NewBullet(p.bulletSprite, spawnPos, p.barrelRotation, bulletSpeed, p.barrelSlope))
