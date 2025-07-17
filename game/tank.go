@@ -26,8 +26,9 @@ func NewRandomTank(game *Game) *Tank {
 	return NewTank(game, game.assets.GetSprite(randomBodyName), game.assets.GetSprite(randomBarrelName))
 }
 
-func (p *Tank) Draw(screen *ebiten.Image, pos Vector, rotation float64) {
+func (p *Tank) Draw(screen *ebiten.Image, pos Vector, rotation, barrelRotation float64) {
 	// Draw the tank
+
 	// body
 	bodyBounds := p.BodySprite.Bounds()
 	bodyHalfW := float64(bodyBounds.Dx() / 2)
@@ -44,7 +45,7 @@ func (p *Tank) Draw(screen *ebiten.Image, pos Vector, rotation float64) {
 	barrellHeight := float64(barrellBounds.Dy())
 	op_barrell := &ebiten.DrawImageOptions{}
 	op_barrell.GeoM.Translate(-barrellHalfW, -barrellHeight)
-	op_barrell.GeoM.Rotate(rotation)
+	op_barrell.GeoM.Rotate(barrelRotation)
 	op_barrell.GeoM.Translate(barrellHalfW, barrellHeight)
 	op_barrell.GeoM.Translate(
 		pos.X+float64(bodyBounds.Dx())/2-barrellHalfW,

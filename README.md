@@ -6,8 +6,8 @@ A game with tanks<!-- >, try it on https://runozo.github.io/go-tanks/ -->
 |Key|Function
 |------------|----------|
 |Arrow keys|Move tank|
-|z|Rotate barrel counterclockwise|
-|x|Rotate barrel clockwise|
+|a|Rotate barrel counterclockwise|
+|d|Rotate barrel clockwise|
 |Spacebar|Fire|
 |T|New random tank|
 |P|Redraw random playfield
@@ -17,7 +17,7 @@ A game with tanks<!-- >, try it on https://runozo.github.io/go-tanks/ -->
     [x] Load assets
     [x] Draw tank
     [x] Tank moves
-    [ ] Barrel rotate
+    [x] Barrel rotation
     [ ] Bullet gravity
     [x] Tank fires
     [x] Draw playfield
