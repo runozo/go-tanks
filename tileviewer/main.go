@@ -24,13 +24,15 @@ type Icon struct {
 }
 
 type Game struct {
-	screenWidth  int
-	screenHeight int
-	spriteSheet  *ebiten.Image
-	mouseX       int
-	mouseY       int
-	tileEntries  map[string]assets.TileEntry
-	assets       *assets.Assets
+	screenWidth        int
+	screenHeight       int
+	spriteSheet        *ebiten.Image
+	mouseX             int
+	mouseY             int
+	tileEntries        map[string]assets.TileEntry
+	assets             *assets.Assets
+	spriteSheetOffsetX int
+	spriteSheetOffsetY int
 }
 
 func (g *Game) Update() error {
@@ -39,22 +41,25 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.DrawImage(g.spriteSheet, nil)
+	spriteSheetOptions := &ebiten.DrawImageOptions{}
+	spriteSheetOptions.GeoM.Translate(float64(g.spriteSheetOffsetX), float64(g.spriteSheetOffsetY))
+	screen.DrawImage(g.spriteSheet, spriteSheetOptions)
 
 	tileName := g.isOverTile()
 	if tileName != "" {
 		tileEntry := g.tileEntries[tileName]
-		text.Draw(screen, fmt.Sprintf(" %s X: %d, Y: %d, W: %d, H: %d", tileName, tileEntry.X, tileEntry.Y, tileEntry.Width, tileEntry.Height), mplusNormalFont, 10, g.spriteSheet.Bounds().Dy()+20, color.White)
+		text.Draw(screen, fmt.Sprintf(" %s X: %d, Y: %d, W: %d, H: %d", tileName, tileEntry.X, tileEntry.Y, tileEntry.Width, tileEntry.Height), mplusNormalFont, 10, g.spriteSheet.Bounds().Dy()+g.spriteSheetOffsetY+20, color.White)
 
 		tileX := tileEntry.X
 		tileY := tileEntry.Y
-		// tileWidth := tileEntry.Width
-		// tileHeight := tileEntry.Height
+		tileWidth := tileEntry.Width
+		tileHeight := tileEntry.Height
 		tileImage := g.assets.GetSprite(tileName)
 
 		imageOptions := &ebiten.DrawImageOptions{}
-		imageOptions.GeoM.Scale(float64(2), float64(2))
-		imageOptions.GeoM.Translate(float64(tileX), float64(tileY))
+		scaleFactor := 2
+		imageOptions.GeoM.Scale(float64(scaleFactor), float64(scaleFactor))
+		imageOptions.GeoM.Translate(float64(tileX-tileWidth/2+g.spriteSheetOffsetX), float64(tileY-tileHeight/2+g.spriteSheetOffsetY))
 		screen.DrawImage(tileImage, imageOptions)
 	}
 }
@@ -64,8 +69,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) isOverTile() string {
+	g.spriteSheet.Bounds()
 	for _, tile := range g.tileEntries {
-		if g.mouseX > tile.X && g.mouseX < tile.X+tile.Width && g.mouseY > tile.Y && g.mouseY < tile.Y+tile.Height {
+		if g.mouseX > tile.X+g.spriteSheetOffsetX &&
+			g.mouseX < tile.X+tile.Width+g.spriteSheetOffsetX &&
+			g.mouseY > tile.Y+g.spriteSheetOffsetY && g.mouseY < tile.Y+tile.Height+g.spriteSheetOffsetY {
 			return tile.Name
 		}
 	}
@@ -108,12 +116,27 @@ func main() {
 		log.Fatal(err)
 	}
 
+	maxTileWidth := 0
+	maxTileHeight := 0
+	for _, tile := range ass.TileEntries {
+		if tile.Width > maxTileWidth {
+			maxTileWidth = tile.Width
+		}
+
+		if tile.Height > maxTileHeight {
+			maxTileHeight = tile.Height
+		}
+	}
+	// spriteSheet.SetPivot(float64(maxTileWidth/2), float64(ass.TileEntries["grass"].Height))
+
 	g := &Game{
-		screenWidth:  spriteSheet.Bounds().Dx(),
-		screenHeight: spriteSheet.Bounds().Dy() + 50,
-		spriteSheet:  spriteSheet,
-		tileEntries:  ass.TileEntries,
-		assets:       ass,
+		screenWidth:        spriteSheet.Bounds().Dx() + maxTileWidth,
+		screenHeight:       spriteSheet.Bounds().Dy() + maxTileHeight + 50,
+		spriteSheet:        spriteSheet,
+		tileEntries:        ass.TileEntries,
+		assets:             ass,
+		spriteSheetOffsetX: maxTileWidth / 2,
+		spriteSheetOffsetY: maxTileHeight / 2,
 	}
 
 	ebiten.SetWindowSize(g.screenWidth, g.screenHeight)
