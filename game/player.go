@@ -21,11 +21,12 @@ const (
 type Player struct {
 	game *Game
 
-	tank         *Tank
-	rotation     float64
-	position     Vector
-	bulletSprite *ebiten.Image
-	bullets      []*Bullet
+	tank           *Tank
+	tankRotation   float64
+	barrelRotation float64
+	position       Vector
+	bulletSprite   *ebiten.Image
+	bullets        []*Bullet
 
 	shootCooldown *Timer
 }
@@ -34,12 +35,13 @@ func NewPlayer(game *Game) *Player {
 	bulletSprite := game.assets.GetSprite("bulletRed2")
 
 	return &Player{
-		game:          game,
-		rotation:      0,
-		tank:          NewRandomTank(game),
-		position:      Vector{X: screenWidth / 2, Y: screenHeight / 2},
-		shootCooldown: NewTimer(shootCooldown),
-		bulletSprite:  bulletSprite,
+		game:           game,
+		tankRotation:   0,
+		barrelRotation: 0,
+		tank:           NewRandomTank(game),
+		position:       Vector{X: screenWidth / 2, Y: screenHeight / 2},
+		shootCooldown:  NewTimer(shootCooldown),
+		bulletSprite:   bulletSprite,
 	}
 }
 
@@ -48,26 +50,34 @@ func (p *Player) Update() {
 	movementSpeed := tankSpeed / float64(ebiten.TPS())
 	p.shootCooldown.Update()
 
-	// rotate
-	rotate := 0.0
+	// rotate tank
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		rotate -= rotationSpeed
+		p.tankRotation -= rotationSpeed
+		p.barrelRotation -= rotationSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		rotate += rotationSpeed
+		p.tankRotation += rotationSpeed
+		p.barrelRotation += rotationSpeed
 	}
-	p.rotation += rotate
+
+	// rotate barrel
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
+		p.barrelRotation -= rotationSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyD) {
+		p.barrelRotation += rotationSpeed
+	}
 
 	// move
 	movementX := 0.0
 	movementY := 0.0
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		movementX += math.Sin(p.rotation) * movementSpeed
-		movementY -= math.Cos(p.rotation) * movementSpeed
+		movementX += math.Sin(p.tankRotation) * movementSpeed
+		movementY -= math.Cos(p.tankRotation) * movementSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		movementX -= math.Sin(p.rotation) * movementSpeed
-		movementY += math.Cos(p.rotation) * movementSpeed
+		movementX -= math.Sin(p.tankRotation) * movementSpeed
+		movementY += math.Cos(p.tankRotation) * movementSpeed
 	}
 	p.position.X += movementX
 	p.position.Y += movementY
@@ -84,11 +94,11 @@ func (p *Player) Update() {
 		halfH := float64(tankBounds.Dy()) / 2
 
 		spawnPos := Vector{
-			p.position.X + halfW - float64(halfWBullet) + math.Sin(p.rotation)*bulletSpawnOffset,
-			p.position.Y + halfH - float64(halfHBullet) + math.Cos(p.rotation)*-bulletSpawnOffset,
+			p.position.X + halfW - float64(halfWBullet) + math.Sin(p.barrelRotation)*bulletSpawnOffset,
+			p.position.Y + halfH - float64(halfHBullet) + math.Cos(p.barrelRotation)*-bulletSpawnOffset,
 		}
 
-		p.bullets = append(p.bullets, NewBullet(p.bulletSprite, spawnPos, p.rotation, bulletSpeed))
+		p.bullets = append(p.bullets, NewBullet(p.bulletSprite, spawnPos, p.barrelRotation, bulletSpeed))
 
 	}
 
@@ -108,7 +118,7 @@ func (p *Player) Update() {
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
-	p.tank.Draw(screen, p.position, p.rotation)
+	p.tank.Draw(screen, p.position, p.tankRotation, p.barrelRotation)
 	for _, bullet := range p.bullets {
 		bullet.Draw(screen)
 	}
