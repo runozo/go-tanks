@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	_ "image/png"
 	"math"
 	"time"
@@ -16,6 +17,7 @@ const (
 
 	bulletSpawnOffset = 40.0
 	bulletSpeed       = 10.0
+	maxSlope          = 1.0
 )
 
 type Player struct {
@@ -24,6 +26,7 @@ type Player struct {
 	tank           *Tank
 	tankRotation   float64
 	barrelRotation float64
+	barrelSlope    float64
 	position       Vector
 	bulletSprite   *ebiten.Image
 	bullets        []*Bullet
@@ -42,12 +45,15 @@ func NewPlayer(game *Game) *Player {
 		position:       Vector{X: screenWidth / 2, Y: screenHeight / 2},
 		shootCooldown:  NewTimer(shootCooldown),
 		bulletSprite:   bulletSprite,
+		barrelSlope:    0.0,
 	}
 }
 
 func (p *Player) Update() {
-	rotationSpeed := rotationPerSecond / float64(ebiten.TPS())
-	movementSpeed := tankSpeed / float64(ebiten.TPS())
+	tps := float64(ebiten.TPS())
+	rotationSpeed := rotationPerSecond / tps
+	movementSpeed := tankSpeed / tps
+	slopeSpeed := maxSlope / tps / 2
 	p.shootCooldown.Update()
 
 	// rotate tank
@@ -84,7 +90,14 @@ func (p *Player) Update() {
 
 	// shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
-		p.shootCooldown.Reset()
+		p.barrelSlope += slopeSpeed
+		if p.barrelSlope > maxSlope {
+			p.barrelSlope = maxSlope
+		}
+		fmt.Println(p.barrelSlope)
+	}
+
+	if p.barrelSlope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.barrelSlope >= maxSlope {
 
 		tankBounds := p.tank.BodySprite.Bounds()
 		bulletBounds := p.bulletSprite.Bounds()
@@ -98,8 +111,10 @@ func (p *Player) Update() {
 			p.position.Y + halfH - float64(halfHBullet) + math.Cos(p.barrelRotation)*-bulletSpawnOffset,
 		}
 
-		p.bullets = append(p.bullets, NewBullet(p.bulletSprite, spawnPos, p.barrelRotation, bulletSpeed))
-
+		p.bullets = append(p.bullets, NewBullet(p.bulletSprite, spawnPos, p.barrelRotation, bulletSpeed, p.barrelSlope))
+		p.barrelSlope = 0.0
+		p.shootCooldown.Reset()
+		// fmt.Println(len(p.bullets))
 	}
 
 	// new tank
@@ -110,7 +125,7 @@ func (p *Player) Update() {
 	var visibleBullets []*Bullet
 	for _, bullet := range p.bullets {
 		bullet.Update()
-		if bullet.position.X > 0 && bullet.position.X < float64(p.game.width) && bullet.position.Y > 0 && bullet.position.Y < float64(p.game.height) {
+		if bullet.altitude > 0.0 {
 			visibleBullets = append(visibleBullets, bullet)
 		}
 	}
