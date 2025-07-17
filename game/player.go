@@ -46,16 +46,33 @@ func NewPlayer(game *Game) *Player {
 func (p *Player) Update() {
 	rotationSpeed := rotationPerSecond / float64(ebiten.TPS())
 	movementSpeed := tankSpeed / float64(ebiten.TPS())
-
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		p.rotation -= rotationSpeed
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		p.rotation += rotationSpeed
-	}
-
 	p.shootCooldown.Update()
+
+	// rotate
+	rotate := 0.0
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		rotate -= rotationSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		rotate += rotationSpeed
+	}
+	p.rotation += rotate
+
+	// move
+	movementX := 0.0
+	movementY := 0.0
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		movementX += math.Sin(p.rotation) * movementSpeed
+		movementY -= math.Cos(p.rotation) * movementSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		movementX -= math.Sin(p.rotation) * movementSpeed
+		movementY += math.Cos(p.rotation) * movementSpeed
+	}
+	p.position.X += movementX
+	p.position.Y += movementY
+
+	// shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		p.shootCooldown.Reset()
 
@@ -75,25 +92,7 @@ func (p *Player) Update() {
 
 	}
 
-	// move towards facing
-	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		// first get the direction the entity is pointed
-		dx := math.Sin(p.rotation)
-		dy := math.Cos(p.rotation)
-
-		p.position.X += dx * movementSpeed
-		p.position.Y -= dy * movementSpeed
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		// first get the direction the entity is pointed
-		dx := math.Sin(p.rotation)
-		dy := math.Cos(p.rotation)
-		// then move in that direction
-		p.position.X -= dx * movementSpeed
-		p.position.Y += dy * movementSpeed
-	}
-
+	// new tank
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
 		p.tank = NewRandomTank(p.game)
 	}
