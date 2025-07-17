@@ -69,7 +69,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// text.Draw(screen, fmt.Sprintf("CURSOR KEYS: move tank. SPACE: shoot. T: new random tank"), nil, 10, 10, color.Black)
-	ebitenutil.DebugPrint(screen, "CURSOR KEYS: move tank, A/D: rotate barrel,SPACE: shoot, T: new random tank, P: generate new playfield")
+	ebitenutil.DebugPrint(screen, "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield")
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
