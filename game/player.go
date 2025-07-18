@@ -83,7 +83,7 @@ func (p *Player) Update() {
 	if p.tank.barrel.slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrel.slope >= maxSlope {
 
 		p.bullets = append(p.bullets, p.tank.Fire())
-		// p.bullets = append(p.bullets, p.tank.Fire())
+
 		p.tank.barrel.slope = 0.0
 		p.shootCooldown.Reset()
 		// fmt.Println(len(p.bullets))

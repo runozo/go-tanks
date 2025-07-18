@@ -24,8 +24,14 @@ type Bullet struct {
 }
 
 func NewBullet(sprite *ebiten.Image, barrel *Barrel) *Bullet {
+	halfBarrelW := float64(barrel.sprite.Bounds().Dx()) / 2
+	// halfBarrelH := float64(barrel.sprite.Bounds().Dy()) / 2
+	position := Vector{
+		X: barrel.position.X - halfBarrelW + math.Sin(barrel.absoluteRotation) + bulletSpawnOffset,
+		Y: barrel.position.Y - math.Cos(barrel.absoluteRotation) + bulletSpawnOffset,
+	}
 	return &Bullet{
-		position:    barrel.position,
+		position:    position,
 		rotation:    barrel.absoluteRotation,
 		sprite:      sprite,
 		speed:       bulletSpeed,
@@ -38,7 +44,7 @@ func NewBullet(sprite *ebiten.Image, barrel *Barrel) *Bullet {
 func (b *Bullet) Update() {
 	if b.altitude > 0.0 {
 		b.position.X += math.Sin(b.rotation) * b.speed
-		b.position.Y += math.Cos(b.rotation) * -b.speed
+		b.position.Y -= math.Cos(b.rotation) * b.speed
 		verticalSpeed := b.speed * math.Sin(b.slope)
 		b.altitude += verticalSpeed - gravity*math.Pow(b.elapsedTime, 2)
 		b.elapsedTime += 1.0 / float64(ebiten.TPS())
