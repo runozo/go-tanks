@@ -50,11 +50,9 @@ func (p *Player) Update() {
 	// rotate tank
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		p.tank.rotation -= rotationSpeed
-		p.tank.barrel.rotation -= rotationSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
 		p.tank.rotation += rotationSpeed
-		p.tank.barrel.rotation += rotationSpeed
 	}
 
 	// rotate barrel
