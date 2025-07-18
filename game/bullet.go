@@ -24,12 +24,11 @@ type Bullet struct {
 }
 
 func NewBullet(barrel *Barrel) *Bullet {
-	halfBarrelW := float64(barrel.sprite.Bounds().Dx()) / 2
-	// halfBarrelH := float64(barrel.sprite.Bounds().Dy()) / 2
 	position := Vector{
-		X: barrel.position.X + halfBarrelW + math.Sin(barrel.absoluteRotation),
+		X: barrel.position.X + barrel.spriteWidth/2 + math.Sin(barrel.absoluteRotation),
 		Y: barrel.position.Y - math.Cos(barrel.absoluteRotation) + bulletSpawnOffset,
 	}
+
 	return &Bullet{
 		position:    position,
 		rotation:    barrel.absoluteRotation,

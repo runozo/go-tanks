@@ -17,14 +17,16 @@ type Barrel struct {
 }
 
 func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank) *Barrel {
+	spriteWidth := float64(sprite.Bounds().Dx())
+	spriteHeight := float64(sprite.Bounds().Dy())
 	position := Vector{
-		X: tank.position.X + float64(tank.bodySprite.Bounds().Dx())/2 - float64(sprite.Bounds().Dx())/2,
-		Y: tank.position.Y + float64(tank.bodySprite.Bounds().Dy())/2 - float64(sprite.Bounds().Dy()),
+		X: tank.position.X + tank.bodyWidth/2 - spriteWidth/2,
+		Y: tank.position.Y + tank.bodyHeight/2 - spriteHeight,
 	}
 	return &Barrel{
 		sprite:           sprite,
-		spriteWidth:      float64(sprite.Bounds().Dx()),
-		spriteHeight:     float64(sprite.Bounds().Dy()),
+		spriteWidth:      spriteWidth,
+		spriteHeight:     spriteHeight,
 		bulletSprite:     bulletSprite,
 		position:         position,
 		relativeRotation: 0.0,
