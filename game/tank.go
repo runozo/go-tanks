@@ -9,12 +9,14 @@ import (
 type Tank struct {
 	BodySprite   *ebiten.Image
 	BarrelSprite *ebiten.Image
+	position     Vector
 }
 
 func NewTank(game *Game, bodySprite, barrelSprite *ebiten.Image) *Tank {
 	return &Tank{
 		BodySprite:   bodySprite,
 		BarrelSprite: barrelSprite,
+		position:     Vector{X: screenWidth / 2, Y: screenHeight / 2},
 	}
 }
 
@@ -28,21 +30,25 @@ func NewRandomTank(game *Game) *Tank {
 	return NewTank(game, game.assets.GetSprite(randomBodyName), game.assets.GetSprite(randomBarrelName))
 }
 
-func (p *Tank) Draw(screen *ebiten.Image, pos Vector, rotation, barrelRotation float64) {
+func (t *Tank) Fire() *Bullet {
+	return nil
+}
+
+func (t *Tank) Draw(screen *ebiten.Image, rotation, barrelRotation float64) {
 	// Draw the tank
 
 	// body
-	bodyBounds := p.BodySprite.Bounds()
+	bodyBounds := t.BodySprite.Bounds()
 	bodyHalfW := float64(bodyBounds.Dx() / 2)
 	bodyHalfH := float64(bodyBounds.Dy() / 2)
 	op_body := &ebiten.DrawImageOptions{}
 	op_body.GeoM.Translate(-bodyHalfW, -bodyHalfH)
 	op_body.GeoM.Rotate(rotation)
 	op_body.GeoM.Translate(bodyHalfW, bodyHalfH)
-	op_body.GeoM.Translate(pos.X, pos.Y)
+	op_body.GeoM.Translate(t.position.X, t.position.Y)
 
 	// barrel
-	barrellBounds := p.BarrelSprite.Bounds()
+	barrellBounds := t.BarrelSprite.Bounds()
 	barrellHalfW := float64(barrellBounds.Dx() / 2)
 	barrellHeight := float64(barrellBounds.Dy())
 	op_barrell := &ebiten.DrawImageOptions{}
@@ -50,10 +56,10 @@ func (p *Tank) Draw(screen *ebiten.Image, pos Vector, rotation, barrelRotation f
 	op_barrell.GeoM.Rotate(barrelRotation)
 	op_barrell.GeoM.Translate(barrellHalfW, barrellHeight)
 	op_barrell.GeoM.Translate(
-		pos.X+float64(bodyBounds.Dx())/2-barrellHalfW,
-		pos.Y+float64(bodyBounds.Dy())/2-barrellHeight,
+		t.position.X+float64(bodyBounds.Dx())/2-barrellHalfW,
+		t.position.Y+float64(bodyBounds.Dy())/2-barrellHeight,
 	)
 
-	screen.DrawImage(p.BodySprite, op_body)
-	screen.DrawImage(p.BarrelSprite, op_barrell)
+	screen.DrawImage(t.BodySprite, op_body)
+	screen.DrawImage(t.BarrelSprite, op_barrell)
 }

@@ -27,7 +27,6 @@ type Player struct {
 	tankRotation   float64
 	barrelRotation float64
 	barrelSlope    float64
-	position       Vector
 	bulletSprite   *ebiten.Image
 	bullets        []*Bullet
 
@@ -42,7 +41,6 @@ func NewPlayer(game *Game) *Player {
 		tankRotation:   0,
 		barrelRotation: 0,
 		tank:           NewRandomTank(game),
-		position:       Vector{X: screenWidth / 2, Y: screenHeight / 2},
 		shootCooldown:  NewTimer(shootCooldown),
 		bulletSprite:   bulletSprite,
 		barrelSlope:    0.0,
@@ -85,8 +83,8 @@ func (p *Player) Update() {
 		movementX -= math.Sin(p.tankRotation) * movementSpeed
 		movementY += math.Cos(p.tankRotation) * movementSpeed
 	}
-	p.position.X += movementX
-	p.position.Y += movementY
+	p.tank.position.X += movementX
+	p.tank.position.Y += movementY
 
 	// shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
@@ -107,11 +105,12 @@ func (p *Player) Update() {
 		halfH := float64(tankBounds.Dy()) / 2
 
 		spawnPos := Vector{
-			p.position.X + halfW - math.Cos(p.barrelRotation)*float64(halfWBullet) + math.Sin(p.barrelRotation)*bulletSpawnOffset,
-			p.position.Y + halfH - math.Sin(p.barrelRotation)*float64(halfHBullet) + math.Cos(p.barrelRotation)*-bulletSpawnOffset,
+			p.tank.position.X + halfW - math.Cos(p.barrelRotation)*float64(halfWBullet) + math.Sin(p.barrelRotation)*bulletSpawnOffset,
+			p.tank.position.Y + halfH - math.Sin(p.barrelRotation)*float64(halfHBullet) + math.Cos(p.barrelRotation)*-bulletSpawnOffset,
 		}
 
 		p.bullets = append(p.bullets, NewBullet(p.bulletSprite, spawnPos, p.barrelRotation, bulletSpeed, p.barrelSlope))
+		// p.bullets = append(p.bullets, p.tank.Fire())
 		p.barrelSlope = 0.0
 		p.shootCooldown.Reset()
 		// fmt.Println(len(p.bullets))
@@ -133,7 +132,7 @@ func (p *Player) Update() {
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
-	p.tank.Draw(screen, p.position, p.tankRotation, p.barrelRotation)
+	p.tank.Draw(screen, p.tankRotation, p.barrelRotation)
 	for _, bullet := range p.bullets {
 		bullet.Draw(screen)
 	}
