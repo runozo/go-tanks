@@ -6,6 +6,8 @@ import (
 
 type Barrel struct {
 	sprite           *ebiten.Image
+	spriteWidth      float64
+	spriteHeight     float64
 	bulletSprite     *ebiten.Image
 	position         Vector
 	relativeRotation float64
@@ -15,10 +17,16 @@ type Barrel struct {
 }
 
 func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank) *Barrel {
+	position := Vector{
+		X: tank.position.X + float64(tank.bodySprite.Bounds().Dx())/2 - float64(sprite.Bounds().Dx())/2,
+		Y: tank.position.Y + float64(tank.bodySprite.Bounds().Dy())/2 - float64(sprite.Bounds().Dy()),
+	}
 	return &Barrel{
 		sprite:           sprite,
+		spriteWidth:      float64(sprite.Bounds().Dx()),
+		spriteHeight:     float64(sprite.Bounds().Dy()),
 		bulletSprite:     bulletSprite,
-		position:         tank.position,
+		position:         position,
 		relativeRotation: 0.0,
 		absoluteRotation: tank.rotation,
 		slope:            0.0,
@@ -27,41 +35,24 @@ func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank) *Barrel {
 }
 
 func (b *Barrel) Fire() *Bullet {
-	// barrelBounds := b.sprite.Bounds()
-	// bulletBounds := b.bulletSprite.Bounds()
-	/*
-		halfWBullet := bulletBounds.Dx() / 2
-		halfHBullet := bulletBounds.Dy() / 2
-		halfW := float64(barrelBounds.Dx()) / 2
-		halfH := float64(barrelBounds.Dy()) / 2
-		bulletRotation := b.rotation + tank.rotation
-	*/
-
-	/*spawnPos := Vector{
-		b.position.X + halfW - math.Cos(bulletRotation)*float64(halfWBullet) + math.Sin(bulletRotation)*bulletSpawnOffset,
-		b.position.Y + halfH - math.Sin(bulletRotation)*float64(halfHBullet) + math.Cos(bulletRotation)*-bulletSpawnOffset,
-	}*/
-
-	return NewBullet(b.bulletSprite, b)
+	return NewBullet(b)
 }
 
 func (b *Barrel) Update() {
 	b.absoluteRotation = b.tank.rotation + b.relativeRotation
+	position := Vector{
+		X: b.tank.position.X + float64(b.tank.bodyWidth)/2 - b.spriteWidth/2,
+		Y: b.tank.position.Y + float64(b.tank.bodyHeight)/2 - b.spriteHeight,
+	}
+	b.position = position
 }
 
 func (b *Barrel) Draw(screen *ebiten.Image) {
 	// barrel
-	tankBounds := b.tank.bodySprite.Bounds()
-	barrellBounds := b.sprite.Bounds()
-	barrellHalfW := float64(barrellBounds.Dx() / 2)
-	barrellHeight := float64(barrellBounds.Dy())
 	op_barrel := &ebiten.DrawImageOptions{}
-	op_barrel.GeoM.Translate(-barrellHalfW, -barrellHeight)
+	op_barrel.GeoM.Translate(-b.spriteWidth/2, -b.spriteHeight)
 	op_barrel.GeoM.Rotate(b.absoluteRotation)
-	op_barrel.GeoM.Translate(barrellHalfW, barrellHeight)
-	op_barrel.GeoM.Translate(
-		b.tank.position.X+float64(tankBounds.Dx())/2-barrellHalfW,
-		b.tank.position.Y+float64(tankBounds.Dy())/2-barrellHeight,
-	)
+	op_barrel.GeoM.Translate(b.spriteWidth/2, b.spriteHeight)
+	op_barrel.GeoM.Translate(b.position.X, b.position.Y)
 	screen.DrawImage(b.sprite, op_barrel)
 }

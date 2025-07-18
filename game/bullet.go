@@ -23,17 +23,17 @@ type Bullet struct {
 	elapsedTime float64
 }
 
-func NewBullet(sprite *ebiten.Image, barrel *Barrel) *Bullet {
+func NewBullet(barrel *Barrel) *Bullet {
 	halfBarrelW := float64(barrel.sprite.Bounds().Dx()) / 2
 	// halfBarrelH := float64(barrel.sprite.Bounds().Dy()) / 2
 	position := Vector{
-		X: barrel.position.X - halfBarrelW + math.Sin(barrel.absoluteRotation) + bulletSpawnOffset,
+		X: barrel.position.X + halfBarrelW + math.Sin(barrel.absoluteRotation),
 		Y: barrel.position.Y - math.Cos(barrel.absoluteRotation) + bulletSpawnOffset,
 	}
 	return &Bullet{
 		position:    position,
 		rotation:    barrel.absoluteRotation,
-		sprite:      sprite,
+		sprite:      barrel.bulletSprite,
 		speed:       bulletSpeed,
 		slope:       barrel.slope,
 		altitude:    0.2,
