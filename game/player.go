@@ -97,7 +97,7 @@ func (p *Player) Update() {
 
 	if p.barrelSlope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.barrelSlope >= maxSlope {
 
-		tankBounds := p.tank.BodySprite.Bounds()
+		tankBounds := p.tank.bodySprite.Bounds()
 		bulletBounds := p.bulletSprite.Bounds()
 		halfWBullet := bulletBounds.Dx() / 2
 		halfHBullet := bulletBounds.Dy() / 2
