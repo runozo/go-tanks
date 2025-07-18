@@ -49,19 +49,8 @@ func (t *Tank) Draw(screen *ebiten.Image, rotation float64) {
 	op_body.GeoM.Translate(bodyHalfW, bodyHalfH)
 	op_body.GeoM.Translate(t.position.X, t.position.Y)
 
-	// barrel
-	barrellBounds := t.barrel.sprite.Bounds()
-	barrellHalfW := float64(barrellBounds.Dx() / 2)
-	barrellHeight := float64(barrellBounds.Dy())
-	op_barrell := &ebiten.DrawImageOptions{}
-	op_barrell.GeoM.Translate(-barrellHalfW, -barrellHeight)
-	op_barrell.GeoM.Rotate(t.barrel.rotation)
-	op_barrell.GeoM.Translate(barrellHalfW, barrellHeight)
-	op_barrell.GeoM.Translate(
-		t.position.X+float64(bodyBounds.Dx())/2-barrellHalfW,
-		t.position.Y+float64(bodyBounds.Dy())/2-barrellHeight,
-	)
-
 	screen.DrawImage(t.bodySprite, op_body)
-	screen.DrawImage(t.barrel.sprite, op_barrell)
+
+	// barrel
+	t.barrel.Draw(screen, t)
 }
