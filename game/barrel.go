@@ -1,21 +1,44 @@
 package game
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"math"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Barrel struct {
-	sprite   *ebiten.Image
-	position Vector
-	rotation float64
-	slope    float64
+	sprite       *ebiten.Image
+	bulletSprite *ebiten.Image
+	position     Vector
+	rotation     float64
+	slope        float64
 }
 
-func NewBarrel(sprite *ebiten.Image, tankPosition Vector, rotation float64) *Barrel {
+func NewBarrel(sprite, bulletSprite *ebiten.Image, tankPosition Vector, rotation float64) *Barrel {
 	return &Barrel{
-		sprite:   sprite,
-		position: tankPosition,
-		rotation: rotation,
-		slope:    0.0,
+		sprite:       sprite,
+		bulletSprite: bulletSprite,
+		position:     tankPosition,
+		rotation:     rotation,
+		slope:        0.0,
 	}
+}
+
+func (b *Barrel) Fire(tank *Tank) *Bullet {
+	barrelBounds := b.sprite.Bounds()
+	bulletBounds := b.bulletSprite.Bounds()
+	halfWBullet := bulletBounds.Dx() / 2
+	halfHBullet := bulletBounds.Dy() / 2
+	halfW := float64(barrelBounds.Dx()) / 2
+	halfH := float64(barrelBounds.Dy()) / 2
+	bulletRotation := b.rotation + tank.rotation
+
+	spawnPos := Vector{
+		tank.position.X + halfW - math.Cos(bulletRotation)*float64(halfWBullet) + math.Sin(bulletRotation)*bulletSpawnOffset,
+		tank.position.Y + halfH - math.Sin(bulletRotation)*float64(halfHBullet) + math.Cos(bulletRotation)*-bulletSpawnOffset,
+	}
+
+	return NewBullet(b.bulletSprite, spawnPos, bulletRotation, bulletSpeed, b.slope)
 }
 
 func (b *Barrel) Draw(screen *ebiten.Image, tank *Tank) {

@@ -30,13 +30,10 @@ type Player struct {
 }
 
 func NewPlayer(game *Game) *Player {
-	bulletSprite := game.assets.GetSprite("bulletRed2")
-
 	return &Player{
 		game:          game,
 		tank:          NewRandomTank(game),
 		shootCooldown: NewTimer(shootCooldown),
-		bulletSprite:  bulletSprite,
 	}
 }
 
@@ -88,19 +85,7 @@ func (p *Player) Update() {
 
 	if p.tank.barrel.slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrel.slope >= maxSlope {
 
-		tankBounds := p.tank.bodySprite.Bounds()
-		bulletBounds := p.bulletSprite.Bounds()
-		halfWBullet := bulletBounds.Dx() / 2
-		halfHBullet := bulletBounds.Dy() / 2
-		halfW := float64(tankBounds.Dx()) / 2
-		halfH := float64(tankBounds.Dy()) / 2
-
-		spawnPos := Vector{
-			p.tank.position.X + halfW - math.Cos(p.tank.barrel.rotation)*float64(halfWBullet) + math.Sin(p.tank.barrel.rotation)*bulletSpawnOffset,
-			p.tank.position.Y + halfH - math.Sin(p.tank.barrel.rotation)*float64(halfHBullet) + math.Cos(p.tank.barrel.rotation)*-bulletSpawnOffset,
-		}
-
-		p.bullets = append(p.bullets, NewBullet(p.bulletSprite, spawnPos, p.tank.barrel.rotation, bulletSpeed, p.tank.barrel.slope))
+		p.bullets = append(p.bullets, p.tank.Fire())
 		// p.bullets = append(p.bullets, p.tank.Fire())
 		p.tank.barrel.slope = 0.0
 		p.shootCooldown.Reset()
