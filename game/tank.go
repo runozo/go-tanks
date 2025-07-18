@@ -7,15 +7,15 @@ import (
 )
 
 type Tank struct {
-	BodySprite   *ebiten.Image
-	BarrelSprite *ebiten.Image
+	bodySprite   *ebiten.Image
+	barrelSprite *ebiten.Image
 	position     Vector
 }
 
 func NewTank(game *Game, bodySprite, barrelSprite *ebiten.Image) *Tank {
 	return &Tank{
-		BodySprite:   bodySprite,
-		BarrelSprite: barrelSprite,
+		bodySprite:   bodySprite,
+		barrelSprite: barrelSprite,
 		position:     Vector{X: screenWidth / 2, Y: screenHeight / 2},
 	}
 }
@@ -38,7 +38,7 @@ func (t *Tank) Draw(screen *ebiten.Image, rotation, barrelRotation float64) {
 	// Draw the tank
 
 	// body
-	bodyBounds := t.BodySprite.Bounds()
+	bodyBounds := t.bodySprite.Bounds()
 	bodyHalfW := float64(bodyBounds.Dx() / 2)
 	bodyHalfH := float64(bodyBounds.Dy() / 2)
 	op_body := &ebiten.DrawImageOptions{}
@@ -48,7 +48,7 @@ func (t *Tank) Draw(screen *ebiten.Image, rotation, barrelRotation float64) {
 	op_body.GeoM.Translate(t.position.X, t.position.Y)
 
 	// barrel
-	barrellBounds := t.BarrelSprite.Bounds()
+	barrellBounds := t.barrelSprite.Bounds()
 	barrellHalfW := float64(barrellBounds.Dx() / 2)
 	barrellHeight := float64(barrellBounds.Dy())
 	op_barrell := &ebiten.DrawImageOptions{}
@@ -60,6 +60,6 @@ func (t *Tank) Draw(screen *ebiten.Image, rotation, barrelRotation float64) {
 		t.position.Y+float64(bodyBounds.Dy())/2-barrellHeight,
 	)
 
-	screen.DrawImage(t.BodySprite, op_body)
-	screen.DrawImage(t.BarrelSprite, op_barrell)
+	screen.DrawImage(t.bodySprite, op_body)
+	screen.DrawImage(t.barrelSprite, op_barrell)
 }
