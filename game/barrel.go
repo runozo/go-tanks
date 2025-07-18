@@ -43,8 +43,8 @@ func (b *Barrel) Fire() *Bullet {
 func (b *Barrel) Update() {
 	b.absoluteRotation = b.tank.rotation + b.relativeRotation
 	position := Vector{
-		X: b.tank.position.X + float64(b.tank.bodyWidth)/2 - b.spriteWidth/2,
-		Y: b.tank.position.Y + float64(b.tank.bodyHeight)/2 - b.spriteHeight,
+		X: b.tank.position.X + b.tank.bodyWidth/2 - b.spriteWidth/2,
+		Y: b.tank.position.Y + b.tank.bodyHeight/2 - b.spriteHeight,
 	}
 	b.position = position
 }
