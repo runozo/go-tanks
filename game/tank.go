@@ -14,12 +14,14 @@ type Tank struct {
 }
 
 func NewTank(game *Game, bodySprite, barrelSprite, bulletSprite *ebiten.Image) *Tank {
-	return &Tank{
+	tank := &Tank{
 		bodySprite: bodySprite,
 		position:   Vector{X: screenWidth / 2, Y: screenHeight / 2},
 		rotation:   0.0,
-		barrel:     NewBarrel(barrelSprite, bulletSprite, Vector{X: screenWidth / 2, Y: screenHeight / 2}, 0.0),
+		barrel:     nil,
 	}
+	tank.barrel = NewBarrel(barrelSprite, bulletSprite, tank)
+	return tank
 }
 
 func NewRandomTank(game *Game) *Tank {
@@ -35,7 +37,11 @@ func NewRandomTank(game *Game) *Tank {
 }
 
 func (t *Tank) Fire() *Bullet {
-	return t.barrel.Fire(t)
+	return t.barrel.Fire()
+}
+
+func (t *Tank) Update() {
+	t.barrel.Update()
 }
 
 func (t *Tank) Draw(screen *ebiten.Image, rotation float64) {
@@ -54,5 +60,5 @@ func (t *Tank) Draw(screen *ebiten.Image, rotation float64) {
 	screen.DrawImage(t.bodySprite, op_body)
 
 	// barrel
-	t.barrel.Draw(screen, t)
+	t.barrel.Draw(screen)
 }

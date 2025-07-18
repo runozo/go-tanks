@@ -8,7 +8,9 @@ import (
 )
 
 const (
-	gravity = 3.0
+	gravity           = 3.0
+	bulletSpawnOffset = 20.0
+	bulletSpeed       = 10.0
 )
 
 type Bullet struct {
@@ -21,13 +23,13 @@ type Bullet struct {
 	elapsedTime float64
 }
 
-func NewBullet(sprite *ebiten.Image, pos Vector, rotation, speed, slope float64) *Bullet {
+func NewBullet(sprite *ebiten.Image, barrel *Barrel) *Bullet {
 	return &Bullet{
-		position:    pos,
-		rotation:    rotation,
+		position:    barrel.position,
+		rotation:    barrel.absoluteRotation,
 		sprite:      sprite,
-		speed:       speed,
-		slope:       slope,
+		speed:       bulletSpeed,
+		slope:       barrel.slope,
 		altitude:    0.2,
 		elapsedTime: 0.0,
 	}

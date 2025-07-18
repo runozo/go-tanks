@@ -15,16 +15,13 @@ const (
 	rotationPerSecond = math.Pi
 	tankSpeed         = 120.0
 
-	bulletSpawnOffset = 20.0
-	bulletSpeed       = 10.0
-	maxSlope          = 1.0
+	maxSlope = 1.0
 )
 
 type Player struct {
-	game         *Game
-	tank         *Tank
-	bulletSprite *ebiten.Image
-	bullets      []*Bullet
+	game    *Game
+	tank    *Tank
+	bullets []*Bullet
 
 	shootCooldown *Timer
 }
@@ -54,10 +51,10 @@ func (p *Player) Update() {
 
 	// rotate barrel
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		p.tank.barrel.rotation -= rotationSpeed
+		p.tank.barrel.relativeRotation -= rotationSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		p.tank.barrel.rotation += rotationSpeed
+		p.tank.barrel.relativeRotation += rotationSpeed
 	}
 
 	// move
@@ -96,6 +93,11 @@ func (p *Player) Update() {
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
 		p.tank = NewRandomTank(p.game)
 	}
+	// update tanks
+
+	p.tank.Update()
+
+	// update bullets
 
 	var visibleBullets []*Bullet
 	for _, bullet := range p.bullets {
