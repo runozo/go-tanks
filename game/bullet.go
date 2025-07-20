@@ -14,15 +14,15 @@ const (
 )
 
 type Bullet struct {
-	position    Vector
-	rotation    float64
-	sprite      *ebiten.Image
-	speed       float64
-	slope       float64
-	altitude    float64
-	elapsedTime float64
-	width       float64
-	height      float64
+	position     Vector
+	rotation     float64
+	sprite       *ebiten.Image
+	speed        float64
+	slope        float64
+	altitude     float64
+	elapsedTime  float64
+	spriteWidth  float64
+	spriteHeight float64
 }
 
 func NewBullet(barrel *Barrel) *Bullet {
@@ -32,15 +32,15 @@ func NewBullet(barrel *Barrel) *Bullet {
 	}
 
 	return &Bullet{
-		position:    position,
-		rotation:    barrel.absoluteRotation,
-		sprite:      barrel.bulletSprite,
-		speed:       bulletSpeed,
-		slope:       barrel.slope,
-		altitude:    0.2,
-		elapsedTime: 0.0,
-		width:       float64(barrel.bulletSprite.Bounds().Dx()),
-		height:      float64(barrel.bulletSprite.Bounds().Dy()),
+		position:     position,
+		rotation:     barrel.absoluteRotation,
+		sprite:       barrel.bulletSprite,
+		speed:        bulletSpeed,
+		slope:        barrel.slope,
+		altitude:     0.2,
+		elapsedTime:  0.0,
+		spriteWidth:  float64(barrel.bulletSprite.Bounds().Dx()),
+		spriteHeight: float64(barrel.bulletSprite.Bounds().Dy()),
 	}
 }
 
@@ -63,8 +63,8 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 			scale = 1.0
 		}
 
-		bulletHalfH := b.height / 2
-		bulletHalfW := b.width / 2
+		bulletHalfH := b.spriteHeight / 2
+		bulletHalfW := b.spriteWidth / 2
 
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
