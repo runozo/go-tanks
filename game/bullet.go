@@ -21,11 +21,13 @@ type Bullet struct {
 	slope       float64
 	altitude    float64
 	elapsedTime float64
+	width       float64
+	height      float64
 }
 
 func NewBullet(barrel *Barrel) *Bullet {
 	position := Vector{
-		X: barrel.position.X + barrel.spriteWidth/2 + math.Sin(barrel.absoluteRotation),
+		X: barrel.position.X + math.Sin(barrel.absoluteRotation),
 		Y: barrel.position.Y - math.Cos(barrel.absoluteRotation) + bulletSpawnOffset,
 	}
 
@@ -37,6 +39,8 @@ func NewBullet(barrel *Barrel) *Bullet {
 		slope:       barrel.slope,
 		altitude:    0.2,
 		elapsedTime: 0.0,
+		width:       float64(barrel.bulletSprite.Bounds().Dx()),
+		height:      float64(barrel.bulletSprite.Bounds().Dy()),
 	}
 }
 
@@ -58,8 +62,14 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 		if scale < 1.0 {
 			scale = 1.0
 		}
+
+		bulletHalfH := b.height / 2
+		bulletHalfW := b.width / 2
+
 		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
 		op.GeoM.Rotate(b.rotation)
+		op.GeoM.Translate(bulletHalfW, bulletHalfH)
 		op.GeoM.Scale(scale, scale)
 		op.GeoM.Translate(b.position.X, b.position.Y)
 		screen.DrawImage(b.sprite, op)
