@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	_ "image/png"
 	"math"
 	"time"
@@ -77,7 +76,7 @@ func (p *Player) Update() {
 		if p.tank.barrel.slope > maxSlope {
 			p.tank.barrel.slope = maxSlope
 		}
-		fmt.Println(p.tank.barrel.slope)
+		// fmt.Println(p.tank.barrel.slope)
 	}
 
 	if p.tank.barrel.slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrel.slope >= maxSlope {

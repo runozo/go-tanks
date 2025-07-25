@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	_ "image/png"
 	"math"
 
@@ -27,9 +28,11 @@ type Bullet struct {
 
 func NewBullet(barrel *Barrel) *Bullet {
 	position := Vector{
-		X: barrel.position.X + math.Sin(barrel.absoluteRotation),
-		Y: barrel.position.Y - math.Cos(barrel.absoluteRotation) + bulletSpawnOffset,
+		X: barrel.position.X + barrel.spriteWidth/2 - float64(barrel.bulletSprite.Bounds().Dx())/2,
+		Y: barrel.position.Y + barrel.spriteHeight/2 - float64(barrel.bulletSprite.Bounds().Dy()),
 	}
+
+	fmt.Println("Barrel position", barrel.position.X, barrel.position.Y, "Bullet position", position.X, position.Y)
 
 	return &Bullet{
 		position:     position,
@@ -63,13 +66,13 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 			scale = 1.0
 		}
 
-		bulletHalfH := b.spriteHeight / 2
+		// bulletHalfH := b.spriteHeight / 2
 		bulletHalfW := b.spriteWidth / 2
 
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
+		op.GeoM.Translate(-bulletHalfW, -b.spriteHeight)
 		op.GeoM.Rotate(b.rotation)
-		op.GeoM.Translate(bulletHalfW, bulletHalfH)
+		op.GeoM.Translate(bulletHalfW, b.spriteHeight)
 		op.GeoM.Scale(scale, scale)
 		op.GeoM.Translate(b.position.X, b.position.Y)
 		screen.DrawImage(b.sprite, op)
