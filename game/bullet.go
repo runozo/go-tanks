@@ -92,7 +92,7 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 
 		// center the bullet than scale
 		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
-		op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*2.0)
+		op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*scaleCoeff)
 		op.GeoM.Translate(bulletHalfW, bulletHalfH)
 
 		// center the bullet and the barrel than rotate
