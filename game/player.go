@@ -18,10 +18,9 @@ const (
 )
 
 type Player struct {
-	game    *Game
-	tank    *Tank
-	bullets []*Bullet
-
+	game          *Game
+	tank          *Tank
+	bullets       []*Bullet
 	shootCooldown *Timer
 }
 
@@ -70,7 +69,7 @@ func (p *Player) Update() {
 	p.tank.position.X += movementX
 	p.tank.position.Y += movementY
 
-	// shoot
+	// charge shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		p.tank.barrel.slope += slopeSpeed
 		if p.tank.barrel.slope > maxSlope {
@@ -79,7 +78,8 @@ func (p *Player) Update() {
 		// fmt.Println(p.tank.barrel.slope)
 	}
 
-	if p.tank.barrel.slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrel.slope >= maxSlope {
+	// fire
+	if (p.tank.barrel.slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrel.slope >= maxSlope) && p.shootCooldown.IsReady() {
 
 		p.bullets = append(p.bullets, p.tank.Fire())
 
@@ -92,20 +92,19 @@ func (p *Player) Update() {
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
 		p.tank = NewRandomTank(p.game)
 	}
-	// update tanks
 
+	// update tank(s)
 	p.tank.Update()
 
 	// update bullets
-
-	var visibleBullets []*Bullet
+	var activeBullets []*Bullet
 	for _, bullet := range p.bullets {
 		bullet.Update()
 		if bullet.altitude > 0.0 {
-			visibleBullets = append(visibleBullets, bullet)
+			activeBullets = append(activeBullets, bullet)
 		}
 	}
-	p.bullets = visibleBullets
+	p.bullets = activeBullets
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
