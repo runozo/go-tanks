@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	gravity        = 8.0
-	bulletSpeed    = 10.0
+	gravity        = 9.8
+	bulletSpeed    = 12.0
 	bulletMinScale = 1.0
 	bulletMaxScale = 8.0
-	scaleCoeff     = 0.2
+	scaleCoeff     = 1.8
 )
 
 type Bullet struct {
@@ -21,7 +21,8 @@ type Bullet struct {
 	rotation      float64
 	sprite        *ebiten.Image
 	verticalSpeed float64
-	slope         float64
+	currentSlope  float64
+	initialSlope  float64
 	altitude      float64
 	scale         float64
 	elapsedTime   float64
@@ -48,7 +49,8 @@ func NewBullet(barrel *Barrel) *Bullet {
 		rotation:      barrel.absoluteRotation,
 		sprite:        bulletSprite,
 		verticalSpeed: bulletSpeed * math.Sin(barrel.slope),
-		slope:         barrel.slope,
+		currentSlope:  barrel.slope,
+		initialSlope:  barrel.slope,
 		altitude:      0.2,
 		scale:         bulletMinScale,
 		elapsedTime:   0.0,
@@ -61,11 +63,20 @@ func NewBullet(barrel *Barrel) *Bullet {
 
 func (b *Bullet) Update() {
 	if b.altitude > 0.0 {
-		b.position.X += math.Sin(b.rotation) * bulletSpeed
-		b.position.Y -= math.Cos(b.rotation) * bulletSpeed
-		b.altitude += b.verticalSpeed*b.elapsedTime - 0.5*gravity*math.Pow(b.elapsedTime, 2)
+		dt := 1.0 / float64(ebiten.TPS())
+		sinRot, cosRot := math.Sincos(b.rotation)
+		b.position.X += sinRot * bulletSpeed
+		b.position.Y -= cosRot * bulletSpeed
+		b.elapsedTime += dt
+
+		gravityEffect := 0.5 * gravity * dt * dt
+		b.altitude += b.verticalSpeed*dt - gravityEffect
+		b.verticalSpeed -= gravity * dt
+
+		actualSpeed := bulletSpeed * math.Cos(b.initialSlope)
+		b.currentSlope = math.Atan2(b.verticalSpeed, actualSpeed)
 		b.scale = b.altitude*scaleCoeff + bulletMinScale
-		b.elapsedTime += 1.0 / float64(ebiten.TPS())
+		fmt.Println(b.currentSlope)
 	}
 }
 
@@ -75,17 +86,20 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 		bulletHalfH := b.spriteHeight / 2
 		bulletAndBarrellHeight := b.barrelHeight + b.spriteHeight
 
-		fmt.Println(b.altitude) // , "Scale", b.scale)
+		// fmt.Println(b.altitude) // , "Scale", b.scale)
 
 		op := &ebiten.DrawImageOptions{}
+
 		// center the bullet than scale
 		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
-		op.GeoM.Scale(b.scale, b.scale)
+		op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*2.0)
 		op.GeoM.Translate(bulletHalfW, bulletHalfH)
+
 		// center the bullet and the barrel than rotate
 		op.GeoM.Translate(-bulletHalfW, -bulletAndBarrellHeight)
 		op.GeoM.Rotate(b.rotation)
 		op.GeoM.Translate(bulletHalfW, bulletAndBarrellHeight)
+
 		// true position of the bullet
 		op.GeoM.Translate(b.position.X, b.position.Y)
 		screen.DrawImage(b.sprite, op)
