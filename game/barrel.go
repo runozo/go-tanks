@@ -9,14 +9,18 @@ type Barrel struct {
 	spriteWidth      float64
 	spriteHeight     float64
 	bulletSprite     *ebiten.Image
+	shootFrames      []*ebiten.Image
 	position         Vector
 	relativeRotation float64
 	absoluteRotation float64
 	slope            float64
 	tank             *Tank
+	isFiring         bool
+	shootFrameNumber int
+	count            float64
 }
 
-func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank) *Barrel {
+func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootSprites []*ebiten.Image) *Barrel {
 	spriteWidth := float64(sprite.Bounds().Dx())
 	spriteHeight := float64(sprite.Bounds().Dy())
 	position := Vector{
@@ -28,25 +32,40 @@ func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank) *Barrel {
 		spriteWidth:      spriteWidth,
 		spriteHeight:     spriteHeight,
 		bulletSprite:     bulletSprite,
+		shootFrames:      shootSprites,
 		position:         position,
 		relativeRotation: 0.0,
 		absoluteRotation: tank.rotation,
 		slope:            0.0,
 		tank:             tank,
+		isFiring:         false,
+		shootFrameNumber: 0,
+		count:            0.0,
 	}
 }
 
 func (b *Barrel) Fire() *Bullet {
+	b.isFiring = true
+	b.shootFrameNumber = 0
 	return NewBullet(b)
 }
 
-func (b *Barrel) Update() {
+func (b *Barrel) Update(tps float64) {
 	b.absoluteRotation = b.tank.rotation + b.relativeRotation
 	position := Vector{
 		X: b.tank.position.X + b.tank.bodyWidth/2 - b.spriteWidth/2,
 		Y: b.tank.position.Y + b.tank.bodyHeight/2 - b.spriteHeight,
 	}
 	b.position = position
+	if b.isFiring {
+		b.shootFrameNumber = int(b.count)
+		if b.shootFrameNumber >= len(b.shootFrames) {
+			b.isFiring = false
+			b.shootFrameNumber = 0
+			b.count = 0.0
+		}
+		b.count += 1 / tps * 10
+	}
 }
 
 func (b *Barrel) Draw(screen *ebiten.Image) {
@@ -58,15 +77,16 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 	op_barrel.GeoM.Translate(b.position.X, b.position.Y)
 	screen.DrawImage(b.sprite, op_barrel)
 
-	// bullet debug
-	/*
-		bulletHalfW := float64(b.bulletSprite.Bounds().Dx()) / 2
-		bulletAndBarrellheight := b.spriteHeight + float64(b.bulletSprite.Bounds().Dy())
-		op_bullet := &ebiten.DrawImageOptions{}
-		op_bullet.GeoM.Translate(-bulletHalfW, -bulletAndBarrellheight)
-		op_bullet.GeoM.Rotate(b.absoluteRotation)
-		op_bullet.GeoM.Translate(bulletHalfW, bulletAndBarrellheight)
-		op_bullet.GeoM.Translate(b.position.X+b.spriteWidth/2-bulletHalfW, b.position.Y-float64(b.bulletSprite.Bounds().Dy()))
-		screen.DrawImage(b.bulletSprite, op_bullet)
-	*/
+	if b.isFiring {
+		shootFrame := b.shootFrames[b.shootFrameNumber]
+		shootHalfW := float64(shootFrame.Bounds().Dx()) / 2
+		shootAndBarrellheight := b.spriteHeight + float64(shootFrame.Bounds().Dy())
+		op_shoot := &ebiten.DrawImageOptions{}
+		op_shoot.GeoM.Translate(-shootHalfW, -shootAndBarrellheight)
+		op_shoot.GeoM.Rotate(b.absoluteRotation)
+		op_shoot.GeoM.Translate(shootHalfW, shootAndBarrellheight)
+		op_shoot.GeoM.Translate(b.position.X+b.spriteWidth/2-shootHalfW, b.position.Y-float64(shootFrame.Bounds().Dy()))
+		screen.DrawImage(shootFrame, op_shoot)
+	}
+
 }

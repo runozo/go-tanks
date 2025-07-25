@@ -51,12 +51,13 @@ func NewGame() *Game {
 }
 
 func (g *Game) Update() error {
+	tps := float64(ebiten.TPS())
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.playfield = NewPlayfield(screenWidth, screenHeight, g.assets)
 	}
-	g.playfield.Update()
+	g.playfield.Update(tps)
 	for _, p := range g.players {
-		p.Update()
+		p.Update(tps)
 	}
 	return nil
 }

@@ -61,9 +61,9 @@ func NewBullet(barrel *Barrel) *Bullet {
 	}
 }
 
-func (b *Bullet) Update() {
+func (b *Bullet) Update(tps float64) {
 	if b.altitude > 0.0 {
-		dt := 1.0 / float64(ebiten.TPS())
+		dt := 1.0 / tps
 		sinRot, cosRot := math.Sincos(b.rotation)
 		b.position.X += sinRot * bulletSpeed
 		b.position.Y -= cosRot * bulletSpeed
