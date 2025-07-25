@@ -57,4 +57,16 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 	op_barrel.GeoM.Translate(b.spriteWidth/2, b.spriteHeight)
 	op_barrel.GeoM.Translate(b.position.X, b.position.Y)
 	screen.DrawImage(b.sprite, op_barrel)
+
+	// bullet debug
+	/*
+		bulletHalfW := float64(b.bulletSprite.Bounds().Dx()) / 2
+		bulletAndBarrellheight := b.spriteHeight + float64(b.bulletSprite.Bounds().Dy())
+		op_bullet := &ebiten.DrawImageOptions{}
+		op_bullet.GeoM.Translate(-bulletHalfW, -bulletAndBarrellheight)
+		op_bullet.GeoM.Rotate(b.absoluteRotation)
+		op_bullet.GeoM.Translate(bulletHalfW, bulletAndBarrellheight)
+		op_bullet.GeoM.Translate(b.position.X+b.spriteWidth/2-bulletHalfW, b.position.Y-float64(b.bulletSprite.Bounds().Dy()))
+		screen.DrawImage(b.bulletSprite, op_bullet)
+	*/
 }

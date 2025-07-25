@@ -21,15 +21,21 @@ type Bullet struct {
 	speed        float64
 	slope        float64
 	altitude     float64
+	scale        float64
 	elapsedTime  float64
 	spriteWidth  float64
 	spriteHeight float64
+	barrelWidth  float64
+	barrelHeight float64
 }
 
 func NewBullet(barrel *Barrel) *Bullet {
+	spriteWidth := float64(barrel.bulletSprite.Bounds().Dx())
+	spriteHeight := float64(barrel.bulletSprite.Bounds().Dy())
+
 	position := Vector{
-		X: barrel.position.X + barrel.spriteWidth/2 - float64(barrel.bulletSprite.Bounds().Dx())/2,
-		Y: barrel.position.Y + barrel.spriteHeight/2 - float64(barrel.bulletSprite.Bounds().Dy()),
+		X: barrel.position.X + barrel.spriteWidth/2 - spriteWidth/2,
+		Y: barrel.position.Y - spriteHeight,
 	}
 
 	fmt.Println("Barrel position", barrel.position.X, barrel.position.Y, "Bullet position", position.X, position.Y)
@@ -41,14 +47,21 @@ func NewBullet(barrel *Barrel) *Bullet {
 		speed:        bulletSpeed,
 		slope:        barrel.slope,
 		altitude:     0.2,
+		scale:        1.0,
 		elapsedTime:  0.0,
-		spriteWidth:  float64(barrel.bulletSprite.Bounds().Dx()),
-		spriteHeight: float64(barrel.bulletSprite.Bounds().Dy()),
+		spriteWidth:  spriteWidth,
+		spriteHeight: spriteHeight,
+		barrelWidth:  barrel.spriteWidth,
+		barrelHeight: barrel.spriteHeight,
 	}
 }
 
 func (b *Bullet) Update() {
 	if b.altitude > 0.0 {
+		b.scale = b.altitude * 0.2
+		if b.scale < 1.0 {
+			b.scale = 1.0
+		}
 		b.position.X += math.Sin(b.rotation) * b.speed
 		b.position.Y -= math.Cos(b.rotation) * b.speed
 		verticalSpeed := b.speed * math.Sin(b.slope)
@@ -61,19 +74,16 @@ func (b *Bullet) Update() {
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
 	if b.altitude > 0.0 {
-		scale := b.altitude * 0.2
-		if scale < 1.0 {
-			scale = 1.0
-		}
-
-		// bulletHalfH := b.spriteHeight / 2
 		bulletHalfW := b.spriteWidth / 2
+		bulletAndBarrellheight := b.barrelHeight + b.spriteHeight
+
+		fmt.Println("Bullet altitude", b.altitude, "Scale", b.scale)
 
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(-bulletHalfW, -b.spriteHeight)
+		op.GeoM.Translate(-bulletHalfW*b.scale, -bulletAndBarrellheight*b.scale)
 		op.GeoM.Rotate(b.rotation)
-		op.GeoM.Translate(bulletHalfW, b.spriteHeight)
-		op.GeoM.Scale(scale, scale)
+		op.GeoM.Translate(bulletHalfW*b.scale, bulletAndBarrellheight*b.scale)
+		op.GeoM.Scale(b.scale, b.scale)
 		op.GeoM.Translate(b.position.X, b.position.Y)
 		screen.DrawImage(b.sprite, op)
 	}
