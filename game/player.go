@@ -32,8 +32,7 @@ func NewPlayer(game *Game) *Player {
 	}
 }
 
-func (p *Player) Update() {
-	tps := float64(ebiten.TPS())
+func (p *Player) Update(tps float64) {
 	rotationSpeed := rotationPerSecond / tps
 	movementSpeed := tankSpeed / tps
 	slopeSpeed := maxSlope / tps
@@ -94,12 +93,12 @@ func (p *Player) Update() {
 	}
 
 	// update tank(s)
-	p.tank.Update()
+	p.tank.Update(tps)
 
 	// update bullets
 	var activeBullets []*Bullet
 	for _, bullet := range p.bullets {
-		bullet.Update()
+		bullet.Update(tps)
 		if bullet.altitude > 0.0 {
 			activeBullets = append(activeBullets, bullet)
 		}

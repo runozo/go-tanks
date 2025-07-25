@@ -63,7 +63,7 @@ func NewPlayfield(width, height int, ass *assets.Assets) *Playfield {
 	return playfield
 }
 
-func (p *Playfield) Update() {
+func (p *Playfield) Update(tps float64) {
 }
 
 func (p *Playfield) Draw(screen *ebiten.Image) {
