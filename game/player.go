@@ -14,7 +14,7 @@ const (
 	rotationPerSecond = math.Pi
 	tankSpeed         = 120.0
 
-	maxSlope = 1.0
+	maxSlope = math.Pi / 4
 )
 
 type Player struct {
@@ -37,7 +37,7 @@ func (p *Player) Update() {
 	tps := float64(ebiten.TPS())
 	rotationSpeed := rotationPerSecond / tps
 	movementSpeed := tankSpeed / tps
-	slopeSpeed := maxSlope / tps / 2
+	slopeSpeed := maxSlope / tps
 	p.shootCooldown.Update()
 
 	// rotate tank
