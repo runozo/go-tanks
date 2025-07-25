@@ -9,12 +9,11 @@ import (
 )
 
 const (
-	gravity           = 8.0
-	bulletSpawnOffset = 20.0
-	bulletSpeed       = 10.0
-	bulletMinScale    = 1.0
-	bulletMaxScale    = 8.0
-	scaleCoeff        = 0.2
+	gravity        = 8.0
+	bulletSpeed    = 10.0
+	bulletMinScale = 1.0
+	bulletMaxScale = 8.0
+	scaleCoeff     = 0.2
 )
 
 type Bullet struct {
