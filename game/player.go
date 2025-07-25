@@ -13,8 +13,7 @@ const (
 	shootCooldown     = time.Millisecond * 250
 	rotationPerSecond = math.Pi
 	tankSpeed         = 120.0
-
-	maxSlope = math.Pi / 4
+	maxSlope          = math.Pi / 4
 )
 
 type Player struct {
