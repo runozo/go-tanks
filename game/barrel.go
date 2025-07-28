@@ -87,10 +87,13 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 		shootHalfH := shootFrameHeight / 2
 		shootAndBarrellheight := b.spriteHeight + shootFrameHeight
 		op_shoot := &ebiten.DrawImageOptions{}
+
 		// first reverse the frame alone
 		op_shoot.GeoM.Translate(-shootHalfW, -shootHalfH)
 		op_shoot.GeoM.Rotate(math.Pi)
 		op_shoot.GeoM.Translate(shootHalfW, shootHalfH)
+
+		// then translate the frame to the barrel
 		op_shoot.GeoM.Translate(-shootHalfW, -shootAndBarrellheight)
 		op_shoot.GeoM.Rotate(b.absoluteRotation)
 		op_shoot.GeoM.Translate(shootHalfW, shootAndBarrellheight)
