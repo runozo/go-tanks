@@ -7,22 +7,22 @@ import (
 )
 
 type Barrel struct {
-	sprite           *ebiten.Image
-	spriteWidth      float64
-	spriteHeight     float64
-	bulletSprite     *ebiten.Image
-	shootFrames      []*ebiten.Image
-	position         Vector
-	relativeRotation float64
-	absoluteRotation float64
-	slope            float64
-	tank             *Tank
-	isFiring         bool
-	shootFrameNumber int
-	count            float64
+	sprite               *ebiten.Image
+	spriteWidth          float64
+	spriteHeight         float64
+	bulletSprite         *ebiten.Image
+	shootAnimationFrames []*ebiten.Image
+	position             Vector
+	relativeRotation     float64
+	absoluteRotation     float64
+	slope                float64
+	tank                 *Tank
+	isFiring             bool
+	shootFrameNumber     int
+	count                float64
 }
 
-func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootSprites []*ebiten.Image) *Barrel {
+func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootAnimationSprites []*ebiten.Image) *Barrel {
 	spriteWidth := float64(sprite.Bounds().Dx())
 	spriteHeight := float64(sprite.Bounds().Dy())
 	position := Vector{
@@ -30,19 +30,19 @@ func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootSprites []*e
 		Y: tank.position.Y + tank.bodyHeight/2 - spriteHeight,
 	}
 	return &Barrel{
-		sprite:           sprite,
-		spriteWidth:      spriteWidth,
-		spriteHeight:     spriteHeight,
-		bulletSprite:     bulletSprite,
-		shootFrames:      shootSprites,
-		position:         position,
-		relativeRotation: 0.0,
-		absoluteRotation: tank.rotation,
-		slope:            0.0,
-		tank:             tank,
-		isFiring:         false,
-		shootFrameNumber: 0,
-		count:            0.0,
+		sprite:               sprite,
+		spriteWidth:          spriteWidth,
+		spriteHeight:         spriteHeight,
+		bulletSprite:         bulletSprite,
+		shootAnimationFrames: shootAnimationSprites,
+		position:             position,
+		relativeRotation:     0.0,
+		absoluteRotation:     tank.rotation,
+		slope:                0.0,
+		tank:                 tank,
+		isFiring:             false,
+		shootFrameNumber:     0,
+		count:                0.0,
 	}
 }
 
@@ -61,7 +61,7 @@ func (b *Barrel) Update(tps float64) {
 	b.position = position
 	if b.isFiring {
 		b.shootFrameNumber = int(b.count)
-		if b.shootFrameNumber >= len(b.shootFrames) {
+		if b.shootFrameNumber >= len(b.shootAnimationFrames) {
 			b.isFiring = false
 			b.shootFrameNumber = 0
 			b.count = 0.0
@@ -81,7 +81,7 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 
 	// barrel shoot animation
 	if b.isFiring {
-		shootFrame := b.shootFrames[b.shootFrameNumber]
+		shootFrame := b.shootAnimationFrames[b.shootFrameNumber]
 		shootHalfW := float64(shootFrame.Bounds().Dx()) / 2
 		shootFrameHeight := float64(shootFrame.Bounds().Dy())
 		shootHalfH := shootFrameHeight / 2
