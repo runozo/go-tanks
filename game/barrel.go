@@ -1,6 +1,8 @@
 package game
 
 import (
+	"math"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -64,7 +66,7 @@ func (b *Barrel) Update(tps float64) {
 			b.shootFrameNumber = 0
 			b.count = 0.0
 		}
-		b.count += 1 / tps * 10
+		b.count += 1 / tps * 20
 	}
 }
 
@@ -77,15 +79,22 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 	op_barrel.GeoM.Translate(b.position.X, b.position.Y)
 	screen.DrawImage(b.sprite, op_barrel)
 
+	// barrel shoot animation
 	if b.isFiring {
 		shootFrame := b.shootFrames[b.shootFrameNumber]
 		shootHalfW := float64(shootFrame.Bounds().Dx()) / 2
-		shootAndBarrellheight := b.spriteHeight + float64(shootFrame.Bounds().Dy())
+		shootFrameHeight := float64(shootFrame.Bounds().Dy())
+		shootHalfH := shootFrameHeight / 2
+		shootAndBarrellheight := b.spriteHeight + shootFrameHeight
 		op_shoot := &ebiten.DrawImageOptions{}
+		// first reverse the frame alone
+		op_shoot.GeoM.Translate(-shootHalfW, -shootHalfH)
+		op_shoot.GeoM.Rotate(math.Pi)
+		op_shoot.GeoM.Translate(shootHalfW, shootHalfH)
 		op_shoot.GeoM.Translate(-shootHalfW, -shootAndBarrellheight)
 		op_shoot.GeoM.Rotate(b.absoluteRotation)
 		op_shoot.GeoM.Translate(shootHalfW, shootAndBarrellheight)
-		op_shoot.GeoM.Translate(b.position.X+b.spriteWidth/2-shootHalfW, b.position.Y-float64(shootFrame.Bounds().Dy()))
+		op_shoot.GeoM.Translate(b.position.X+b.spriteWidth/2-shootHalfW, b.position.Y-shootFrameHeight)
 		screen.DrawImage(shootFrame, op_shoot)
 	}
 
