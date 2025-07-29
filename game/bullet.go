@@ -12,7 +12,6 @@ const (
 	gravity        = 9.8
 	bulletSpeed    = 12.0
 	bulletMinScale = 1.0
-	bulletMaxScale = 8.0
 	scaleCoeff     = 1.8
 )
 
