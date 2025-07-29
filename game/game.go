@@ -1,17 +1,23 @@
 package game
 
 import (
+	"image/color"
+	"log"
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/runozo/go-wave-function-collapse/assets"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 const (
-	screenWidth  = 1960
-	screenHeight = 1088
+	screenWidth   = 1960
+	screenHeight  = 1088
+	fontDpi       = 72
+	fontSizeSmall = 22
 )
 
 type Vector struct {
@@ -25,6 +31,7 @@ type Game struct {
 	assets    *assets.Assets
 	players   []*Player
 	playfield *Playfield
+	fontSmall font.Face
 	// bullets   []*Bullet
 
 	// velocityTimer *Timer
@@ -34,15 +41,38 @@ func NewGame() *Game {
 	// ebiten.SetWindowSize(screenWidth, screenHeight)
 	// ebiten.SetFullscreen(true)
 	ass := assets.NewAssets(
-		"data"+string(os.PathSeparator)+"allSprites_default.png",
-		"data"+string(os.PathSeparator)+"mapped_tiles.json",
+		"assets"+string(os.PathSeparator)+"allSprites_default.png",
+		"assets"+string(os.PathSeparator)+"mapped_tiles.json",
 	)
+
+	// Load fonts
+	fontData, err := os.ReadFile("assets" + string(os.PathSeparator) + "gomarice_no_continue.ttf")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tt, err := opentype.Parse(fontData)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gameFont, err := opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    fontSizeSmall,
+		DPI:     fontDpi,
+		Hinting: font.HintingVertical,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	g := &Game{
 		assets: ass,
 		// velocityTimer: NewTimer(velocitySpeedUpTime),
 		width:     screenWidth,
 		height:    screenHeight,
 		playfield: NewPlayfield(screenWidth, screenHeight, ass),
+		fontSmall: gameFont,
 	}
 
 	g.players = append(g.players, NewPlayer(g))
@@ -70,7 +100,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// text.Draw(screen, fmt.Sprintf("CURSOR KEYS: move tank. SPACE: shoot. T: new random tank"), nil, 10, 10, color.Black)
-	ebitenutil.DebugPrint(screen, "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield")
+	text.Draw(screen, "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield", g.fontSmall, 10, 20, color.Black)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
