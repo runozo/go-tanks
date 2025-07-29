@@ -67,8 +67,7 @@ func NewGame() *Game {
 	}
 
 	g := &Game{
-		assets: ass,
-		// velocityTimer: NewTimer(velocitySpeedUpTime),
+		assets:    ass,
 		width:     screenWidth,
 		height:    screenHeight,
 		playfield: NewPlayfield(screenWidth, screenHeight, ass),
@@ -99,7 +98,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		p.Draw(screen)
 	}
 
-	// text.Draw(screen, fmt.Sprintf("CURSOR KEYS: move tank. SPACE: shoot. T: new random tank"), nil, 10, 10, color.Black)
 	text.Draw(screen, "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield", g.fontSmall, 10, 20, color.Black)
 }
 
