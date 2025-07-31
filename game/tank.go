@@ -24,12 +24,14 @@ func NewTank(game *Game, bodySprite, barrelSprite, bulletSprite *ebiten.Image) *
 		rotation:   0.0,
 		barrel:     nil,
 	}
-	shootSprites := []*ebiten.Image{
+	shootAnimationSprites := []*ebiten.Image{
 		game.assets.GetSprite("shotLarge"),
 		game.assets.GetSprite("shotOrange"),
 		game.assets.GetSprite("shotRed"),
+		game.assets.GetSprite("shotOrange"),
+		game.assets.GetSprite("shotLarge"),
 	}
-	tank.barrel = NewBarrel(barrelSprite, bulletSprite, tank, shootSprites)
+	tank.barrel = NewBarrel(barrelSprite, bulletSprite, tank, shootAnimationSprites)
 	return tank
 }
 
