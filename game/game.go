@@ -1,23 +1,23 @@
 package game
 
 import (
+	"bytes"
 	"embed"
+	"fmt"
 	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/runozo/go-wave-function-collapse/assets"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 )
 
 const (
 	screenWidth   = 1960
 	screenHeight  = 1088
-	fontDpi       = 72
-	fontSizeSmall = 22
+	fontSizeSmall = 32
 )
 
 //go:embed assets/*
@@ -34,15 +34,17 @@ type Game struct {
 	assets    *assets.Assets
 	players   []*Player
 	playfield *Playfield
-	fontSmall font.Face
+	fontSmall *text.GoTextFace
 }
 
 func NewGame() *Game {
+	// Load sprite sheet
 	spriteSheetData, err := assetsFS.ReadFile("assets/allSprites_default.png")
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Load tile map
 	jsonData, err := assetsFS.ReadFile("assets/mapped_tiles.json")
 	if err != nil {
 		log.Fatal(err)
@@ -58,16 +60,16 @@ func NewGame() *Game {
 		log.Fatal(err)
 	}
 
-	tt, err := opentype.Parse(fontData)
+	textFS, err := text.NewGoTextFaceSource(bytes.NewReader(fontData))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	gameFont, err := opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    fontSizeSmall,
-		DPI:     fontDpi,
-		Hinting: font.HintingVertical,
-	})
+	gameFont := &text.GoTextFace{
+		Source:    textFS,
+		Direction: text.DirectionLeftToRight,
+		Size:      fontSizeSmall,
+	}
 
 	if err != nil {
 		log.Fatal(err)
@@ -105,7 +107,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		p.Draw(screen)
 	}
 
-	text.Draw(screen, "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield", g.fontSmall, 10, 20, color.Black)
+	str := "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield"
+	width, height := text.Measure(str, g.fontSmall, 0)
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64((screen.Bounds().Dx()-int(width))/2), float64(height))
+	op.ColorScale.ScaleWithColor(color.Black)
+	text.Draw(screen, str, g.fontSmall, op)
+
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %0.2f", ebiten.ActualTPS()))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
