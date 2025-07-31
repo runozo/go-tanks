@@ -20,6 +20,9 @@ const (
 	fontSizeSmall = 22
 )
 
+//go:embed assets/*
+var assetsFS embed.FS
+
 type Vector struct {
 	X float64
 	Y float64
@@ -33,9 +36,6 @@ type Game struct {
 	playfield *Playfield
 	fontSmall font.Face
 }
-
-//go:embed assets/*
-var assetsFS embed.FS
 
 func NewGame() *Game {
 	spriteSheetData, err := assetsFS.ReadFile("assets/allSprites_default.png")
