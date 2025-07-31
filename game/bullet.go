@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	_ "image/png"
 	"math"
 
@@ -75,7 +74,7 @@ func (b *Bullet) Update(tps float64) {
 		actualSpeed := bulletSpeed * math.Cos(b.initialSlope)
 		b.currentSlope = math.Atan2(b.verticalSpeed, actualSpeed)
 		b.scale = b.altitude*scaleCoeff + bulletMinScale
-		fmt.Println(b.currentSlope)
+		// fmt.Println(b.currentSlope)
 	}
 }
 
