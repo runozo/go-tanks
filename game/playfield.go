@@ -13,16 +13,13 @@ const (
 	tileHeight = 64
 )
 
-type Tile struct {
-	image *ebiten.Image
-}
 type Playfield struct {
 	width       int
 	height      int
-	tiles       []Tile
 	numOfTilesX int
 	numOfTilesY int
-	isRendered  bool
+	wfc         *wfc.Wfc
+	assets      *assets.Assets
 }
 
 // NewPlayfield creates a new Playfield with the specified width, height, and assets.
@@ -42,23 +39,14 @@ func NewPlayfield(width, height int, ass *assets.Assets) *Playfield {
 	playfield := &Playfield{
 		width:  width,
 		height: height,
-		tiles:  make([]Tile, tilesX*tilesY),
 
-		isRendered:  false,
+		wfc:         wfc.NewWfc(screenWidth/tileWidth+1, screenHeight/tileHeight+1, ass.TileEntries),
+		assets:      ass,
 		numOfTilesX: tilesX,
 		numOfTilesY: tilesY,
 	}
 
-	myWfc := wfc.NewWfc(screenWidth/tileWidth+1, screenHeight/tileHeight+1, ass.TileEntries)
-	myWfc.StartRender()
-	for y := 0; y < tilesY; y++ {
-		for x := 0; x < tilesX; x++ {
-			tile := Tile{
-				image: ass.GetSprite(myWfc.Tiles[y*tilesX+x].Name),
-			}
-			playfield.tiles[y*tilesX+x] = tile
-		}
-	}
+	go playfield.wfc.StartRender()
 
 	return playfield
 }
@@ -68,14 +56,16 @@ func (p *Playfield) Update(tps float64) {
 
 func (p *Playfield) Draw(screen *ebiten.Image) {
 	var i int
-	for y := 0; y < p.height; y += tileHeight {
-		for x := 0; x < p.width; x += tileWidth {
-			if x%tileWidth == 0 && y%tileHeight == 0 && i < len(p.tiles) {
-				ops := &ebiten.DrawImageOptions{}
-				ops.GeoM.Translate(float64(x), float64(y))
-				screen.DrawImage(p.tiles[i].image, ops)
-				i++
+	for y := 0; y < screenHeight; y += tileHeight {
+		for x := 0; x < screenWidth; x += tileWidth {
+			ops := &ebiten.DrawImageOptions{}
+			ops.GeoM.Translate(float64(x), float64(y))
+			if p.wfc.Tiles[i].Collapsed {
+				screen.DrawImage(p.assets.GetSprite(p.wfc.Tiles[i].Name), ops)
+			} else {
+				screen.DrawImage(ebiten.NewImage(tileWidth, tileHeight), ops)
 			}
+			i++
 		}
 	}
 }

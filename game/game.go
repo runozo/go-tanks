@@ -97,6 +97,8 @@ func (g *Game) Update() error {
 	for _, p := range g.players {
 		p.Update(tps)
 	}
+	// fmt.Println(g.playfield.tiles)
+
 	return nil
 }
 
