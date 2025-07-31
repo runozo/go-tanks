@@ -23,6 +23,7 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
+
 	g := game.NewGame()
 	ebiten.SetFullscreen(true)
 	err := ebiten.RunGame(g)

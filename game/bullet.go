@@ -12,7 +12,6 @@ const (
 	gravity        = 9.8
 	bulletSpeed    = 12.0
 	bulletMinScale = 1.0
-	bulletMaxScale = 8.0
 	scaleCoeff     = 1.8
 )
 
@@ -92,7 +91,7 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 
 		// center the bullet than scale
 		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
-		op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*scaleCoeff)
+		op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*scaleCoeff) // simulate bullet deflection (poorly)
 		op.GeoM.Translate(bulletHalfW, bulletHalfH)
 
 		// center the bullet and the barrel than rotate
