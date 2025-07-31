@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"image/color"
@@ -81,24 +82,29 @@ func (g *Game) isOverTile() string {
 }
 
 func main() {
-	spriteSheetPath := ".." + string(os.PathSeparator) + "data" + string(os.PathSeparator) + "allSprites_default.png"
-	spriteMapPath := ".." + string(os.PathSeparator) + "data" + string(os.PathSeparator) + "mapped_tiles.json"
+	spriteSheetPath := ".." + string(os.PathSeparator) + "assets" + string(os.PathSeparator) + "allSprites_default.png"
+	spriteMapPath := ".." + string(os.PathSeparator) + "assets" + string(os.PathSeparator) + "mapped_tiles.json"
 
-	dat, err := os.Open(spriteSheetPath)
+	spriteSheetData, err := os.ReadFile(spriteSheetPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("main:", err)
 	}
 
-	img, _, err := image.Decode(dat)
+	img, _, err := image.Decode(bytes.NewReader(spriteSheetData))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("main:", err)
 	}
 
 	spriteSheet := ebiten.NewImageFromImage(img)
 
+	spriteMapData, err := os.ReadFile(spriteMapPath)
+	if err != nil {
+		log.Fatal("main:", err)
+	}
+
 	ass := assets.NewAssets(
-		spriteSheetPath,
-		spriteMapPath,
+		spriteSheetData,
+		spriteMapData,
 	)
 
 	// Load fonts
@@ -127,7 +133,6 @@ func main() {
 			maxTileHeight = tile.Height
 		}
 	}
-	// spriteSheet.SetPivot(float64(maxTileWidth/2), float64(ass.TileEntries["grass"].Height))
 
 	g := &Game{
 		screenWidth:        spriteSheet.Bounds().Dx() + maxTileWidth,
