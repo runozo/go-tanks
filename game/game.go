@@ -4,7 +4,6 @@ import (
 	"embed"
 	"image/color"
 	"log"
-	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -33,32 +32,28 @@ type Game struct {
 	players   []*Player
 	playfield *Playfield
 	fontSmall font.Face
-	// bullets   []*Bullet
-
-	// velocityTimer *Timer
 }
 
 //go:embed assets/*
 var assetsFS embed.FS
 
 func NewGame() *Game {
-	// ebiten.SetWindowSize(screenWidth, screenHeight)
-	// ebiten.SetFullscreen(true)
-	spriteSheetData, err := os.ReadFile("assets" + string(os.PathSeparator) + "allSprites_default.png")
+	spriteSheetData, err := assetsFS.ReadFile("assets/allSprites_default.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	jsonData, err := os.ReadFile("assets" + string(os.PathSeparator) + "mapped_tiles.json")
+
+	jsonData, err := assetsFS.ReadFile("assets/mapped_tiles.json")
 	if err != nil {
 		log.Fatal(err)
 	}
 	ass := assets.NewAssets(
 		spriteSheetData,
-		"assets"+string(os.PathSeparator)+"mapped_tiles.json",
+		jsonData,
 	)
 
 	// Load fonts
-	fontData, err := os.ReadFile("assets" + string(os.PathSeparator) + "gomarice_no_continue.ttf")
+	fontData, err := assetsFS.ReadFile("assets/gomarice_no_continue.ttf")
 	if err != nil {
 		log.Fatal(err)
 	}
