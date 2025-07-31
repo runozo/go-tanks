@@ -22,7 +22,7 @@ A game with tanks<!-- >, try it on https://runozo.github.io/go-tanks/ -->
     [x] Draw tank
     [x] Tank moves
     [x] Barrel rotation
-    [ ] Bullet gravity
+    [x] Bullet gravity
     [x] Tank fires
     [x] Draw playfield
     [ ] Draw playfield obstacles
