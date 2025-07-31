@@ -1,6 +1,7 @@
 package game
 
 import (
+	"embed"
 	"image/color"
 	"log"
 	"os"
@@ -37,11 +38,22 @@ type Game struct {
 	// velocityTimer *Timer
 }
 
+//go:embed assets/*
+var assetsFS embed.FS
+
 func NewGame() *Game {
 	// ebiten.SetWindowSize(screenWidth, screenHeight)
 	// ebiten.SetFullscreen(true)
+	spriteSheetData, err := os.ReadFile("assets" + string(os.PathSeparator) + "allSprites_default.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	jsonData, err := os.ReadFile("assets" + string(os.PathSeparator) + "mapped_tiles.json")
+	if err != nil {
+		log.Fatal(err)
+	}
 	ass := assets.NewAssets(
-		"assets"+string(os.PathSeparator)+"allSprites_default.png",
+		spriteSheetData,
 		"assets"+string(os.PathSeparator)+"mapped_tiles.json",
 	)
 
