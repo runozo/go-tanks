@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	_ "image/png"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -52,6 +53,15 @@ func NewPlayfield(width, height int, ass *assets.Assets) *Playfield {
 }
 
 func (p *Playfield) Update(tps float64) {
+	if p.wfc.IsRunning {
+		count := 0
+		for i := 0; i < len(p.wfc.Tiles); i++ {
+			if p.wfc.Tiles[i].Collapsed {
+				count++
+			}
+		}
+		fmt.Printf("%d of %d tiles rendered\n", count, len(p.wfc.Tiles))
+	}
 }
 
 func (p *Playfield) Draw(screen *ebiten.Image) {
