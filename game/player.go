@@ -26,7 +26,7 @@ type Player struct {
 func NewPlayer(game *Game) *Player {
 	return &Player{
 		game:          game,
-		tank:          NewRandomTank(game, screenWidth/2, screenHeight/2, 0),
+		tank:          NewRandomTank(game, screenWidth/2+screenWidth/4, screenHeight/2, 0),
 		shootCooldown: NewTimer(shootCooldown),
 	}
 }
@@ -104,7 +104,7 @@ func (p *Player) Update(tps float64) {
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
-	p.tank.Draw(screen, p.tank.rotation)
+	p.tank.Draw(screen)
 	for _, bullet := range p.bullets {
 		bullet.Draw(screen)
 	}

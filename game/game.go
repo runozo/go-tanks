@@ -34,6 +34,7 @@ type Game struct {
 	height     int
 	assets     *assets.Assets
 	players    []*Player
+	enemies    []*Enemy
 	playfield  *Playfield
 	fontMedium *text.GoTextFace
 	fontSmall  *text.GoTextFace
@@ -89,6 +90,7 @@ func NewGame() *Game {
 	}
 
 	g.players = append(g.players, NewPlayer(g))
+	g.enemies = append(g.enemies, NewEnemy(g))
 	g.playfield = NewPlayfield(g)
 
 	return g
@@ -100,6 +102,11 @@ func (g *Game) Update() error {
 		g.playfield = NewPlayfield(g)
 	}
 	g.playfield.Update(tps)
+
+	for _, e := range g.enemies {
+		e.Update(tps)
+	}
+
 	for _, p := range g.players {
 		p.Update(tps)
 	}
@@ -110,6 +117,10 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.playfield.Draw(screen)
+
+	for _, e := range g.enemies {
+		e.Draw(screen)
+	}
 
 	for _, p := range g.players {
 		p.Draw(screen)
