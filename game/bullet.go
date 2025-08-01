@@ -16,16 +16,17 @@ const (
 
 type Bullet struct {
 	position                   Vector
-	rotation                   float64
 	sprite                     *ebiten.Image
 	verticalSpeed, altitude    float64
 	currentSlope, initialSlope float64
-	scale                      float64
+	rotation, scale            float64
 	elapsedTime                float64
 	spriteWidth, spriteHeight  float64
 	barrelWidth                float64
 	barrelHeight               float64
-	explosion                  *Explosion
+	explosionElapsedTime       float64
+	explosionFrames            []*ebiten.Image
+	exploding                  bool
 	exploded                   bool
 }
 
@@ -42,31 +43,35 @@ func NewBullet(barrel *Barrel) *Bullet {
 	// fmt.Println("Barrel position", barrel.position.X, barrel.position.Y, "Bullet position", position.X, position.Y)
 
 	return &Bullet{
-		position:      position,
-		rotation:      barrel.absoluteRotation,
-		sprite:        bulletSprite,
-		verticalSpeed: bulletSpeed * math.Sin(barrel.slope),
-		currentSlope:  barrel.slope,
-		initialSlope:  barrel.slope,
-		altitude:      0.2,
-		scale:         bulletMinScale,
-		elapsedTime:   0.0,
-		spriteWidth:   bulletSpriteWidth,
-		spriteHeight:  bulletSpriteHeight,
-		barrelWidth:   barrel.spriteWidth,
-		barrelHeight:  barrel.spriteHeight,
-		explosion:     NewExplosion(barrel.explosionAnimationFrames),
-		exploded:      false,
+		position:             position,
+		rotation:             barrel.absoluteRotation,
+		sprite:               bulletSprite,
+		verticalSpeed:        bulletSpeed * math.Sin(barrel.slope),
+		currentSlope:         barrel.slope,
+		initialSlope:         barrel.slope,
+		altitude:             0.2,
+		scale:                bulletMinScale,
+		elapsedTime:          0.0,
+		spriteWidth:          bulletSpriteWidth,
+		spriteHeight:         bulletSpriteHeight,
+		barrelWidth:          barrel.spriteWidth,
+		barrelHeight:         barrel.spriteHeight,
+		explosionElapsedTime: 0,
+		explosionFrames:      barrel.explosionAnimationFrames,
+		exploding:            false,
+		exploded:             false,
 	}
 }
 
 func (b *Bullet) Update(tps float64) {
+
+	sinRot, cosRot := math.Sincos(b.rotation)
+	dt := 1.0 / tps
+	b.elapsedTime += dt
+
 	if b.altitude > 0.0 {
-		dt := 1.0 / tps
-		sinRot, cosRot := math.Sincos(b.rotation)
 		b.position.X += sinRot * bulletSpeed
 		b.position.Y -= cosRot * bulletSpeed
-		b.elapsedTime += dt
 
 		gravityEffect := 0.5 * gravity * dt * dt
 		b.altitude += b.verticalSpeed*dt - gravityEffect
@@ -77,12 +82,13 @@ func (b *Bullet) Update(tps float64) {
 		b.scale = b.altitude*scaleCoeff + bulletMinScale
 		// fmt.Println(b.currentSlope)
 	} else {
-		b.explosion.Update(tps)
+		b.exploding = !b.exploded
+		b.explosionElapsedTime += dt * 10
 	}
 }
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
-	if b.altitude > 0.0 {
+	if !b.exploding && !b.exploded {
 		bulletHalfW := b.spriteWidth / 2
 		bulletHalfH := b.spriteHeight / 2
 		bulletAndBarrellHeight := b.barrelHeight + b.spriteHeight
@@ -105,8 +111,16 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(b.position.X, b.position.Y)
 		screen.DrawImage(b.sprite, op)
 	} else {
-		if int(b.explosion.age) < len(b.explosion.frameSet) {
-			b.explosion.Draw(screen, b.position.X, b.position.Y)
+		if int(b.explosionElapsedTime) < len(b.explosionFrames) {
+			frame := b.explosionFrames[int(b.explosionElapsedTime)]
+			explosionHalfW := float64(frame.Bounds().Dx()) / 2
+			bulletAndExplosionHeight := b.spriteHeight + explosionHalfW
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(-explosionHalfW, -bulletAndExplosionHeight)
+			op.GeoM.Rotate(b.rotation)
+			op.GeoM.Translate(explosionHalfW, bulletAndExplosionHeight)
+			op.GeoM.Translate(b.position.X, b.position.Y)
+			screen.DrawImage(frame, op)
 		} else {
 			b.exploded = true
 		}
