@@ -98,7 +98,7 @@ func (p *Player) Update(tps float64) {
 	var activeBullets []*Bullet
 	for _, bullet := range p.bullets {
 		bullet.Update(tps)
-		if bullet.altitude > 0.0 {
+		if !bullet.exploded {
 			activeBullets = append(activeBullets, bullet)
 		}
 	}

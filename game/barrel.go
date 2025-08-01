@@ -7,22 +7,23 @@ import (
 )
 
 type Barrel struct {
-	sprite               *ebiten.Image
-	spriteWidth          float64
-	spriteHeight         float64
-	bulletSprite         *ebiten.Image
-	shootAnimationFrames []*ebiten.Image
-	position             Vector
-	relativeRotation     float64
-	absoluteRotation     float64
-	slope                float64
-	tank                 *Tank
-	isFiring             bool
-	shootFrameNumber     int
-	count                float64
+	sprite                   *ebiten.Image
+	spriteWidth              float64
+	spriteHeight             float64
+	bulletSprite             *ebiten.Image
+	shootAnimationFrames     []*ebiten.Image
+	explosionAnimationFrames []*ebiten.Image
+	position                 Vector
+	relativeRotation         float64
+	absoluteRotation         float64
+	slope                    float64
+	tank                     *Tank
+	isFiring                 bool
+	shootFrameNumber         int
+	count                    float64
 }
 
-func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootAnimationSprites []*ebiten.Image) *Barrel {
+func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootAnimationSprites, explosionAnimationSprites []*ebiten.Image) *Barrel {
 	spriteWidth := float64(sprite.Bounds().Dx())
 	spriteHeight := float64(sprite.Bounds().Dy())
 	position := Vector{
@@ -30,19 +31,20 @@ func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootAnimationSpr
 		Y: tank.position.Y + tank.bodyHeight/2 - spriteHeight,
 	}
 	return &Barrel{
-		sprite:               sprite,
-		spriteWidth:          spriteWidth,
-		spriteHeight:         spriteHeight,
-		bulletSprite:         bulletSprite,
-		shootAnimationFrames: shootAnimationSprites,
-		position:             position,
-		relativeRotation:     0.0,
-		absoluteRotation:     tank.rotation,
-		slope:                0.0,
-		tank:                 tank,
-		isFiring:             false,
-		shootFrameNumber:     0,
-		count:                0.0,
+		sprite:                   sprite,
+		spriteWidth:              spriteWidth,
+		spriteHeight:             spriteHeight,
+		bulletSprite:             bulletSprite,
+		shootAnimationFrames:     shootAnimationSprites,
+		explosionAnimationFrames: explosionAnimationSprites,
+		position:                 position,
+		relativeRotation:         0.0,
+		absoluteRotation:         tank.rotation,
+		slope:                    0.0,
+		tank:                     tank,
+		isFiring:                 false,
+		shootFrameNumber:         0,
+		count:                    0.0,
 	}
 }
 
