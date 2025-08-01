@@ -19,8 +19,7 @@ type Barrel struct {
 	slope                    float64
 	tank                     *Tank
 	isFiring                 bool
-	shootFrameNumber         int
-	count                    float64
+	shootAge                 float64
 }
 
 func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootAnimationSprites, explosionAnimationSprites []*ebiten.Image) *Barrel {
@@ -43,14 +42,13 @@ func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootAnimationSpr
 		slope:                    0.0,
 		tank:                     tank,
 		isFiring:                 false,
-		shootFrameNumber:         0,
-		count:                    0.0,
+		shootAge:                 0.0,
 	}
 }
 
 func (b *Barrel) Fire() *Bullet {
 	b.isFiring = true
-	b.shootFrameNumber = 0
+	b.shootAge = 0
 	return NewBullet(b)
 }
 
@@ -62,13 +60,11 @@ func (b *Barrel) Update(tps float64) {
 	}
 	b.position = position
 	if b.isFiring {
-		b.shootFrameNumber = int(b.count)
-		if b.shootFrameNumber >= len(b.shootAnimationFrames) {
+		b.shootAge += 1 / tps * 20
+		if int(b.shootAge) >= len(b.shootAnimationFrames) {
 			b.isFiring = false
-			b.shootFrameNumber = 0
-			b.count = 0.0
+			b.shootAge = 0
 		}
-		b.count += 1 / tps * 20
 	}
 }
 
@@ -83,7 +79,7 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 
 	// barrel shoot animation
 	if b.isFiring {
-		shootFrame := b.shootAnimationFrames[b.shootFrameNumber]
+		shootFrame := b.shootAnimationFrames[int(b.shootAge)%len(b.shootAnimationFrames)]
 		shootHalfW := float64(shootFrame.Bounds().Dx()) / 2
 		shootFrameHeight := float64(shootFrame.Bounds().Dy())
 		shootHalfH := shootFrameHeight / 2
