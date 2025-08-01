@@ -15,9 +15,10 @@ import (
 )
 
 const (
-	screenWidth   = 1960
-	screenHeight  = 1088
-	fontSizeSmall = 32
+	screenWidth    = 1960
+	screenHeight   = 1088
+	fontSizeMedium = 32
+	fontSizeSmall  = 22
 )
 
 //go:embed assets/*
@@ -29,12 +30,13 @@ type Vector struct {
 }
 
 type Game struct {
-	width     int
-	height    int
-	assets    *assets.Assets
-	players   []*Player
-	playfield *Playfield
-	fontSmall *text.GoTextFace
+	width      int
+	height     int
+	assets     *assets.Assets
+	players    []*Player
+	playfield  *Playfield
+	fontMedium *text.GoTextFace
+	fontSmall  *text.GoTextFace
 }
 
 func NewGame() *Game {
@@ -65,12 +67,6 @@ func NewGame() *Game {
 		log.Fatal(err)
 	}
 
-	gameFont := &text.GoTextFace{
-		Source:    textFS,
-		Direction: text.DirectionLeftToRight,
-		Size:      fontSizeSmall,
-	}
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -79,11 +75,21 @@ func NewGame() *Game {
 		assets:    ass,
 		width:     screenWidth,
 		height:    screenHeight,
-		playfield: NewPlayfield(screenWidth, screenHeight, ass),
-		fontSmall: gameFont,
+		playfield: nil,
+		fontMedium: &text.GoTextFace{
+			Source:    textFS,
+			Direction: text.DirectionLeftToRight,
+			Size:      fontSizeMedium,
+		},
+		fontSmall: &text.GoTextFace{
+			Source:    textFS,
+			Direction: text.DirectionLeftToRight,
+			Size:      fontSizeSmall,
+		},
 	}
 
 	g.players = append(g.players, NewPlayer(g))
+	g.playfield = NewPlayfield(g)
 
 	return g
 }
@@ -91,7 +97,7 @@ func NewGame() *Game {
 func (g *Game) Update() error {
 	tps := float64(ebiten.TPS())
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		g.playfield = NewPlayfield(screenWidth, screenHeight, g.assets)
+		g.playfield = NewPlayfield(g)
 	}
 	g.playfield.Update(tps)
 	for _, p := range g.players {
@@ -110,11 +116,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	str := "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield"
-	width, height := text.Measure(str, g.fontSmall, 0)
+	width, height := text.Measure(str, g.fontMedium, 0)
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(float64((screen.Bounds().Dx()-int(width))/2), float64(height))
 	op.ColorScale.ScaleWithColor(color.Black)
-	text.Draw(screen, str, g.fontSmall, op)
+	text.Draw(screen, str, g.fontMedium, op)
 
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %0.2f", ebiten.ActualTPS()))
 }

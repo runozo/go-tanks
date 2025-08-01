@@ -25,6 +25,7 @@ func NewTank(game *Game, bodySprite, barrelSprite, bulletSprite *ebiten.Image) *
 		barrel:     nil,
 	}
 	shootAnimationSprites := []*ebiten.Image{
+		game.assets.GetSprite("shotThin"),
 		game.assets.GetSprite("shotLarge"),
 		game.assets.GetSprite("shotOrange"),
 		game.assets.GetSprite("shotRed"),

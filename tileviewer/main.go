@@ -82,8 +82,8 @@ func (g *Game) isOverTile() string {
 }
 
 func main() {
-	spriteSheetPath := ".." + string(os.PathSeparator) + "assets" + string(os.PathSeparator) + "allSprites_default.png"
-	spriteMapPath := ".." + string(os.PathSeparator) + "assets" + string(os.PathSeparator) + "mapped_tiles.json"
+	spriteSheetPath := "../game/assets/allSprites_default.png"
+	spriteMapPath := "../game/assets/mapped_tiles.json"
 
 	spriteSheetData, err := os.ReadFile(spriteSheetPath)
 	if err != nil {

@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	_ "image/png"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -21,6 +20,7 @@ type Playfield struct {
 	numOfTilesY int
 	wfc         *wfc.Wfc
 	assets      *assets.Assets
+	progressBar *ProgressBar
 }
 
 // NewPlayfield creates a new Playfield with the specified width, height, and assets.
@@ -32,20 +32,23 @@ type Playfield struct {
 //
 // Returns:
 // - a pointer to the newly created Playfield.
-func NewPlayfield(width, height int, ass *assets.Assets) *Playfield {
+func NewPlayfield(game *Game) *Playfield {
 
-	tilesX := width/tileWidth + 1
-	tilesY := height/tileHeight + 1
+	tilesX := game.width/tileWidth + 1
+	tilesY := game.height/tileHeight + 1
 
 	playfield := &Playfield{
-		width:  width,
-		height: height,
+		width:  game.width,
+		height: game.height,
 
-		wfc:         wfc.NewWfc(screenWidth/tileWidth+1, screenHeight/tileHeight+1, ass.TileEntries),
-		assets:      ass,
+		wfc:         wfc.NewWfc(screenWidth/tileWidth+1, screenHeight/tileHeight+1, game.assets.TileEntries),
+		assets:      game.assets,
+		progressBar: NewProgressBar(400, 36, "Generating playfield", Vector{X: (screenWidth - 400) / 2, Y: (screenHeight - 36) / 2}, game.fontSmall),
 		numOfTilesX: tilesX,
 		numOfTilesY: tilesY,
 	}
+
+	playfield.progressBar.Update(0)
 
 	go playfield.wfc.StartRender()
 
@@ -60,7 +63,7 @@ func (p *Playfield) Update(tps float64) {
 				count++
 			}
 		}
-		fmt.Printf("%d of %d tiles rendered\n", count, len(p.wfc.Tiles))
+		p.progressBar.Update(float64(count) / float64(len(p.wfc.Tiles)) * 100)
 	}
 }
 
@@ -78,4 +81,8 @@ func (p *Playfield) Draw(screen *ebiten.Image) {
 			i++
 		}
 	}
+	if p.wfc.IsRunning {
+		p.progressBar.Draw(screen)
+	}
+
 }
