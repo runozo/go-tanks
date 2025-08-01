@@ -68,7 +68,7 @@ func (t *Tank) Update(tps float64) {
 	t.barrel.Update(tps)
 }
 
-func (t *Tank) Draw(screen *ebiten.Image, rotation float64) {
+func (t *Tank) Draw(screen *ebiten.Image) {
 	// Draw the tank
 
 	// body
@@ -76,7 +76,7 @@ func (t *Tank) Draw(screen *ebiten.Image, rotation float64) {
 	bodyHalfH := t.bodyHeight / 2
 	op_body := &ebiten.DrawImageOptions{}
 	op_body.GeoM.Translate(-bodyHalfW, -bodyHalfH)
-	op_body.GeoM.Rotate(rotation)
+	op_body.GeoM.Rotate(t.rotation)
 	op_body.GeoM.Translate(bodyHalfW, bodyHalfH)
 	op_body.GeoM.Translate(t.position.X, t.position.Y)
 
