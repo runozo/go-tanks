@@ -19,7 +19,9 @@ func (e *Explosion) Update(tps float64) {
 }
 
 func (e *Explosion) Draw(screen *ebiten.Image, x, y float64) {
+	frame := e.frameSet[int(e.age)%len(e.frameSet)]
 	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(-float64(frame.Bounds().Dx())/2, -float64(frame.Bounds().Dy())/2)
 	op.GeoM.Translate(x, y)
-	screen.DrawImage(e.frameSet[int(e.age)%len(e.frameSet)], op)
+	screen.DrawImage(frame, op)
 }
