@@ -81,6 +81,7 @@ func (p *Playfield) Draw(screen *ebiten.Image) {
 			i++
 		}
 	}
+
 	if p.wfc.IsRunning {
 		p.progressBar.Draw(screen)
 	}
