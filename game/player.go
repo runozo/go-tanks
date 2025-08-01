@@ -13,7 +13,7 @@ const (
 	shootCooldown     = time.Millisecond * 250
 	rotationPerSecond = math.Pi
 	tankSpeed         = 120.0
-	maxSlope          = math.Pi / 4
+	barrelMaxSlope    = math.Pi / 4
 )
 
 type Player struct {
@@ -26,7 +26,7 @@ type Player struct {
 func NewPlayer(game *Game) *Player {
 	return &Player{
 		game:          game,
-		tank:          NewRandomTank(game),
+		tank:          NewRandomTank(game, screenWidth/2, screenHeight/2, 0),
 		shootCooldown: NewTimer(shootCooldown),
 	}
 }
@@ -34,7 +34,7 @@ func NewPlayer(game *Game) *Player {
 func (p *Player) Update(tps float64) {
 	rotationSpeed := rotationPerSecond / tps
 	movementSpeed := tankSpeed / tps
-	slopeSpeed := maxSlope / tps
+	slopeSpeed := barrelMaxSlope / tps
 	p.shootCooldown.Update()
 
 	// rotate tank
@@ -70,25 +70,23 @@ func (p *Player) Update(tps float64) {
 	// charge shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		p.tank.barrel.slope += slopeSpeed
-		if p.tank.barrel.slope > maxSlope {
-			p.tank.barrel.slope = maxSlope
+		if p.tank.barrel.slope > barrelMaxSlope {
+			p.tank.barrel.slope = barrelMaxSlope
 		}
 		// fmt.Println(p.tank.barrel.slope)
 	}
 
 	// fire
-	if (p.tank.barrel.slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrel.slope >= maxSlope) && p.shootCooldown.IsReady() {
-
-		p.bullets = append(p.bullets, p.tank.Fire())
-
-		p.tank.barrel.slope = 0.0
+	if (p.tank.barrel.slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrel.slope >= barrelMaxSlope) && p.shootCooldown.IsReady() {
 		p.shootCooldown.Reset()
+		p.bullets = append(p.bullets, p.tank.Fire())
+		p.tank.barrel.slope = 0.0
 		// fmt.Println(len(p.bullets))
 	}
 
 	// new tank
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		p.tank = NewRandomTank(p.game)
+		p.tank = NewRandomTank(p.game, p.tank.position.X, p.tank.position.Y, p.tank.rotation)
 	}
 
 	// update tank(s)
