@@ -14,13 +14,10 @@ const (
 )
 
 type Playfield struct {
-	width       int
-	height      int
-	numOfTilesX int
-	numOfTilesY int
-	wfc         *wfc.Wfc
-	assets      *assets.Assets
-	progressBar *ProgressBar
+	width, height, numOfTilesX, numOfTilesY int
+	wfc                                     *wfc.Wfc
+	assets                                  *assets.Assets
+	progressBar                             *ProgressBar
 }
 
 // NewPlayfield creates a new Playfield with the specified width, height, and assets.
