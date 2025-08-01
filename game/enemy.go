@@ -31,7 +31,7 @@ func NewEnemy(game *Game) *Enemy {
 
 	return &Enemy{
 		game:          game,
-		shootCooldown: NewTimer(time.Millisecond * 250),
+		shootCooldown: NewTimer(time.Millisecond * 2500),
 		tank:          NewTank(game, bodySprite, barrelSpriteReversed, bulletSprite, screenWidth/2-screenWidth/4, screenHeight/2, 0),
 		bullets:       make([]*Bullet, 0),
 	}
