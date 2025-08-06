@@ -44,7 +44,6 @@ func (e *Enemy) Update(tps float64) {
 
 	if e.shootCooldown.IsReady() {
 		e.shootCooldown.Reset()
-		e.tank.Fire()
 		e.bullets = append(e.bullets, e.tank.Fire())
 	}
 	e.shootCooldown.Update()
