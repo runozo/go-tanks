@@ -47,10 +47,14 @@ func (p *Player) Update(tps float64) {
 
 	// rotate barrel
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		p.tank.barrel.relativeRotation -= rotationSpeed
+		for i := 0; i < len(p.tank.barrels); i++ {
+			p.tank.barrels[i].relativeRotation -= rotationSpeed
+		}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		p.tank.barrel.relativeRotation += rotationSpeed
+		for i := 0; i < len(p.tank.barrels); i++ {
+			p.tank.barrels[i].relativeRotation += rotationSpeed
+		}
 	}
 
 	// move
@@ -69,19 +73,24 @@ func (p *Player) Update(tps float64) {
 
 	// charge shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
-		p.tank.barrel.slope += slopeSpeed
-		if p.tank.barrel.slope > barrelMaxSlope {
-			p.tank.barrel.slope = barrelMaxSlope
+		for i := 0; i < len(p.tank.barrels); i++ {
+			p.tank.barrels[i].slope += slopeSpeed
+			if p.tank.barrels[i].slope > barrelMaxSlope {
+				p.tank.barrels[i].slope = barrelMaxSlope
+			}
+
 		}
 		// fmt.Println(p.tank.barrel.slope)
 	}
 
 	// fire
-	if (p.tank.barrel.slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrel.slope >= barrelMaxSlope) && p.shootCooldown.IsReady() {
-		p.shootCooldown.Reset()
-		p.bullets = append(p.bullets, p.tank.Fire())
-		p.tank.barrel.slope = 0.0
-		// fmt.Println(len(p.bullets))
+	for i := 0; i < len(p.tank.barrels); i++ {
+		if (p.tank.barrels[i].slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrels[i].slope >= barrelMaxSlope) && p.shootCooldown.IsReady() {
+			p.shootCooldown.Reset()
+			p.bullets = append(p.bullets, p.tank.Fire()...)
+			p.tank.barrels[i].slope = 0.0
+			// fmt.Println(len(p.bullets))
+		}
 	}
 
 	// new tank

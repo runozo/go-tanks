@@ -493,7 +493,7 @@
                 "tileGrass_roadTransitionW",
                 "tileGrass_roadTransitionW_dirt"
             ],
-            "above": [],
+            "above": ["fenceYellow"],
             "below": []
         },
         "type": "ground",
@@ -549,7 +549,7 @@
                 "tileGrass_roadSplitW",
                 "tileGrass_transitionW"
             ],
-            "above": [],
+            "above": ["fenceYellow", "fenceRed"],
             "below": []
         },
         "type": "ground",
@@ -833,7 +833,7 @@
                 "tileGrass_roadTransitionW",
                 "tileGrass_roadTransitionW_dirt"
             ],
-            "above": [],
+            "above": ["fenceYellow", "fenceRed"],
             "below": []
         },
         "type": "ground",
@@ -1897,7 +1897,7 @@
                 "tileSand_roadNorth",
                 "tileSand_roadSplitW"
             ],
-            "above": [],
+            "above": ["fenceYellow", "fenceRed"],
             "below": []
         },
         "type": "ground",

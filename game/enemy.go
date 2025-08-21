@@ -23,28 +23,33 @@ func FlipVertical(source *ebiten.Image) *ebiten.Image {
 	return result
 }
 
-func NewEnemy(game *Game) *Enemy {
-	bodySprite := game.assets.GetSprite("tankBody_darkLarge")
-	barrelSprite := game.assets.GetSprite("specialBarrel1_outline")
-	barrelSpriteReversed := FlipVertical(barrelSprite)
-	bulletSprite := game.assets.GetSprite("bulletRed1_outline")
+func NewEnemy(game *Game, flavor string) *Enemy {
+	flavors := map[string][]string{
+		// body barrel bullet
+		"easy":   []string{"tankBody_darkLarge", "specialBarrel1_outline", "bulletRed1_outline"},
+		"medium": []string{"tankBody_darkLarge", "specialBarrel1_outline", "bulletRed1_outline"},
+		"hard":   []string{"tankBody_huge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
+	}
 
 	return &Enemy{
 		game:          game,
 		shootCooldown: NewTimer(time.Millisecond * 2500),
-		tank:          NewTank(game, bodySprite, barrelSpriteReversed, bulletSprite, screenWidth/2-screenWidth/4, screenHeight/2, 0),
+		tank:          NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], screenWidth/2-screenWidth/4, screenHeight/2, 0),
 		bullets:       make([]*Bullet, 0),
 	}
 }
 
 func (e *Enemy) Update(tps float64) {
 	playerPosition := e.game.players[0].tank.position
-	e.tank.barrel.relativeRotation = math.Atan2(playerPosition.Y-e.tank.position.Y, playerPosition.X-e.tank.position.X) + math.Pi/2
+	for i := 0; i < len(e.tank.barrels); i++ {
+		e.tank.barrels[i].relativeRotation = math.Atan2(playerPosition.Y-e.tank.position.Y, playerPosition.X-e.tank.position.X) + math.Pi/2
+
+	}
 	// fmt.Println(e.tank.barrel.absoluteRotation)
 
 	if e.shootCooldown.IsReady() {
 		e.shootCooldown.Reset()
-		e.bullets = append(e.bullets, e.tank.Fire())
+		e.bullets = append(e.bullets, e.tank.Fire()...)
 	}
 	e.shootCooldown.Update()
 	e.tank.Update(tps)

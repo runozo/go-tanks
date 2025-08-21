@@ -90,7 +90,7 @@ func NewGame() *Game {
 	}
 
 	g.players = append(g.players, NewPlayer(g))
-	g.enemies = append(g.enemies, NewEnemy(g))
+	g.enemies = append(g.enemies, NewEnemy(g, "hard"))
 	g.playfield = NewPlayfield(g)
 
 	return g
