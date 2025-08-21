@@ -2,6 +2,7 @@ package game
 
 import (
 	"math"
+	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -27,7 +28,7 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 	flavors := map[string][]string{
 		// body barrel bullet
 		"easy":   []string{"tankBody_darkLarge", "specialBarrel1_outline", "bulletRed1_outline"},
-		"medium": []string{"tankBody_darkLarge", "specialBarrel1_outline", "bulletRed1_outline"},
+		"medium": []string{"tankBody_darkLarge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 		"hard":   []string{"tankBody_huge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 	}
 
@@ -49,6 +50,10 @@ func (e *Enemy) Update(tps float64) {
 
 	if e.shootCooldown.IsReady() {
 		e.shootCooldown.Reset()
+		randomSlope := rand.Float64() * math.Pi / 4
+		for i := 0; i < len(e.tank.barrels); i++ {
+			e.tank.barrels[i].slope = randomSlope
+		}
 		e.bullets = append(e.bullets, e.tank.Fire()...)
 	}
 	e.shootCooldown.Update()
@@ -62,7 +67,6 @@ func (e *Enemy) Update(tps float64) {
 		}
 	}
 	e.bullets = activeBullets
-
 }
 
 func (e *Enemy) Draw(screen *ebiten.Image) {
