@@ -90,13 +90,18 @@ func (p *Player) Update(tps float64) {
 	}
 
 	// fire
+	yesFire := false
 	for i := 0; i < len(p.tank.barrels); i++ {
 		if (p.tank.barrels[i].slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrels[i].slope >= barrelMaxSlope) && p.shootCooldown.IsReady() {
 			p.shootCooldown.Reset()
-			p.bullets = append(p.bullets, p.tank.Fire()...)
+			yesFire = true
 			p.tank.barrels[i].slope = 0.0
 			// fmt.Println(len(p.bullets))
 		}
+	}
+
+	if yesFire {
+		p.bullets = append(p.bullets, p.tank.Fire()...)
 	}
 
 	// new tank
