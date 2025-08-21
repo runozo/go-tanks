@@ -9,21 +9,31 @@ import (
 
 type Tank struct {
 	bodySprite *ebiten.Image
-	barrel     *Barrel
+	barrels    []*Barrel
 	bodyWidth  float64
 	bodyHeight float64
 	position   Vector
 	rotation   float64
 }
 
-func NewTank(game *Game, bodySprite, barrelSprite, bulletSprite *ebiten.Image, x, y, rotation float64) *Tank {
+func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, x, y, rotation float64) *Tank {
+
+	bodySprite := game.assets.GetSprite(bodySpriteName)
+
+	barrelSprite := game.assets.GetSprite(barrelSpriteName)
+	if barrelSpriteName == "specialBarrel1_outline" {
+		barrelSprite = FlipVertical(barrelSprite)
+	}
+
+	bulletSprite := game.assets.GetSprite(bulletSpriteName)
+
 	tank := &Tank{
 		bodySprite: bodySprite,
 		bodyWidth:  float64(bodySprite.Bounds().Dx()),
 		bodyHeight: float64(bodySprite.Bounds().Dy()),
 		position:   Vector{X: x, Y: y},
 		rotation:   rotation,
-		barrel:     nil,
+		barrels:    make([]*Barrel, 0),
 	}
 	shootAnimationSprites := []*ebiten.Image{
 		game.assets.GetSprite("shotThin"),
@@ -42,7 +52,7 @@ func NewTank(game *Game, bodySprite, barrelSprite, bulletSprite *ebiten.Image, x
 		game.assets.GetSprite("explosionSmoke5"),
 	}
 
-	tank.barrel = NewBarrel(barrelSprite, bulletSprite, tank, shootAnimationSprites, explosionAnimationSprites)
+	tank.barrels = append(tank.barrels, NewBarrel(barrelSprite, bulletSprite, tank, shootAnimationSprites, explosionAnimationSprites))
 	return tank
 }
 
@@ -57,15 +67,22 @@ func NewRandomTank(game *Game, x, y, rotation float64) *Tank {
 
 	fmt.Println("Random tank:", randomBodyName, randomBarrelName, randomBulletName)
 
-	return NewTank(game, game.assets.GetSprite(randomBodyName), game.assets.GetSprite(randomBarrelName), game.assets.GetSprite(randomBulletName), x, y, rotation)
+	return NewTank(game, randomBodyName, randomBarrelName, randomBulletName, x, y, rotation)
 }
 
-func (t *Tank) Fire() *Bullet {
-	return t.barrel.Fire()
+func (t *Tank) Fire() []*Bullet {
+	// Fire all the barrels
+	bullets := make([]*Bullet, len(t.barrels))
+	for b := 0; b < len(t.barrels); b++ {
+		bullets[b] = t.barrels[b].Fire()
+	}
+	return bullets
 }
 
 func (t *Tank) Update(tps float64) {
-	t.barrel.Update(tps)
+	for i := 0; i < len(t.barrels); i++ {
+		t.barrels[i].Update(tps)
+	}
 }
 
 func (t *Tank) Draw(screen *ebiten.Image) {
@@ -83,5 +100,7 @@ func (t *Tank) Draw(screen *ebiten.Image) {
 	screen.DrawImage(t.bodySprite, op_body)
 
 	// barrel
-	t.barrel.Draw(screen)
+	for i := 0; i < len(t.barrels); i++ {
+		t.barrels[i].Draw(screen)
+	}
 }
