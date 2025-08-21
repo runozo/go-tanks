@@ -24,9 +24,15 @@ type Player struct {
 }
 
 func NewPlayer(game *Game) *Player {
+
+	position := Vector{
+		X: screenWidth/2 + screenWidth/4,
+		Y: screenHeight / 2,
+	}
+
 	return &Player{
 		game:          game,
-		tank:          NewRandomTank(game, screenWidth/2+screenWidth/4, screenHeight/2, 0),
+		tank:          NewRandomTank(game, position, 0),
 		shootCooldown: NewTimer(shootCooldown),
 	}
 }
@@ -95,7 +101,7 @@ func (p *Player) Update(tps float64) {
 
 	// new tank
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		p.tank = NewRandomTank(p.game, p.tank.position.X, p.tank.position.Y, p.tank.rotation)
+		p.tank = NewRandomTank(p.game, p.tank.position, p.tank.rotation)
 	}
 
 	// update tank(s)

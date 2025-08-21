@@ -16,7 +16,7 @@ type Tank struct {
 	rotation   float64
 }
 
-func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, x, y, rotation float64) *Tank {
+func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position Vector, rotation float64) *Tank {
 
 	bodySprite := game.assets.GetSprite(bodySpriteName)
 
@@ -24,7 +24,7 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 		bodySprite: bodySprite,
 		bodyWidth:  float64(bodySprite.Bounds().Dx()),
 		bodyHeight: float64(bodySprite.Bounds().Dy()),
-		position:   Vector{X: x, Y: y},
+		position:   position,
 		rotation:   rotation,
 		barrels:    make([]*Barrel, 0),
 	}
@@ -39,7 +39,7 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 	return tank
 }
 
-func NewRandomTank(game *Game, x, y, rotation float64) *Tank {
+func NewRandomTank(game *Game, position Vector, rotation float64) *Tank {
 	bodies := []string{"tankBody_red_outline", "tankBody_blue_outline", "tankBody_dark_outline", "tankBody_green_outline", "tankBody_dark_outline", "tankBody_green_outline", "tankBody_sand_outline"}
 	barrels := []string{"tankDark_barrel1_outline", "tankDark_barrel2_outline", "tankDark_barrel3_outline", "tankGreen_barrel1", "tankGreen_barrel1_outline", "tankGreen_barrel2", "tankGreen_barrel2_outline", "tankGreen_barrel3", "tankGreen_barrel3_outline", "tankRed_barrel1", "tankRed_barrel1_outline", "tankRed_barrel2_outline", "tankRed_barrel3_outline", "tankSand_barrel2_outline", "tankSand_barrel3_outline"}
 	bullets := []string{"bulletSand3_outline", "bulletGreen3_outline", "bulletBlue3_outline"}
@@ -50,7 +50,7 @@ func NewRandomTank(game *Game, x, y, rotation float64) *Tank {
 
 	fmt.Println("Random tank:", randomBodyName, randomBarrelName, randomBulletName)
 
-	return NewTank(game, randomBodyName, randomBarrelName, randomBulletName, x, y, rotation)
+	return NewTank(game, randomBodyName, randomBarrelName, randomBulletName, position, rotation)
 }
 
 func (t *Tank) Fire() []*Bullet {

@@ -32,10 +32,15 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 		"hard":   []string{"tankBody_huge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 	}
 
+	position := Vector{
+		X: screenWidth/2 - screenWidth/4,
+		Y: screenHeight / 2,
+	}
+
 	return &Enemy{
 		game:          game,
 		shootCooldown: NewTimer(time.Millisecond * 2500),
-		tank:          NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], screenWidth/2-screenWidth/4, screenHeight/2, 0),
+		tank:          NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], position, 0),
 		bullets:       make([]*Bullet, 0),
 	}
 }
@@ -48,6 +53,7 @@ func (e *Enemy) Update(tps float64) {
 	}
 	// fmt.Println(e.tank.barrel.absoluteRotation)
 
+	// fires randomly
 	if e.shootCooldown.IsReady() {
 		e.shootCooldown.Reset()
 		randomSlope := rand.Float64() * math.Pi / 4
@@ -56,8 +62,12 @@ func (e *Enemy) Update(tps float64) {
 		}
 		e.bullets = append(e.bullets, e.tank.Fire()...)
 	}
+
 	e.shootCooldown.Update()
+
+	// update tank
 	e.tank.Update(tps)
+
 	// update bullets
 	var activeBullets []*Bullet
 	for _, bullet := range e.bullets {
