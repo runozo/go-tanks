@@ -20,13 +20,6 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 
 	bodySprite := game.assets.GetSprite(bodySpriteName)
 
-	barrelSprite := game.assets.GetSprite(barrelSpriteName)
-	if barrelSpriteName == "specialBarrel1_outline" {
-		barrelSprite = FlipVertical(barrelSprite)
-	}
-
-	bulletSprite := game.assets.GetSprite(bulletSpriteName)
-
 	tank := &Tank{
 		bodySprite: bodySprite,
 		bodyWidth:  float64(bodySprite.Bounds().Dx()),
@@ -35,24 +28,8 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 		rotation:   rotation,
 		barrels:    make([]*Barrel, 0),
 	}
-	shootAnimationSprites := []*ebiten.Image{
-		game.assets.GetSprite("shotThin"),
-		game.assets.GetSprite("shotLarge"),
-		game.assets.GetSprite("shotOrange"),
-		game.assets.GetSprite("shotRed"),
-		game.assets.GetSprite("shotOrange"),
-		game.assets.GetSprite("shotLarge"),
-	}
 
-	explosionAnimationSprites := []*ebiten.Image{
-		game.assets.GetSprite("explosionSmoke1"),
-		game.assets.GetSprite("explosionSmoke2"),
-		game.assets.GetSprite("explosionSmoke3"),
-		game.assets.GetSprite("explosionSmoke4"),
-		game.assets.GetSprite("explosionSmoke5"),
-	}
-
-	tank.barrels = append(tank.barrels, NewBarrel(barrelSprite, bulletSprite, tank, shootAnimationSprites, explosionAnimationSprites))
+	tank.barrels = append(tank.barrels, NewBarrel(game, barrelSpriteName, bulletSpriteName, tank))
 	return tank
 }
 
