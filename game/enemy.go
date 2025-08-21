@@ -41,9 +41,9 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 
 func (e *Enemy) Update(tps float64) {
 	playerPosition := e.game.players[0].tank.position
+
 	for i := 0; i < len(e.tank.barrels); i++ {
 		e.tank.barrels[i].relativeRotation = math.Atan2(playerPosition.Y-e.tank.position.Y, playerPosition.X-e.tank.position.X) + math.Pi/2
-
 	}
 	// fmt.Println(e.tank.barrel.absoluteRotation)
 

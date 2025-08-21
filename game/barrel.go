@@ -22,13 +22,36 @@ type Barrel struct {
 	shootAge                 float64
 }
 
-func NewBarrel(sprite, bulletSprite *ebiten.Image, tank *Tank, shootAnimationSprites, explosionAnimationSprites []*ebiten.Image) *Barrel {
+func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank) *Barrel {
+	sprite := game.assets.GetSprite(spriteName)
+	if spriteName == "specialBarrel1_outline" {
+		sprite = FlipVertical(sprite)
+	}
+	bulletSprite := game.assets.GetSprite(bulletSpriteName)
 	spriteWidth := float64(sprite.Bounds().Dx())
 	spriteHeight := float64(sprite.Bounds().Dy())
 	position := Vector{
 		X: tank.position.X + tank.bodyWidth/2 - spriteWidth/2,
 		Y: tank.position.Y + tank.bodyHeight/2 - spriteHeight,
 	}
+
+	shootAnimationSprites := []*ebiten.Image{
+		game.assets.GetSprite("shotThin"),
+		game.assets.GetSprite("shotLarge"),
+		game.assets.GetSprite("shotOrange"),
+		game.assets.GetSprite("shotRed"),
+		game.assets.GetSprite("shotOrange"),
+		game.assets.GetSprite("shotLarge"),
+	}
+
+	explosionAnimationSprites := []*ebiten.Image{
+		game.assets.GetSprite("explosionSmoke1"),
+		game.assets.GetSprite("explosionSmoke2"),
+		game.assets.GetSprite("explosionSmoke3"),
+		game.assets.GetSprite("explosionSmoke4"),
+		game.assets.GetSprite("explosionSmoke5"),
+	}
+
 	return &Barrel{
 		sprite:                   sprite,
 		spriteWidth:              spriteWidth,
