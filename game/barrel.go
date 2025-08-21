@@ -14,6 +14,7 @@ type Barrel struct {
 	shootAnimationFrames     []*ebiten.Image
 	explosionAnimationFrames []*ebiten.Image
 	position                 Vector
+	offset                   Vector
 	relativeRotation         float64
 	absoluteRotation         float64
 	slope                    float64
@@ -22,17 +23,21 @@ type Barrel struct {
 	shootAge                 float64
 }
 
-func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank) *Barrel {
+func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offset Vector) *Barrel {
 	sprite := game.assets.GetSprite(spriteName)
+
 	if spriteName == "specialBarrel1_outline" {
 		sprite = FlipVertical(sprite)
 	}
+
 	bulletSprite := game.assets.GetSprite(bulletSpriteName)
+
 	spriteWidth := float64(sprite.Bounds().Dx())
 	spriteHeight := float64(sprite.Bounds().Dy())
+
 	position := Vector{
-		X: tank.position.X + tank.bodyWidth/2 - spriteWidth/2,
-		Y: tank.position.Y + tank.bodyHeight/2 - spriteHeight,
+		X: tank.position.X + offset.X - spriteWidth/2, // tank.bodyWidth/2 - spriteWidth/2,
+		Y: tank.position.Y + offset.Y - spriteHeight,  // tank.bodyHeight/2 - spriteHeight,
 	}
 
 	shootAnimationSprites := []*ebiten.Image{
@@ -60,6 +65,7 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank) *Bar
 		shootAnimationFrames:     shootAnimationSprites,
 		explosionAnimationFrames: explosionAnimationSprites,
 		position:                 position,
+		offset:                   offset,
 		relativeRotation:         0.0,
 		absoluteRotation:         tank.rotation,
 		slope:                    0.0,
@@ -78,8 +84,8 @@ func (b *Barrel) Fire() *Bullet {
 func (b *Barrel) Update(tps float64) {
 	b.absoluteRotation = b.tank.rotation + b.relativeRotation
 	position := Vector{
-		X: b.tank.position.X + b.tank.bodyWidth/2 - b.spriteWidth/2,
-		Y: b.tank.position.Y + b.tank.bodyHeight/2 - b.spriteHeight,
+		X: b.tank.position.X + b.offset.X - b.spriteWidth/2,
+		Y: b.tank.position.Y + b.offset.Y - b.spriteHeight,
 	}
 	b.position = position
 	if b.isFiring {
