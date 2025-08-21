@@ -34,7 +34,7 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 
 	position := Vector{
 		X: screenWidth/2 - screenWidth/4,
-		Y: screenHeight / 2,
+		Y: float64(rand.Intn(screenHeight)),
 	}
 
 	return &Enemy{
