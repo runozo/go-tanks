@@ -30,17 +30,18 @@ type Vector struct {
 }
 
 type Game struct {
-	width      int
-	height     int
-	assets     *assets.Assets
-	players    []*Player
-	enemies    []*Enemy
-	playfield  *Playfield
-	fontMedium *text.GoTextFace
-	fontSmall  *text.GoTextFace
+	width         int
+	height        int
+	assets        *assets.Assets
+	players       []*Player
+	enemies       []*Enemy
+	playfield     *Playfield
+	fontMedium    *text.GoTextFace
+	fontSmall     *text.GoTextFace
+	serverAddress string
 }
 
-func NewGame() *Game {
+func NewGame(serverAddress string) *Game {
 	// Load sprite sheet
 	spriteSheetData, err := assetsFS.ReadFile("assets/allSprites_default.png")
 	if err != nil {
@@ -87,6 +88,7 @@ func NewGame() *Game {
 			Direction: text.DirectionLeftToRight,
 			Size:      fontSizeSmall,
 		},
+		serverAddress: serverAddress,
 	}
 
 	g.players = append(g.players, NewPlayer(g))
