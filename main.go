@@ -12,6 +12,7 @@ import (
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+var serveraddress = flag.String("addr", "localhost:8080", "http service address")
 
 func main() {
 	flag.Parse()
@@ -24,7 +25,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	g := game.NewGame()
+	g := game.NewGame(*serveraddress)
 	ebiten.SetFullscreen(true)
 	err := ebiten.RunGame(g)
 	if err != nil {
