@@ -32,12 +32,15 @@ func NewPlayer(game *Game) *Player {
 		Y: screenHeight / 2,
 	}
 
-	return &Player{
+	p := &Player{
 		game:          game,
 		Tank:          NewRandomTank(game, position, 0),
 		shootCooldown: NewTimer(shootCooldown),
-		netClient:     NewNetClient(game.serverAddress),
 	}
+	if game.serverAddress != "" {
+		p.netClient = NewNetClient(game.serverAddress)
+	}
+	return p
 }
 
 func (p *Player) Update(tps float64) {
@@ -130,9 +133,11 @@ func (p *Player) Update(tps float64) {
 	p.Bullets = activeBullets
 
 	// send data to server
-	buf := make([]byte, 8) // float64 is 8 bytes long
-	binary.LittleEndian.PutUint64(buf, math.Float64bits(p.Tank.Position.X))
-	p.netClient.SendData(buf)
+	if p.netClient != nil {
+		buf := make([]byte, 8) // float64 is 8 bytes long
+		binary.LittleEndian.PutUint64(buf, math.Float64bits(p.Tank.Position.X))
+		p.netClient.SendData(buf)
+	}
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
