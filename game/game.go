@@ -105,29 +105,31 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.playfield = NewPlayfield(g)
 	}
+
 	g.playfield.Update(tps)
 
-	for _, e := range g.enemies {
-		e.Update(tps)
-	}
+	if !g.playfield.wfc.IsRunning {
+		for _, e := range g.enemies {
+			e.Update(tps)
+		}
 
-	for _, p := range g.players {
-		p.Update(tps)
+		for _, p := range g.players {
+			p.Update(tps)
+		}
 	}
-	// fmt.Println(g.playfield.tiles)
 
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.playfield.Draw(screen)
-
-	for _, e := range g.enemies {
-		e.Draw(screen)
-	}
-
-	for _, p := range g.players {
-		p.Draw(screen)
+	if !g.playfield.wfc.IsRunning {
+		for _, e := range g.enemies {
+			e.Draw(screen)
+		}
+		for _, p := range g.players {
+			p.Draw(screen)
+		}
 	}
 
 	str := "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield"

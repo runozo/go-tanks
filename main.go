@@ -12,7 +12,7 @@ import (
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
-var serveraddress = flag.String("addr", "localhost:8080", "http service address")
+var serveraddress = flag.String("addr", "", "http service address")
 
 func main() {
 	flag.Parse()
