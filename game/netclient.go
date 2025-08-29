@@ -1,6 +1,8 @@
 package game
 
 import (
+	"bytes"
+	"encoding/json"
 	"log"
 	"net/url"
 	"os"
@@ -14,9 +16,10 @@ type NetClient struct {
 	player    *Player
 	client    *websocket.Conn
 	interrupt chan os.Signal
+	buffer    bytes.Buffer
 }
 
-func NewNetClient(serverAddress string, player *Player) *NetClient {
+func NewNetClient(serverAddress string) *NetClient {
 	u := url.URL{Scheme: "ws", Host: serverAddress, Path: "/echo"}
 	log.Printf("connecting to %s", u.String())
 
@@ -24,13 +27,12 @@ func NewNetClient(serverAddress string, player *Player) *NetClient {
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
-	defer c.Close()
+	//	defer c.Close()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
 	nc := &NetClient{
-		player:    player,
 		client:    c,
 		interrupt: interrupt,
 	}
@@ -49,7 +51,17 @@ func (c *NetClient) Close() {
 	<-timer.C
 }
 
-func (c *NetClient) sendData(data []byte) {
+func (c *NetClient) SendPlayerData(player *Player) {
+	j, err := json.Marshal(player)
+	if err != nil {
+		log.Fatal("encode error:", err)
+	}
+
+	// HERE ARE YOUR BYTES!!!!
+	c.SendData(j)
+}
+
+func (c *NetClient) SendData(data []byte) {
 	err := c.client.WriteMessage(websocket.TextMessage, data)
 	if err != nil {
 		log.Println("write:", err)

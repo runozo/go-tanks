@@ -12,8 +12,8 @@ type Tank struct {
 	barrels    []*Barrel
 	bodyWidth  float64
 	bodyHeight float64
-	position   Vector
-	rotation   float64
+	Position   Vector
+	Rotation   float64
 }
 
 func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position Vector, rotation float64) *Tank {
@@ -24,8 +24,8 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 		bodySprite: bodySprite,
 		bodyWidth:  float64(bodySprite.Bounds().Dx()),
 		bodyHeight: float64(bodySprite.Bounds().Dy()),
-		position:   position,
-		rotation:   rotation,
+		Position:   position,
+		Rotation:   rotation,
 		barrels:    make([]*Barrel, 0),
 	}
 
@@ -77,9 +77,9 @@ func (t *Tank) Draw(screen *ebiten.Image) {
 	bodyHalfH := t.bodyHeight / 2
 	op_body := &ebiten.DrawImageOptions{}
 	op_body.GeoM.Translate(-bodyHalfW, -bodyHalfH)
-	op_body.GeoM.Rotate(t.rotation)
+	op_body.GeoM.Rotate(t.Rotation)
 	op_body.GeoM.Translate(bodyHalfW, bodyHalfH)
-	op_body.GeoM.Translate(t.position.X, t.position.Y)
+	op_body.GeoM.Translate(t.Position.X, t.Position.Y)
 
 	screen.DrawImage(t.bodySprite, op_body)
 
