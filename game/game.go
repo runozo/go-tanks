@@ -92,6 +92,8 @@ func NewGame(serverAddress string) *Game {
 	}
 
 	g.players = append(g.players, NewPlayer(g))
+
+	// add enemies one at a time so they don't overlap
 	g.enemies = append(g.enemies, NewEnemy(g, "hard"))
 	g.enemies = append(g.enemies, NewEnemy(g, "medium"))
 	g.enemies = append(g.enemies, NewEnemy(g, "easy"))
