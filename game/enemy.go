@@ -1,11 +1,16 @@
 package game
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+)
+
+const (
+	enemyOffset = 5
 )
 
 type Enemy struct {
@@ -32,16 +37,16 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 		"hard":   []string{"tankBody_huge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 	}
 
-	// don't overlap position with other enemies
-
 	position := Vector{
 		X: screenWidth/2 - screenWidth/4,
 		Y: float64(rand.Intn(screenHeight - tileHeight)),
 	}
 
+	// don't overlap position with other enemies
 	for _, e := range game.enemies {
-		for position.Y < e.tank.Position.Y-tileHeight || position.Y > e.tank.Position.Y+e.tank.bodyHeight {
+		for position.Y > e.tank.Position.Y-enemyOffset && position.Y < e.tank.Position.Y+e.tank.bodyHeight+enemyOffset {
 			position.Y = float64(rand.Intn(screenHeight - tileHeight))
+			fmt.Println("new position", position.Y, len(game.enemies))
 		}
 	}
 
@@ -59,12 +64,11 @@ func (e *Enemy) Update(tps float64) {
 	for i := 0; i < len(e.tank.barrels); i++ {
 		e.tank.barrels[i].relativeRotation = math.Atan2(playerPosition.Y-e.tank.Position.Y, playerPosition.X-e.tank.Position.X) + math.Pi/2
 	}
-	// fmt.Println(e.tank.barrel.absoluteRotation)
 
 	// fires randomly
 	if e.shootCooldown.IsReady() {
 		e.shootCooldown.Reset()
-		randomSlope := rand.Float64() * math.Pi / 4
+		randomSlope := rand.Float64() * barrelMaxSlope
 		for i := 0; i < len(e.tank.barrels); i++ {
 			e.tank.barrels[i].slope = randomSlope
 		}
