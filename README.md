@@ -28,6 +28,8 @@ A game with tanks<!-- >, try it on https://runozo.github.io/go-tanks/ -->
     [x] Bullet explosion
     [x] Draw playfield
     [x] Progress bar drawing playfield
+    [x] Enemies
+    [ ] Actual enemies
     [ ] Draw crosshair
     [ ] Draw playfield obstacles
     [ ] Draw actual playfield
