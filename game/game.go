@@ -92,11 +92,9 @@ func NewGame(serverAddress string) *Game {
 	}
 
 	g.players = append(g.players, NewPlayer(g))
-	g.enemies = []*Enemy{
-		NewEnemy(g, "hard"),
-		NewEnemy(g, "medium"),
-		NewEnemy(g, "easy"),
-	}
+	g.enemies = append(g.enemies, NewEnemy(g, "hard"))
+	g.enemies = append(g.enemies, NewEnemy(g, "medium"))
+	g.enemies = append(g.enemies, NewEnemy(g, "easy"))
 	g.playfield = NewPlayfield(g)
 
 	return g
@@ -107,11 +105,10 @@ func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.playfield = NewPlayfield(g)
-		g.enemies = []*Enemy{
-			NewEnemy(g, "hard"),
-			NewEnemy(g, "medium"),
-			NewEnemy(g, "easy"),
-		}
+		g.enemies = []*Enemy{}
+		g.enemies = append(g.enemies, NewEnemy(g, "hard"))
+		g.enemies = append(g.enemies, NewEnemy(g, "medium"))
+		g.enemies = append(g.enemies, NewEnemy(g, "easy"))
 	}
 
 	g.playfield.Update(tps)
