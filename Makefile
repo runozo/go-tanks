@@ -12,11 +12,13 @@ profile:
 
 build:
 	go build -ldflags="-s -w -v" -o ./cmd/go-tanks
+	upx -9 ./cmd/go-tanks
 
 .PHONY: build
 
 buildwin:
 	GOOS=windows go build -ldflags="-s -w -v" -o ./cmd/go-tanks.exe
+	upx -9 ./cmd/go-tanks.exe
 
 .PHONY: run
 
