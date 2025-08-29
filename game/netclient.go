@@ -1,7 +1,6 @@
 package game
 
 import (
-	"bytes"
 	"encoding/json"
 	"log"
 	"net/url"
@@ -13,10 +12,8 @@ import (
 )
 
 type NetClient struct {
-	player    *Player
 	client    *websocket.Conn
 	interrupt chan os.Signal
-	buffer    bytes.Buffer
 }
 
 func NewNetClient(serverAddress string) *NetClient {
