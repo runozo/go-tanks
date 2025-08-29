@@ -30,6 +30,7 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 	}
 
 	if bodySpriteName == "tankBody_huge_outline" {
+		// this bodies have 2 barrels each
 		tank.barrels = append(tank.barrels, NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, Vector{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 4}))
 		tank.barrels = append(tank.barrels, NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, Vector{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 4 * 3}))
 	} else {

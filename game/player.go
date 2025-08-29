@@ -99,6 +99,7 @@ func (p *Player) Update(tps float64) {
 		}
 	}
 
+	// fire and reset barrels slope
 	if yesFire {
 		p.bullets = append(p.bullets, p.tank.Fire()...)
 		for i := 0; i < len(p.tank.barrels); i++ {

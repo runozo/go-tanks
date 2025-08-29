@@ -51,6 +51,7 @@ func main() {
 	log.SetFlags(0)
 	http.HandleFunc("/echo", echo)
 	http.HandleFunc("/", home)
+	log.Println("Listening on", *addr)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }
 
