@@ -38,17 +38,15 @@ func NewNetClient(serverAddress string, player *Player) *NetClient {
 	return nc
 }
 
-func (c *NetClient) close() {
-	// Cleanly close the connection by sending a close message and then
-	// waiting (with timeout) for the server to close the connection.
-	err := c.client.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+func (c *NetClient) Close() {
+	closeMsg := websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")
+	err := c.client.WriteMessage(websocket.CloseMessage, closeMsg)
 	if err != nil {
-		log.Println("write close:", err)
 		return
 	}
-	select {
-	case <-time.After(time.Second):
-	}
+	timer := time.NewTimer(time.Second)
+	defer timer.Stop()
+	<-timer.C
 }
 
 func (c *NetClient) sendData(data []byte) {
