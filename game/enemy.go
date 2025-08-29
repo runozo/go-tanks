@@ -32,14 +32,22 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 		"hard":   []string{"tankBody_huge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 	}
 
+	// don't overlap position with other enemies
+
 	position := Vector{
 		X: screenWidth/2 - screenWidth/4,
-		Y: float64(rand.Intn(screenHeight)),
+		Y: float64(rand.Intn(screenHeight - tileHeight)),
+	}
+
+	for _, e := range game.enemies {
+		for position.Y < e.tank.Position.Y-tileHeight || position.Y > e.tank.Position.Y+e.tank.bodyHeight {
+			position.Y = float64(rand.Intn(screenHeight - tileHeight))
+		}
 	}
 
 	return &Enemy{
 		game:          game,
-		shootCooldown: NewTimer(time.Millisecond * 2500),
+		shootCooldown: NewTimer(time.Millisecond*2500 + time.Millisecond*time.Duration(rand.Intn(1000))),
 		tank:          NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], position, 0),
 		bullets:       make([]*Bullet, 0),
 	}
