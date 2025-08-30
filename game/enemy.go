@@ -38,13 +38,17 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 	}
 
 	position := Vector{
-		X: screenWidth/2 - screenWidth/4,
+		X: float64(rand.Intn(screenWidth / 2)),
 		Y: float64(rand.Intn(screenHeight - tileHeight)),
 	}
 
 	// don't overlap position with other enemies
 	for _, e := range game.enemies {
-		for position.Y > e.tank.Position.Y-enemyOffset && position.Y < e.tank.Position.Y+e.tank.bodyHeight+enemyOffset {
+		for position.Y > e.tank.Position.Y-enemyOffset &&
+			position.Y < e.tank.Position.Y+e.tank.bodyHeight+enemyOffset &&
+			position.X > e.tank.Position.X-enemyOffset &&
+			position.X < e.tank.Position.X+e.tank.bodyWidth+enemyOffset {
+			position.X = float64(rand.Intn(screenWidth / 2))
 			position.Y = float64(rand.Intn(screenHeight - tileHeight))
 			fmt.Println("new position", position.Y, len(game.enemies))
 		}
