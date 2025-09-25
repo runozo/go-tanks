@@ -22,6 +22,7 @@ type Barrel struct {
 	tank                              *Tank
 	isFiring                          bool
 	shootAge                          float64
+	game                              *Game
 }
 
 func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offset Vector) *Barrel {
@@ -82,13 +83,14 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 		tank:                              tank,
 		isFiring:                          false,
 		shootAge:                          0.0,
+		game:                              game,
 	}
 }
 
 func (b *Barrel) Fire() *Bullet {
 	b.isFiring = true
 	b.shootAge = 0
-	return NewBullet(b)
+	return NewBullet(b.game, b)
 }
 
 func (b *Barrel) Update(tps float64) {

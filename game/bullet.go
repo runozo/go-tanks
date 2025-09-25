@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	gravity        = 9.8
-	bulletSpeed    = 12.0
-	bulletMinScale = 1.0
-	scaleCoeff     = 1.8
+	gravity         = 9.8
+	bulletSpeed     = 12.0
+	bulletMinScale  = 1.0
+	scaleCoeff      = 1.8
+	initialAltitude = 0.2
 )
 
 type Bullet struct {
@@ -30,9 +31,10 @@ type Bullet struct {
 	exploding                  bool
 	exploded                   bool
 	hasHitTarget               bool
+	game                       *Game
 }
 
-func NewBullet(barrel *Barrel) *Bullet {
+func NewBullet(game *Game, barrel *Barrel) *Bullet {
 	bulletSprite := barrel.bulletSprite
 	bulletSpriteWidth := float64(bulletSprite.Bounds().Dx())
 	bulletSpriteHeight := float64(bulletSprite.Bounds().Dy())
@@ -51,7 +53,7 @@ func NewBullet(barrel *Barrel) *Bullet {
 		verticalSpeed:            bulletSpeed * math.Sin(barrel.slope),
 		currentSlope:             barrel.slope,
 		initialSlope:             barrel.slope,
-		altitude:                 0.2,
+		altitude:                 initialAltitude,
 		scale:                    bulletMinScale,
 		elapsedTime:              0.0,
 		spriteWidth:              bulletSpriteWidth,
@@ -64,6 +66,7 @@ func NewBullet(barrel *Barrel) *Bullet {
 		exploding:                false,
 		exploded:                 false,
 		hasHitTarget:             false,
+		game:                     game,
 	}
 }
 
@@ -73,7 +76,7 @@ func (b *Bullet) Update(tps float64) {
 	dt := 1.0 / tps
 	b.elapsedTime += dt
 
-	if b.altitude > 0.0 {
+	if b.altitude >= initialAltitude {
 		b.position.X += sinRot * bulletSpeed
 		b.position.Y -= cosRot * bulletSpeed
 
@@ -86,8 +89,26 @@ func (b *Bullet) Update(tps float64) {
 		b.scale = b.altitude*scaleCoeff + bulletMinScale
 		// fmt.Println(b.currentSlope)
 	} else {
-		b.exploding = !b.exploded
-		b.explosionElapsedTime += dt * 10
+		b.exploding = true
+	}
+
+	if b.exploding {
+		// check collision with players
+		for _, p := range b.game.players {
+			if doesIntersect(b.position, b.sprite.Bounds(), p.Tank.Position, p.Tank.bodySprite.Bounds()) {
+				b.hasHitTarget = true
+				break
+			}
+		}
+		// check collision with enemies
+		for _, e := range b.game.enemies {
+			if doesIntersect(b.position, b.sprite.Bounds(), e.tank.Position, e.tank.bodySprite.Bounds()) {
+				b.hasHitTarget = true
+				break
+			}
+		}
+
+		b.explosionElapsedTime += dt * float64(len(b.explosionHitTargetFrames))
 	}
 }
 
