@@ -96,14 +96,6 @@ func (e *Enemy) Update(tps float64) {
 	var activeBullets []*Bullet
 	for _, bullet := range e.bullets {
 		bullet.Update(tps)
-		if bullet.exploding {
-			for _, p := range e.game.players {
-				if doesIntersect(bullet.position, bullet.sprite.Bounds(), p.Tank.Position, p.Tank.bodySprite.Bounds()) {
-					bullet.hasHitTarget = true
-					break
-				}
-			}
-		}
 		if !bullet.exploded {
 			activeBullets = append(activeBullets, bullet)
 		}
