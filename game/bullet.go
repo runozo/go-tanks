@@ -26,8 +26,10 @@ type Bullet struct {
 	barrelHeight               float64
 	explosionElapsedTime       float64
 	explosionFrames            []*ebiten.Image
+	explosionHitTargetFrames   []*ebiten.Image
 	exploding                  bool
 	exploded                   bool
+	hasHitTarget               bool
 }
 
 func NewBullet(barrel *Barrel) *Bullet {
@@ -43,23 +45,25 @@ func NewBullet(barrel *Barrel) *Bullet {
 	// fmt.Println("Barrel position", barrel.position.X, barrel.position.Y, "Bullet position", position.X, position.Y)
 
 	return &Bullet{
-		position:             position,
-		rotation:             barrel.absoluteRotation,
-		sprite:               bulletSprite,
-		verticalSpeed:        bulletSpeed * math.Sin(barrel.slope),
-		currentSlope:         barrel.slope,
-		initialSlope:         barrel.slope,
-		altitude:             0.2,
-		scale:                bulletMinScale,
-		elapsedTime:          0.0,
-		spriteWidth:          bulletSpriteWidth,
-		spriteHeight:         bulletSpriteHeight,
-		barrelWidth:          barrel.spriteWidth,
-		barrelHeight:         barrel.spriteHeight,
-		explosionElapsedTime: 0,
-		explosionFrames:      barrel.explosionAnimationFrames,
-		exploding:            false,
-		exploded:             false,
+		position:                 position,
+		rotation:                 barrel.absoluteRotation,
+		sprite:                   bulletSprite,
+		verticalSpeed:            bulletSpeed * math.Sin(barrel.slope),
+		currentSlope:             barrel.slope,
+		initialSlope:             barrel.slope,
+		altitude:                 0.2,
+		scale:                    bulletMinScale,
+		elapsedTime:              0.0,
+		spriteWidth:              bulletSpriteWidth,
+		spriteHeight:             bulletSpriteHeight,
+		barrelWidth:              barrel.spriteWidth,
+		barrelHeight:             barrel.spriteHeight,
+		explosionElapsedTime:     0,
+		explosionFrames:          barrel.explosionAnimationFrames,
+		explosionHitTargetFrames: barrel.explosionHitTargetAnimationFrames,
+		exploding:                false,
+		exploded:                 false,
+		hasHitTarget:             false,
 	}
 }
 
@@ -107,22 +111,49 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 		op.GeoM.Rotate(b.rotation)
 		op.GeoM.Translate(bulletHalfW, bulletAndBarrellHeight)
 
-		// true position of the bullet
+		// true position of the bullet to draw
 		op.GeoM.Translate(b.position.X, b.position.Y)
 		screen.DrawImage(b.sprite, op)
 	} else {
-		if int(b.explosionElapsedTime) < len(b.explosionFrames) {
-			frame := b.explosionFrames[int(b.explosionElapsedTime)]
-			explosionHalfW := float64(frame.Bounds().Dx()) / 2
-			bulletAndExplosionHeight := b.spriteHeight + explosionHalfW
-			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(-explosionHalfW, -bulletAndExplosionHeight)
-			op.GeoM.Rotate(b.rotation)
-			op.GeoM.Translate(explosionHalfW, bulletAndExplosionHeight)
-			op.GeoM.Translate(b.position.X, b.position.Y)
-			screen.DrawImage(frame, op)
+		if b.hasHitTarget {
+			b.drawExplosionHitTarget(screen)
 		} else {
-			b.exploded = true
+			b.drawEsplosion(screen)
 		}
+
 	}
+}
+
+func (b *Bullet) drawExplosionHitTarget(screen *ebiten.Image) {
+	if int(b.explosionElapsedTime) < len(b.explosionHitTargetFrames) {
+		frame := b.explosionHitTargetFrames[int(b.explosionElapsedTime)]
+		explosionHalfW := float64(frame.Bounds().Dx()) / 2
+		bulletAndExplosionHeight := b.spriteHeight + explosionHalfW
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(-explosionHalfW, -bulletAndExplosionHeight)
+		op.GeoM.Rotate(b.rotation)
+		op.GeoM.Translate(explosionHalfW, bulletAndExplosionHeight)
+		op.GeoM.Translate(b.position.X, b.position.Y)
+		screen.DrawImage(frame, op)
+	} else {
+		b.exploded = true
+	}
+
+}
+
+func (b *Bullet) drawEsplosion(screen *ebiten.Image) {
+	if int(b.explosionElapsedTime) < len(b.explosionFrames) {
+		frame := b.explosionFrames[int(b.explosionElapsedTime)]
+		explosionHalfW := float64(frame.Bounds().Dx()) / 2
+		bulletAndExplosionHeight := b.spriteHeight + explosionHalfW
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(-explosionHalfW, -bulletAndExplosionHeight)
+		op.GeoM.Rotate(b.rotation)
+		op.GeoM.Translate(explosionHalfW, bulletAndExplosionHeight)
+		op.GeoM.Translate(b.position.X, b.position.Y)
+		screen.DrawImage(frame, op)
+	} else {
+		b.exploded = true
+	}
+
 }

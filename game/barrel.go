@@ -7,20 +7,21 @@ import (
 )
 
 type Barrel struct {
-	sprite                   *ebiten.Image
-	spriteWidth              float64
-	spriteHeight             float64
-	bulletSprite             *ebiten.Image
-	shootAnimationFrames     []*ebiten.Image
-	explosionAnimationFrames []*ebiten.Image
-	position                 Vector
-	offset                   Vector
-	relativeRotation         float64
-	absoluteRotation         float64
-	slope                    float64
-	tank                     *Tank
-	isFiring                 bool
-	shootAge                 float64
+	sprite                            *ebiten.Image
+	spriteWidth                       float64
+	spriteHeight                      float64
+	bulletSprite                      *ebiten.Image
+	shootAnimationFrames              []*ebiten.Image
+	explosionAnimationFrames          []*ebiten.Image
+	explosionHitTargetAnimationFrames []*ebiten.Image
+	position                          Vector
+	offset                            Vector
+	relativeRotation                  float64
+	absoluteRotation                  float64
+	slope                             float64
+	tank                              *Tank
+	isFiring                          bool
+	shootAge                          float64
 }
 
 func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offset Vector) *Barrel {
@@ -57,21 +58,30 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 		game.assets.GetSprite("explosionSmoke5"),
 	}
 
+	explosionHitTargetAnimationSprites := []*ebiten.Image{
+		game.assets.GetSprite("explosion1"),
+		game.assets.GetSprite("explosion2"),
+		game.assets.GetSprite("explosion3"),
+		game.assets.GetSprite("explosion4"),
+		game.assets.GetSprite("explosion5"),
+	}
+
 	return &Barrel{
-		sprite:                   sprite,
-		spriteWidth:              spriteWidth,
-		spriteHeight:             spriteHeight,
-		bulletSprite:             bulletSprite,
-		shootAnimationFrames:     shootAnimationSprites,
-		explosionAnimationFrames: explosionAnimationSprites,
-		position:                 position,
-		offset:                   offset,
-		relativeRotation:         0.0,
-		absoluteRotation:         tank.Rotation,
-		slope:                    0.0,
-		tank:                     tank,
-		isFiring:                 false,
-		shootAge:                 0.0,
+		sprite:                            sprite,
+		spriteWidth:                       spriteWidth,
+		spriteHeight:                      spriteHeight,
+		bulletSprite:                      bulletSprite,
+		shootAnimationFrames:              shootAnimationSprites,
+		explosionAnimationFrames:          explosionAnimationSprites,
+		explosionHitTargetAnimationFrames: explosionHitTargetAnimationSprites,
+		position:                          position,
+		offset:                            offset,
+		relativeRotation:                  0.0,
+		absoluteRotation:                  tank.Rotation,
+		slope:                             0.0,
+		tank:                              tank,
+		isFiring:                          false,
+		shootAge:                          0.0,
 	}
 }
 

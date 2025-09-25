@@ -94,6 +94,8 @@ func NewGame(serverAddress string) *Game {
 
 	g.players = append(g.players, NewPlayer(g))
 
+	g.playfield = NewPlayfield(g)
+
 	// add enemies one at a time so they don't overlap
 	for i := 0; i < numberOfEnemies; i++ {
 		g.enemies = append(g.enemies, NewEnemy(g, "hard"))
@@ -101,7 +103,6 @@ func NewGame(serverAddress string) *Game {
 		g.enemies = append(g.enemies, NewEnemy(g, "easy"))
 
 	}
-	g.playfield = NewPlayfield(g)
 
 	return g
 }
@@ -140,6 +141,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 		for _, p := range g.players {
 			p.Draw(screen)
+		}
+		// Draw bullet above all
+		for _, e := range g.enemies {
+			for _, bullet := range e.bullets {
+				bullet.Draw(screen)
+			}
+		}
+		for _, p := range g.players {
+			for _, bullet := range p.Bullets {
+				bullet.Draw(screen)
+			}
 		}
 	}
 

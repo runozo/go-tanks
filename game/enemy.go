@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -38,7 +37,7 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 	}
 
 	newPosition := Vector{
-		X: float64(rand.Intn(screenWidth / 2)),
+		X: float64(rand.Intn(screenWidth)),
 		Y: float64(rand.Intn(screenHeight - tileHeight)),
 	}
 
@@ -48,10 +47,9 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 	noneIntersect := true
 	for {
 		for _, e := range game.enemies {
-			if DoesIntersect(e.tank.Position, e.tank.bodySprite.Bounds(), newTank.Position, newTank.bodySprite.Bounds()) {
-				newPosition.X = float64(rand.Intn(screenWidth / 2))
+			if doesIntersect(e.tank.Position, e.tank.bodySprite.Bounds(), newTank.Position, newTank.bodySprite.Bounds()) {
+				newPosition.X = float64(rand.Intn(screenWidth))
 				newPosition.Y = float64(rand.Intn(screenHeight - tileHeight))
-				fmt.Println("new position", newPosition.Y, len(game.enemies))
 				noneIntersect = false
 				break
 			} else {
@@ -101,6 +99,14 @@ func (e *Enemy) Update(tps float64) {
 	var activeBullets []*Bullet
 	for _, bullet := range e.bullets {
 		bullet.Update(tps)
+		if bullet.exploding {
+			for _, p := range e.game.players {
+				if doesIntersect(bullet.position, bullet.sprite.Bounds(), p.Tank.Position, p.Tank.bodySprite.Bounds()) {
+					bullet.hasHitTarget = true
+					break
+				}
+			}
+		}
 		if !bullet.exploded {
 			activeBullets = append(activeBullets, bullet)
 		}
@@ -110,7 +116,4 @@ func (e *Enemy) Update(tps float64) {
 
 func (e *Enemy) Draw(screen *ebiten.Image) {
 	e.tank.Draw(screen)
-	for _, bullet := range e.bullets {
-		bullet.Draw(screen)
-	}
 }
