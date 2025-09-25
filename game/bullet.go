@@ -139,7 +139,7 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 		if b.hasHitTarget {
 			b.drawExplosionHitTarget(screen)
 		} else {
-			b.drawEsplosion(screen)
+			b.drawExplosion(screen)
 		}
 
 	}
@@ -162,7 +162,7 @@ func (b *Bullet) drawExplosionHitTarget(screen *ebiten.Image) {
 
 }
 
-func (b *Bullet) drawEsplosion(screen *ebiten.Image) {
+func (b *Bullet) drawExplosion(screen *ebiten.Image) {
 	if int(b.explosionElapsedTime) < len(b.explosionFrames) {
 		frame := b.explosionFrames[int(b.explosionElapsedTime)]
 		explosionHalfW := float64(frame.Bounds().Dx()) / 2
