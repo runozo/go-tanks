@@ -52,17 +52,14 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 				newPosition.Y = float64(rand.Intn(screenHeight - tileHeight))
 				noneIntersect = false
 				break
-			} else {
-				noneIntersect = true
 			}
+			noneIntersect = true
 		}
 
 		if noneIntersect {
 			break
-		} else {
-			newTank = NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0)
 		}
-
+		newTank = NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0)
 	}
 
 	return &Enemy{
