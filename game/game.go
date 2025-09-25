@@ -15,10 +15,11 @@ import (
 )
 
 const (
-	screenWidth    = 1960
-	screenHeight   = 1088
-	fontSizeMedium = 32
-	fontSizeSmall  = 22
+	screenWidth     = 1960
+	screenHeight    = 1088
+	fontSizeMedium  = 32
+	fontSizeSmall   = 22
+	numberOfEnemies = 5 // *3
 )
 
 //go:embed assets/*
@@ -94,7 +95,7 @@ func NewGame(serverAddress string) *Game {
 	g.players = append(g.players, NewPlayer(g))
 
 	// add enemies one at a time so they don't overlap
-	for i := 0; i < 30; i++ {
+	for i := 0; i < numberOfEnemies; i++ {
 		g.enemies = append(g.enemies, NewEnemy(g, "hard"))
 		g.enemies = append(g.enemies, NewEnemy(g, "medium"))
 		g.enemies = append(g.enemies, NewEnemy(g, "easy"))

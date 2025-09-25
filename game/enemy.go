@@ -37,27 +37,40 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 		"hard":   []string{"tankBody_huge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 	}
 
-	position := Vector{
+	newPosition := Vector{
 		X: float64(rand.Intn(screenWidth / 2)),
 		Y: float64(rand.Intn(screenHeight - tileHeight)),
 	}
 
+	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0)
+
 	// don't overlap position with other enemies
-	for _, e := range game.enemies {
-		for position.Y > e.tank.Position.Y-enemyOffset &&
-			position.Y < e.tank.Position.Y+e.tank.bodyHeight+enemyOffset &&
-			position.X > e.tank.Position.X-enemyOffset &&
-			position.X < e.tank.Position.X+e.tank.bodyWidth+enemyOffset {
-			position.X = float64(rand.Intn(screenWidth / 2))
-			position.Y = float64(rand.Intn(screenHeight - tileHeight))
-			fmt.Println("new position", position.Y, len(game.enemies))
+	noneIntersect := true
+	for {
+		for _, e := range game.enemies {
+			if DoesIntersect(e.tank.Position, e.tank.bodySprite.Bounds(), newTank.Position, newTank.bodySprite.Bounds()) {
+				newPosition.X = float64(rand.Intn(screenWidth / 2))
+				newPosition.Y = float64(rand.Intn(screenHeight - tileHeight))
+				fmt.Println("new position", newPosition.Y, len(game.enemies))
+				noneIntersect = false
+				break
+			} else {
+				noneIntersect = true
+			}
 		}
+
+		if noneIntersect {
+			break
+		} else {
+			newTank = NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0)
+		}
+
 	}
 
 	return &Enemy{
 		game:          game,
 		shootCooldown: NewTimer(time.Millisecond*2500 + time.Millisecond*time.Duration(rand.Intn(1000))),
-		tank:          NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], position, 0),
+		tank:          newTank,
 		bullets:       make([]*Bullet, 0),
 	}
 }
