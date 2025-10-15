@@ -37,9 +37,11 @@ func NewPlayer(game *Game) *Player {
 		Tank:          NewRandomTank(game, position, 0),
 		shootCooldown: NewTimer(shootCooldown),
 	}
+
 	if game.serverAddress != "" {
 		p.netClient = NewNetClient(game.serverAddress)
 	}
+
 	return p
 }
 

@@ -11,6 +11,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	b2 "github.com/oliverbestmann/box2d-go"
 	"github.com/runozo/go-wave-function-collapse/assets"
 )
 
@@ -40,6 +41,7 @@ type Game struct {
 	fontMedium    *text.GoTextFace
 	fontSmall     *text.GoTextFace
 	serverAddress string
+	world         *b2.World
 }
 
 func NewGame(serverAddress string) *Game {
@@ -54,7 +56,7 @@ func NewGame(serverAddress string) *Game {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ass := assets.NewAssets(
+	assets := assets.NewAssets(
 		spriteSheetData,
 		jsonData,
 	)
@@ -74,8 +76,13 @@ func NewGame(serverAddress string) *Game {
 		log.Fatal(err)
 	}
 
+	// box2d config
+	worldDef := b2.DefaultWorldDef()
+	worldDef.Gravity = b2.Vec2{X: 0, Y: 0}
+	b2world := b2.CreateWorld(worldDef)
+
 	g := &Game{
-		assets:    ass,
+		assets:    assets,
 		width:     screenWidth,
 		height:    screenHeight,
 		playfield: nil,
@@ -90,6 +97,7 @@ func NewGame(serverAddress string) *Game {
 			Size:      fontSizeSmall,
 		},
 		serverAddress: serverAddress,
+		world:         &b2world,
 	}
 
 	g.players = append(g.players, NewPlayer(g))
