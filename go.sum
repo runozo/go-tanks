@@ -16,6 +16,8 @@ github.com/hajimehoshi/ebiten/v2 v2.8.8 h1:xyMxOAn52T1tQ+j3vdieZ7auDBOXmvjUprSrx
 github.com/hajimehoshi/ebiten/v2 v2.8.8/go.mod h1:durJ05+OYnio9b8q0sEtOgaNeBEQG7Yr7lRviAciYbs=
 github.com/jezek/xgb v1.1.1 h1:bE/r8ZZtSv7l9gk6nU0mYx51aXrvnyb44892TwSaqS4=
 github.com/jezek/xgb v1.1.1/go.mod h1:nrhwO0FX/enq75I7Y7G8iN1ubpSGZEiA3v9e9GyRFlk=
+github.com/oliverbestmann/box2d-go v0.1.1 h1:co9A+JEfslgfmI7NfVAd2PnJxeiY3nFV39XtsV9KKQ4=
+github.com/oliverbestmann/box2d-go v0.1.1/go.mod h1:1fuzkQOCSnu18iHuruiJriNmrKsMEk9fEH3SJ7MHoic=
 github.com/pierrec/lz4/v4 v4.1.21 h1:yOVMLb6qSIDP67pl/5F7RepeKYu/VmTyEXvuMI5d9mQ=
 github.com/pierrec/lz4/v4 v4.1.21/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/runozo/go-wave-function-collapse v1.0.4 h1:KwfGPSwhLAK+t89hZFo5izioWznguw73KUjCQbOG9Ao=
