@@ -23,6 +23,7 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 
 	bodyDef := b2.DefaultBodyDef()
 	bodyDef.Position = b2.Vec2{X: float32(position.X), Y: float32(position.Y)}
+	bodyDef.Type1 = b2.DynamicBody
 	shape := b2.MakeBox(float32(bodySprite.Bounds().Dx())/2, float32(bodySprite.Bounds().Dy())/2)
 	body := game.world.CreateBody(bodyDef)
 	body.CreatePolygonShape(b2.DefaultShapeDef(), shape)

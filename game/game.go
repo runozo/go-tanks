@@ -133,6 +133,8 @@ func (g *Game) Update() error {
 		}
 	}
 
+	g.world.Step(float32(tps), 4)
+
 	return nil
 }
 

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	_ "image/png"
 	"math"
 	"time"
@@ -13,7 +14,7 @@ import (
 const (
 	shootCooldown     = time.Millisecond * 250
 	rotationPerSecond = math.Pi
-	tankSpeed         = 120.0
+	tankSpeed         = 0.03 // m/s
 	barrelMaxSlope    = math.Pi / 4
 )
 
@@ -49,7 +50,6 @@ func NewPlayer(game *Game) *Player {
 
 func (p *Player) Update(tps float64) {
 	rotationSpeed := rotationPerSecond / tps
-	movementSpeed := tankSpeed / tps
 	slopeSpeed := barrelMaxSlope / tps
 	p.shootCooldown.Update()
 
@@ -75,17 +75,21 @@ func (p *Player) Update(tps float64) {
 	}
 
 	// move
+	// speed is box2d units so meters/second
 	movementX := 0.0
 	movementY := 0.0
+
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		movementX += math.Sin(p.Tank.Rotation) * movementSpeed
-		movementY -= math.Cos(p.Tank.Rotation) * movementSpeed
+		movementX += math.Sin(p.Tank.Rotation) * tankSpeed
+		movementY -= math.Cos(p.Tank.Rotation) * tankSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		movementX -= math.Sin(p.Tank.Rotation) * movementSpeed
-		movementY += math.Cos(p.Tank.Rotation) * movementSpeed
+		movementX -= math.Sin(p.Tank.Rotation) * tankSpeed
+		movementY += math.Cos(p.Tank.Rotation) * tankSpeed
 	}
+
 	p.Tank.tankBody.SetLinearVelocity(b2.Vec2{X: float32(movementX), Y: float32(movementY)})
+	fmt.Println("Linear velocity:", float32(movementX), float32(movementY), movementX, movementY, p.Tank.tankBody.GetLinearVelocity())
 
 	// charge shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
