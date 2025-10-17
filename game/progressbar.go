@@ -6,28 +6,29 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	b2 "github.com/oliverbestmann/box2d-go"
 )
 
 type ProgressBar struct {
 	Width       int
 	Height      int
-	Position    Vector
+	Position    b2.Vec2
 	Percent     float64
 	BorderWidth int
 	Font        *text.GoTextFace
 	Text        string
-	txtPos      Vector
+	txtPos      b2.Vec2
 }
 
 const (
 	barBorderWidth = 4
 )
 
-func NewProgressBar(width, height int, str string, position Vector, font *text.GoTextFace) *ProgressBar {
+func NewProgressBar(width, height int, str string, position b2.Vec2, font *text.GoTextFace) *ProgressBar {
 	txtwidth, txtheight := text.Measure(str+" 100%", font, 0)
 
-	x := position.X + float64(width)/2 - txtwidth/2
-	y := position.Y + float64(height)/2 - txtheight/2
+	x := position.X + float32(width)/2 - float32(txtwidth)/2
+	y := position.Y + float32(height)/2 - float32(txtheight)/2
 
 	return &ProgressBar{
 		Width:       width,
@@ -37,7 +38,7 @@ func NewProgressBar(width, height int, str string, position Vector, font *text.G
 		BorderWidth: barBorderWidth,
 		Font:        font,
 		Text:        str,
-		txtPos: Vector{
+		txtPos: b2.Vec2{
 			X: x,
 			Y: y,
 		},
@@ -52,7 +53,7 @@ func (p *ProgressBar) Draw(screen *ebiten.Image) {
 	backgroundImage := ebiten.NewImage(p.Width, p.Height) // default image is black
 	backgroundImage.Fill(color.RGBA{R: 0, A: 128})        // dark gray
 	opBackground := &ebiten.DrawImageOptions{}
-	opBackground.GeoM.Translate(p.Position.X, p.Position.Y)
+	opBackground.GeoM.Translate(float64(p.Position.X), float64(p.Position.Y))
 	screen.DrawImage(backgroundImage, opBackground)
 
 	barWidth := int(float64(p.Width) * p.Percent / 100)
@@ -63,12 +64,12 @@ func (p *ProgressBar) Draw(screen *ebiten.Image) {
 	barImage := ebiten.NewImage(barWidth-p.BorderWidth*2, p.Height-p.BorderWidth*2)
 	barImage.Fill(color.RGBA{B: 255, A: 255}) // red
 	opBar := &ebiten.DrawImageOptions{}
-	opBar.GeoM.Translate(p.Position.X+float64(p.BorderWidth), p.Position.Y+float64(p.BorderWidth))
+	opBar.GeoM.Translate(float64(p.Position.X)+float64(p.BorderWidth), float64(p.Position.Y)+float64(p.BorderWidth))
 	screen.DrawImage(barImage, opBar)
 
 	if p.Text != "" {
 		op := &text.DrawOptions{}
-		op.GeoM.Translate(p.txtPos.X, p.txtPos.Y)
+		op.GeoM.Translate(float64(p.txtPos.X), float64(p.txtPos.Y))
 		op.ColorScale.ScaleWithColor(color.RGBA{R: 255, A: 255}) // red
 		text.Draw(screen, fmt.Sprintf("%s %d%%", p.Text, int(p.Percent)), p.Font, op)
 	}

@@ -4,6 +4,7 @@ import (
 	_ "image/png"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	b2 "github.com/oliverbestmann/box2d-go"
 	"github.com/runozo/go-wave-function-collapse/assets"
 	"github.com/runozo/go-wave-function-collapse/wfc"
 )
@@ -40,7 +41,7 @@ func NewPlayfield(game *Game) *Playfield {
 
 		wfc:         wfc.NewWfc(screenWidth/tileWidth+1, screenHeight/tileHeight+1, game.assets.TileEntries),
 		assets:      game.assets,
-		progressBar: NewProgressBar(400, 36, "Generating playfield", Vector{X: (screenWidth - 400) / 2, Y: (screenHeight - 36) / 2}, game.fontSmall),
+		progressBar: NewProgressBar(400, 36, "Generating playfield", b2.Vec2{X: (screenWidth - 400) / 2, Y: (screenHeight - 36) / 2}, game.fontSmall),
 		numOfTilesX: tilesX,
 		numOfTilesY: tilesY,
 	}

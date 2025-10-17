@@ -27,7 +27,9 @@ func main() {
 
 	g := game.NewGame(*serveraddress)
 	ebiten.SetFullscreen(true)
-	err := ebiten.RunGame(g)
+	ops := ebiten.RunGameOptions{}
+	ops.SingleThread = true
+	err := ebiten.RunGameWithOptions(g, &ops)
 	if err != nil {
 		panic(err)
 	}

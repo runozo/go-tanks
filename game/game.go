@@ -20,16 +20,11 @@ const (
 	screenHeight    = 1088
 	fontSizeMedium  = 32
 	fontSizeSmall   = 22
-	numberOfEnemies = 5 // *3
+	numberOfEnemies = 5 // triple of enemies
 )
 
 //go:embed assets/*
 var assetsFS embed.FS
-
-type Vector struct {
-	X float64
-	Y float64
-}
 
 type Game struct {
 	width         int
@@ -41,7 +36,7 @@ type Game struct {
 	fontMedium    *text.GoTextFace
 	fontSmall     *text.GoTextFace
 	serverAddress string
-	world         *b2.World
+	world         b2.World
 }
 
 func NewGame(serverAddress string) *Game {
@@ -97,7 +92,7 @@ func NewGame(serverAddress string) *Game {
 			Size:      fontSizeSmall,
 		},
 		serverAddress: serverAddress,
-		world:         &b2world,
+		world:         b2world,
 	}
 
 	g.players = append(g.players, NewPlayer(g))

@@ -1,13 +1,13 @@
 package game
 
 import (
-	"encoding/binary"
 	_ "image/png"
 	"math"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	b2 "github.com/oliverbestmann/box2d-go"
 )
 
 const (
@@ -27,14 +27,16 @@ type Player struct {
 
 func NewPlayer(game *Game) *Player {
 
-	position := Vector{
+	position := b2.Vec2{
 		X: screenWidth/2 + screenWidth/4,
 		Y: screenHeight / 2,
 	}
 
+	newTank := NewRandomTank(game, position, 0)
+
 	p := &Player{
 		game:          game,
-		Tank:          NewRandomTank(game, position, 0),
+		Tank:          newTank,
 		shootCooldown: NewTimer(shootCooldown),
 	}
 
@@ -83,8 +85,7 @@ func (p *Player) Update(tps float64) {
 		movementX -= math.Sin(p.Tank.Rotation) * movementSpeed
 		movementY += math.Cos(p.Tank.Rotation) * movementSpeed
 	}
-	p.Tank.Position.X += movementX
-	p.Tank.Position.Y += movementY
+	p.Tank.tankBody.SetLinearVelocity(b2.Vec2{X: float32(movementX), Y: float32(movementY)})
 
 	// charge shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
@@ -118,7 +119,7 @@ func (p *Player) Update(tps float64) {
 
 	// new tank
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		p.Tank = NewRandomTank(p.game, p.Tank.Position, p.Tank.Rotation)
+		p.Tank = NewRandomTank(p.game, p.Tank.tankBody.GetPosition(), p.Tank.Rotation)
 	}
 
 	// update tank(s)
@@ -134,12 +135,12 @@ func (p *Player) Update(tps float64) {
 	}
 	p.Bullets = activeBullets
 
-	// send data to server
-	if p.netClient != nil {
-		buf := make([]byte, 8) // float64 is 8 bytes long
-		binary.LittleEndian.PutUint64(buf, math.Float64bits(p.Tank.Position.X))
-		p.netClient.SendData(buf)
-	}
+	// // send data to server
+	// if p.netClient != nil {
+	// 	buf := make([]byte, 8) // float64 is 8 bytes long
+	// 	binary.LittleEndian.PutUint64(buf, math.Float64bits(p.Tank.Position.X))
+	// 	p.netClient.SendData(buf)
+	// }
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {

@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	b2 "github.com/oliverbestmann/box2d-go"
 )
 
 const (
@@ -16,15 +17,15 @@ const (
 )
 
 type Bullet struct {
-	position                   Vector
+	position                   b2.Vec2
 	sprite                     *ebiten.Image
 	verticalSpeed, altitude    float64
 	currentSlope, initialSlope float64
 	rotation, scale            float64
 	elapsedTime                float64
-	spriteWidth, spriteHeight  float64
-	barrelWidth                float64
-	barrelHeight               float64
+	spriteWidth, spriteHeight  float32
+	barrelWidth                float32
+	barrelHeight               float32
 	explosionElapsedTime       float64
 	explosionFrames            []*ebiten.Image
 	explosionHitTargetFrames   []*ebiten.Image
@@ -36,10 +37,10 @@ type Bullet struct {
 
 func NewBullet(game *Game, barrel *Barrel) *Bullet {
 	bulletSprite := barrel.bulletSprite
-	bulletSpriteWidth := float64(bulletSprite.Bounds().Dx())
-	bulletSpriteHeight := float64(bulletSprite.Bounds().Dy())
+	bulletSpriteWidth := float32(bulletSprite.Bounds().Dx())
+	bulletSpriteHeight := float32(bulletSprite.Bounds().Dy())
 
-	position := Vector{
+	position := b2.Vec2{
 		X: barrel.position.X + barrel.spriteWidth/2 - bulletSpriteWidth/2,
 		Y: barrel.position.Y - bulletSpriteHeight,
 	}
@@ -77,8 +78,8 @@ func (b *Bullet) Update(tps float64) {
 	b.elapsedTime += dt
 
 	if b.altitude >= initialAltitude {
-		b.position.X += sinRot * bulletSpeed
-		b.position.Y -= cosRot * bulletSpeed
+		b.position.X += float32(sinRot * bulletSpeed)
+		b.position.Y -= float32(cosRot * bulletSpeed)
 
 		gravityEffect := 0.5 * gravity * dt * dt
 		b.altitude += b.verticalSpeed*dt - gravityEffect
@@ -92,22 +93,8 @@ func (b *Bullet) Update(tps float64) {
 		b.exploding = true
 	}
 
+	// TODO: check collision with players
 	if b.exploding {
-		// check collision with players
-		for _, p := range b.game.players {
-			if doesIntersect(b.position, b.sprite.Bounds(), p.Tank.Position, p.Tank.bodySprite.Bounds()) {
-				b.hasHitTarget = true
-				break
-			}
-		}
-		// check collision with enemies
-		for _, e := range b.game.enemies {
-			if doesIntersect(b.position, b.sprite.Bounds(), e.tank.Position, e.tank.bodySprite.Bounds()) {
-				b.hasHitTarget = true
-				break
-			}
-		}
-
 		b.explosionElapsedTime += dt * float64(len(b.explosionHitTargetFrames))
 	}
 }
@@ -123,17 +110,17 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 
 		// center the bullet than scale
-		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
+		op.GeoM.Translate(float64(-bulletHalfW), float64(-bulletHalfH))
 		op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*scaleCoeff) // simulate bullet deflection (poorly)
-		op.GeoM.Translate(bulletHalfW, bulletHalfH)
+		op.GeoM.Translate(float64(bulletHalfW), float64(bulletHalfH))
 
 		// center the bullet and the barrel than rotate
-		op.GeoM.Translate(-bulletHalfW, -bulletAndBarrellHeight)
+		op.GeoM.Translate(float64(-bulletHalfW), float64(-bulletAndBarrellHeight))
 		op.GeoM.Rotate(b.rotation)
-		op.GeoM.Translate(bulletHalfW, bulletAndBarrellHeight)
+		op.GeoM.Translate(float64(bulletHalfW), float64(bulletAndBarrellHeight))
 
 		// true position of the bullet to draw
-		op.GeoM.Translate(b.position.X, b.position.Y)
+		op.GeoM.Translate(float64(b.position.X), float64(b.position.Y))
 		screen.DrawImage(b.sprite, op)
 	} else {
 		if b.hasHitTarget {
@@ -149,7 +136,7 @@ func (b *Bullet) drawExplosionHitTarget(screen *ebiten.Image) {
 	if int(b.explosionElapsedTime) < len(b.explosionHitTargetFrames) {
 		frame := b.explosionHitTargetFrames[int(b.explosionElapsedTime)]
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(b.position.X, b.position.Y)
+		op.GeoM.Translate(float64(b.position.X), float64(b.position.Y))
 		screen.DrawImage(frame, op)
 	} else {
 		b.exploded = true
@@ -161,7 +148,7 @@ func (b *Bullet) drawExplosion(screen *ebiten.Image) {
 	if int(b.explosionElapsedTime) < len(b.explosionFrames) {
 		frame := b.explosionFrames[int(b.explosionElapsedTime)]
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(b.position.X, b.position.Y)
+		op.GeoM.Translate(float64(b.position.X), float64(b.position.Y))
 		screen.DrawImage(frame, op)
 	} else {
 		b.exploded = true

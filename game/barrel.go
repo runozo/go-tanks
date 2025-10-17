@@ -4,18 +4,19 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	b2 "github.com/oliverbestmann/box2d-go"
 )
 
 type Barrel struct {
 	sprite                            *ebiten.Image
-	spriteWidth                       float64
-	spriteHeight                      float64
+	spriteWidth                       float32
+	spriteHeight                      float32
 	bulletSprite                      *ebiten.Image
 	shootAnimationFrames              []*ebiten.Image
 	explosionAnimationFrames          []*ebiten.Image
 	explosionHitTargetAnimationFrames []*ebiten.Image
-	position                          Vector
-	offset                            Vector
+	position                          b2.Vec2
+	offset                            b2.Vec2
 	relativeRotation                  float64
 	absoluteRotation                  float64
 	slope                             float64
@@ -25,7 +26,7 @@ type Barrel struct {
 	game                              *Game
 }
 
-func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offset Vector) *Barrel {
+func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offset b2.Vec2) *Barrel {
 	sprite := game.assets.GetSprite(spriteName)
 
 	if spriteName == "specialBarrel1_outline" {
@@ -34,12 +35,13 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 
 	bulletSprite := game.assets.GetSprite(bulletSpriteName)
 
-	spriteWidth := float64(sprite.Bounds().Dx())
-	spriteHeight := float64(sprite.Bounds().Dy())
+	spriteWidth := float32(sprite.Bounds().Dx())
+	spriteHeight := float32(sprite.Bounds().Dy())
 
-	position := Vector{
-		X: tank.Position.X + offset.X - spriteWidth/2, // tank.bodyWidth/2 - spriteWidth/2,
-		Y: tank.Position.Y + offset.Y - spriteHeight,  // tank.bodyHeight/2 - spriteHeight,
+	pos := tank.tankBody.GetPosition()
+	position := b2.Vec2{
+		X: pos.X + offset.X - spriteWidth/2, // tank.bodyWidth/2 - spriteWidth/2,
+		Y: pos.Y + offset.Y - spriteHeight,  // tank.bodyHeight/2 - spriteHeight,
 	}
 
 	shootAnimationSprites := []*ebiten.Image{
@@ -95,10 +97,14 @@ func (b *Barrel) Fire() *Bullet {
 
 func (b *Barrel) Update(tps float64) {
 	b.absoluteRotation = b.tank.Rotation + b.relativeRotation
-	position := Vector{
-		X: b.tank.Position.X + b.offset.X - b.spriteWidth/2,
-		Y: b.tank.Position.Y + b.offset.Y - b.spriteHeight,
+
+	pos := b.tank.tankBody.GetPosition()
+
+	position := b2.Vec2{
+		X: pos.X + b.offset.X - b.spriteWidth/2,
+		Y: pos.Y + b.offset.Y - b.spriteHeight,
 	}
+
 	b.position = position
 	if b.isFiring {
 		b.shootAge += 1 / tps * 20
@@ -112,10 +118,10 @@ func (b *Barrel) Update(tps float64) {
 func (b *Barrel) Draw(screen *ebiten.Image) {
 	// barrel
 	op_barrel := &ebiten.DrawImageOptions{}
-	op_barrel.GeoM.Translate(-b.spriteWidth/2, -b.spriteHeight)
+	op_barrel.GeoM.Translate(float64(-b.spriteWidth/2), float64(-b.spriteHeight))
 	op_barrel.GeoM.Rotate(b.absoluteRotation)
-	op_barrel.GeoM.Translate(b.spriteWidth/2, b.spriteHeight)
-	op_barrel.GeoM.Translate(b.position.X, b.position.Y)
+	op_barrel.GeoM.Translate(float64(b.spriteWidth/2), float64(b.spriteHeight))
+	op_barrel.GeoM.Translate(float64(b.position.X), float64(b.position.Y))
 	screen.DrawImage(b.sprite, op_barrel)
 
 	// barrel shoot animation
@@ -124,7 +130,7 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 		shootHalfW := float64(shootFrame.Bounds().Dx()) / 2
 		shootFrameHeight := float64(shootFrame.Bounds().Dy())
 		shootHalfH := shootFrameHeight / 2
-		shootAndBarrellheight := b.spriteHeight + shootFrameHeight
+		shootAndBarrellheight := float64(b.spriteHeight) + shootFrameHeight
 		op_shoot := &ebiten.DrawImageOptions{}
 
 		// first reverse the frame alone
@@ -136,7 +142,7 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 		op_shoot.GeoM.Translate(-shootHalfW, -shootAndBarrellheight)
 		op_shoot.GeoM.Rotate(b.absoluteRotation)
 		op_shoot.GeoM.Translate(shootHalfW, shootAndBarrellheight)
-		op_shoot.GeoM.Translate(b.position.X+b.spriteWidth/2-shootHalfW, b.position.Y-shootFrameHeight)
+		op_shoot.GeoM.Translate(float64(b.position.X+b.spriteWidth/2-float32(shootHalfW)), float64(b.position.Y)-shootFrameHeight)
 		screen.DrawImage(shootFrame, op_shoot)
 	}
 

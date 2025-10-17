@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	b2 "github.com/oliverbestmann/box2d-go"
 )
 
 const (
@@ -36,31 +37,14 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 		"hard":   []string{"tankBody_huge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 	}
 
-	newPosition := Vector{
-		X: float64(rand.Intn(screenWidth)),
-		Y: float64(rand.Intn(screenHeight - tileHeight)),
+	newPosition := b2.Vec2{
+		X: float32(rand.Intn(screenWidth)),
+		Y: float32(rand.Intn(screenHeight - tileHeight)),
 	}
 
 	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0)
 
-	// don't overlap position with other enemies
-	noneIntersect := true
-	for {
-		for _, e := range game.enemies {
-			if doesIntersect(e.tank.Position, e.tank.bodySprite.Bounds(), newTank.Position, newTank.bodySprite.Bounds()) {
-				newPosition.X = float64(rand.Intn(screenWidth))
-				newPosition.Y = float64(rand.Intn(screenHeight - tileHeight))
-				noneIntersect = false
-				break
-			}
-			noneIntersect = true
-		}
-
-		if noneIntersect {
-			break
-		}
-		newTank = NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0)
-	}
+	// TODO: don't overlap position with other enemies
 
 	return &Enemy{
 		game:          game,
@@ -71,10 +55,11 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 }
 
 func (e *Enemy) Update(tps float64) {
-	playerPosition := e.game.players[0].Tank.Position
+	playerPosition := e.game.players[0].Tank.tankBody.GetPosition()
 
 	for i := 0; i < len(e.tank.barrels); i++ {
-		e.tank.barrels[i].relativeRotation = math.Atan2(playerPosition.Y-e.tank.Position.Y, playerPosition.X-e.tank.Position.X) + math.Pi/2
+		pos := e.tank.barrels[i].tank.tankBody.GetPosition()
+		e.tank.barrels[i].relativeRotation = math.Atan2(float64(playerPosition.Y-pos.Y), float64(playerPosition.X-pos.X)) + math.Pi/2
 	}
 
 	// fires randomly
