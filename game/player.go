@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	shootCooldown     = time.Millisecond * 250
-	rotationPerSecond = math.Pi
-	tankSpeed         = 0.03 // m/s
-	barrelMaxSlope    = math.Pi / 4
+	shootCooldown            = time.Millisecond * 250
+	rotationRadiansPerSecond = 1.0 / 2.0 * math.Pi / 1000 // rad/s
+	tankSpeed                = 0.03                       // m/s
+	barrelMaxSlope           = math.Pi / 4
 )
 
 type Player struct {
@@ -33,7 +33,7 @@ func NewPlayer(game *Game) *Player {
 		Y: screenHeight / 2,
 	}
 
-	newTank := NewRandomTank(game, position, 0)
+	newTank := NewRandomTank(game, position, 0.0)
 
 	p := &Player{
 		game:          game,
@@ -49,28 +49,27 @@ func NewPlayer(game *Game) *Player {
 }
 
 func (p *Player) Update(tps float64) {
-	rotationSpeed := rotationPerSecond / tps
 	slopeSpeed := barrelMaxSlope / tps
 	p.shootCooldown.Update()
 
 	// rotate tank
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		p.Tank.Rotation -= rotationSpeed
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		p.Tank.Rotation += rotationSpeed
+		p.Tank.tankBody.SetAngularVelocity(-rotationRadiansPerSecond)
+	} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		p.Tank.tankBody.SetAngularVelocity(rotationRadiansPerSecond)
+	} else {
+		p.Tank.tankBody.SetAngularVelocity(0)
 	}
 
 	// rotate barrel
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		for i := 0; i < len(p.Tank.barrels); i++ {
-			p.Tank.barrels[i].relativeRotation -= rotationSpeed
+			p.Tank.barrels[i].relativeRotation -= rotationRadiansPerSecond
 		}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
 		for i := 0; i < len(p.Tank.barrels); i++ {
-			p.Tank.barrels[i].relativeRotation += rotationSpeed
+			p.Tank.barrels[i].relativeRotation += rotationRadiansPerSecond
 		}
 	}
 
@@ -79,13 +78,15 @@ func (p *Player) Update(tps float64) {
 	movementX := 0.0
 	movementY := 0.0
 
+	rot := float64(p.Tank.tankBody.GetRotation().Angle())
+
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		movementX += math.Sin(p.Tank.Rotation) * tankSpeed
-		movementY -= math.Cos(p.Tank.Rotation) * tankSpeed
+		movementX += math.Sin(rot) * tankSpeed
+		movementY -= math.Cos(rot) * tankSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		movementX -= math.Sin(p.Tank.Rotation) * tankSpeed
-		movementY += math.Cos(p.Tank.Rotation) * tankSpeed
+		movementX -= math.Sin(rot) * tankSpeed
+		movementY += math.Cos(rot) * tankSpeed
 	}
 
 	p.Tank.tankBody.SetLinearVelocity(b2.Vec2{X: float32(movementX), Y: float32(movementY)})
@@ -123,7 +124,7 @@ func (p *Player) Update(tps float64) {
 
 	// new tank
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		p.Tank = NewRandomTank(p.game, p.Tank.tankBody.GetPosition(), p.Tank.Rotation)
+		p.Tank = NewRandomTank(p.game, p.Tank.tankBody.GetPosition(), p.Tank.tankBody.GetRotation().Angle())
 	}
 
 	// update tank(s)

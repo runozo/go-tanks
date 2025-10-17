@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -14,15 +15,16 @@ type Tank struct {
 	barrels    []*Barrel
 	bodyWidth  float32
 	bodyHeight float32
-	Rotation   float64
 }
 
-func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position b2.Vec2, rotation float64) *Tank {
+func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position b2.Vec2, rotation float32) *Tank {
 
 	bodySprite := game.assets.GetSprite(bodySpriteName)
 
 	bodyDef := b2.DefaultBodyDef()
 	bodyDef.Position = b2.Vec2{X: float32(position.X), Y: float32(position.Y)}
+	rot := b2.Rot{C: float32(math.Cos(float64(rotation))), S: float32(math.Sin(float64(rotation)))}
+	bodyDef.Rotation = rot
 	bodyDef.Type1 = b2.DynamicBody
 	shape := b2.MakeBox(float32(bodySprite.Bounds().Dx())/2, float32(bodySprite.Bounds().Dy())/2)
 	body := game.world.CreateBody(bodyDef)
@@ -32,7 +34,6 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 		bodySprite: bodySprite,
 		bodyWidth:  float32(bodySprite.Bounds().Dx()),
 		bodyHeight: float32(bodySprite.Bounds().Dy()),
-		Rotation:   rotation,
 		barrels:    make([]*Barrel, 0),
 		tankBody:   body,
 	}
@@ -52,7 +53,7 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 	return tank
 }
 
-func NewRandomTank(game *Game, position b2.Vec2, rotation float64) *Tank {
+func NewRandomTank(game *Game, position b2.Vec2, rotation float32) *Tank {
 	bodies := []string{"tankBody_red_outline", "tankBody_blue_outline", "tankBody_dark_outline", "tankBody_green_outline", "tankBody_dark_outline", "tankBody_green_outline", "tankBody_sand_outline"}
 	barrels := []string{"tankDark_barrel1_outline", "tankDark_barrel2_outline", "tankDark_barrel3_outline", "tankGreen_barrel1", "tankGreen_barrel1_outline", "tankGreen_barrel2", "tankGreen_barrel2_outline", "tankGreen_barrel3", "tankGreen_barrel3_outline", "tankRed_barrel1", "tankRed_barrel1_outline", "tankRed_barrel2_outline", "tankRed_barrel3_outline", "tankSand_barrel2_outline", "tankSand_barrel3_outline"}
 	bullets := []string{"bulletSand3_outline", "bulletGreen3_outline", "bulletBlue3_outline"}
@@ -85,13 +86,14 @@ func (t *Tank) Draw(screen *ebiten.Image) {
 	// Draw the tank
 
 	// body
+	pos := t.tankBody.GetPosition()
+	rot := t.tankBody.GetRotation()
 	bodyHalfW := t.bodyWidth / 2
 	bodyHalfH := t.bodyHeight / 2
 	op_body := &ebiten.DrawImageOptions{}
 	op_body.GeoM.Translate(float64(-bodyHalfW), float64(-bodyHalfH))
-	op_body.GeoM.Rotate(t.Rotation)
+	op_body.GeoM.Rotate(float64(rot.Angle()))
 	op_body.GeoM.Translate(float64(bodyHalfW), float64(bodyHalfH))
-	pos := t.tankBody.GetPosition()
 	op_body.GeoM.Translate(float64(pos.X), float64(pos.Y))
 
 	screen.DrawImage(t.bodySprite, op_body)

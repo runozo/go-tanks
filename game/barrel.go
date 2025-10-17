@@ -80,7 +80,7 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 		position:                          position,
 		offset:                            offset,
 		relativeRotation:                  0.0,
-		absoluteRotation:                  tank.Rotation,
+		absoluteRotation:                  float64(tank.tankBody.GetRotation().Angle()),
 		slope:                             0.0,
 		tank:                              tank,
 		isFiring:                          false,
@@ -96,7 +96,7 @@ func (b *Barrel) Fire() *Bullet {
 }
 
 func (b *Barrel) Update(tps float64) {
-	b.absoluteRotation = b.tank.Rotation + b.relativeRotation
+	b.absoluteRotation = float64(b.tank.tankBody.GetRotation().Angle()) + b.relativeRotation
 
 	pos := b.tank.tankBody.GetPosition()
 
