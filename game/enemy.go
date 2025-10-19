@@ -42,7 +42,8 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 		Y: float32(rand.Intn(screenHeight - tileHeight)),
 	}
 
-	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0.0)
+	randomRotation := rand.Float32() * 2 * math.Pi
+	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, randomRotation)
 
 	// TODO: don't overlap position with other enemies
 
