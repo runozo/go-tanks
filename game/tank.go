@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -13,27 +12,30 @@ type Tank struct {
 	tankBody   b2.Body
 	bodySprite *ebiten.Image
 	barrels    []*Barrel
-	bodyWidth  float32
-	bodyHeight float32
+	bodyWidth  float64
+	bodyHeight float64
 }
 
-func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position b2.Vec2, rotation float32) *Tank {
+func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position b2.Vec2, rotation float64) *Tank {
 
 	bodySprite := game.assets.GetSprite(bodySpriteName)
 
+	// create box2d body
 	bodyDef := b2.DefaultBodyDef()
-	bodyDef.Position = b2.Vec2{X: float32(position.X), Y: float32(position.Y)}
-	rot := b2.Rot{C: float32(math.Cos(float64(rotation))), S: float32(math.Sin(float64(rotation)))}
-	bodyDef.Rotation = rot
+	bodyDef.Position = position
+
+	b2CosSin := b2.ComputeCosSin(float32(rotation))
+	bodyDef.Rotation = b2.Rot{C: b2CosSin.Cosine, S: b2CosSin.Sine}
 	bodyDef.Type1 = b2.DynamicBody
 	shape := b2.MakeBox(float32(bodySprite.Bounds().Dx())/2, float32(bodySprite.Bounds().Dy())/2)
 	body := game.world.CreateBody(bodyDef)
+	// attach shape for collisions
 	body.CreatePolygonShape(b2.DefaultShapeDef(), shape)
 
 	tank := &Tank{
 		bodySprite: bodySprite,
-		bodyWidth:  float32(bodySprite.Bounds().Dx()),
-		bodyHeight: float32(bodySprite.Bounds().Dy()),
+		bodyWidth:  float64(bodySprite.Bounds().Dx()),
+		bodyHeight: float64(bodySprite.Bounds().Dy()),
 		barrels:    make([]*Barrel, 0),
 		tankBody:   body,
 	}
@@ -41,19 +43,19 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 	if bodySpriteName == "tankBody_huge_outline" {
 		// this bodies have 2 barrels each
 		tank.barrels = []*Barrel{
-			NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, b2.Vec2{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 4}),
-			NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, b2.Vec2{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 4 * 3}),
+			NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, b2.Vec2{X: float32(tank.bodyWidth / 2.0), Y: float32(tank.bodyHeight / 4.0)}),
+			NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, b2.Vec2{X: float32(tank.bodyWidth / 2.0), Y: float32(tank.bodyHeight / 4.0 * 3.0)}),
 		}
 	} else {
 		tank.barrels = []*Barrel{
-			NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, b2.Vec2{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 2}),
+			NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, b2.Vec2{X: float32(tank.bodyWidth / 2.0), Y: float32(tank.bodyHeight / 2.0)}),
 		}
 	}
 
 	return tank
 }
 
-func NewRandomTank(game *Game, position b2.Vec2, rotation float32) *Tank {
+func NewRandomTank(game *Game, position b2.Vec2, rotation float64) *Tank {
 	bodies := []string{"tankBody_red_outline", "tankBody_blue_outline", "tankBody_dark_outline", "tankBody_green_outline", "tankBody_dark_outline", "tankBody_green_outline", "tankBody_sand_outline"}
 	barrels := []string{"tankDark_barrel1_outline", "tankDark_barrel2_outline", "tankDark_barrel3_outline", "tankGreen_barrel1", "tankGreen_barrel1_outline", "tankGreen_barrel2", "tankGreen_barrel2_outline", "tankGreen_barrel3", "tankGreen_barrel3_outline", "tankRed_barrel1", "tankRed_barrel1_outline", "tankRed_barrel2_outline", "tankRed_barrel3_outline", "tankSand_barrel2_outline", "tankSand_barrel3_outline"}
 	bullets := []string{"bulletSand3_outline", "bulletGreen3_outline", "bulletBlue3_outline"}
@@ -68,11 +70,12 @@ func NewRandomTank(game *Game, position b2.Vec2, rotation float32) *Tank {
 }
 
 func (t *Tank) Fire() []*Bullet {
-	// Fire all the barrels
 	bullets := make([]*Bullet, len(t.barrels))
+
 	for b := 0; b < len(t.barrels); b++ {
 		bullets[b] = t.barrels[b].Fire()
 	}
+
 	return bullets
 }
 
@@ -87,13 +90,12 @@ func (t *Tank) Draw(screen *ebiten.Image) {
 
 	// body
 	pos := t.tankBody.GetPosition()
-	rot := t.tankBody.GetRotation()
-	bodyHalfW := t.bodyWidth / 2
-	bodyHalfH := t.bodyHeight / 2
+	bodyHalfW := t.bodyWidth / 2.0
+	bodyHalfH := t.bodyHeight / 2.0
 	op_body := &ebiten.DrawImageOptions{}
-	op_body.GeoM.Translate(float64(-bodyHalfW), float64(-bodyHalfH))
-	op_body.GeoM.Rotate(float64(rot.Angle()))
-	op_body.GeoM.Translate(float64(bodyHalfW), float64(bodyHalfH))
+	op_body.GeoM.Translate(-bodyHalfW, -bodyHalfH)
+	op_body.GeoM.Rotate(float64(t.tankBody.GetRotation().Angle()))
+	op_body.GeoM.Translate(bodyHalfW, bodyHalfH)
 	op_body.GeoM.Translate(float64(pos.X), float64(pos.Y))
 
 	screen.DrawImage(t.bodySprite, op_body)

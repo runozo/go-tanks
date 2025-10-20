@@ -42,8 +42,8 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 		Y: float32(rand.Intn(screenHeight - tileHeight)),
 	}
 
-	randomRotation := rand.Float32() * 2 * math.Pi
-	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, randomRotation)
+	// randomRotation := rand.Float64() * 2 * math.Pi
+	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0.0)
 
 	// TODO: don't overlap position with other enemies
 
@@ -60,7 +60,7 @@ func (e *Enemy) Update(tps float64) {
 
 	for i := 0; i < len(e.tank.barrels); i++ {
 		pos := e.tank.barrels[i].tank.tankBody.GetPosition()
-		e.tank.barrels[i].relativeRotation = math.Atan2(float64(playerPosition.Y-pos.Y), float64(playerPosition.X-pos.X)) + math.Pi/2
+		e.tank.barrels[i].relativeRotation = math.Atan2(float64(playerPosition.Y-pos.Y), float64(playerPosition.X-pos.X)) + math.Pi/2.0
 	}
 
 	// fires randomly

@@ -127,7 +127,7 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 	// barrel shoot animation
 	if b.isFiring {
 		shootFrame := b.shootAnimationFrames[int(b.shootAge)%len(b.shootAnimationFrames)]
-		shootHalfW := float64(shootFrame.Bounds().Dx()) / 2
+		shootHalfW := float64(shootFrame.Bounds().Dx() / 2.0)
 		shootFrameHeight := float64(shootFrame.Bounds().Dy())
 		shootHalfH := shootFrameHeight / 2
 		shootAndBarrellheight := float64(b.spriteHeight) + shootFrameHeight

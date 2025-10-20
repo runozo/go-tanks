@@ -13,7 +13,7 @@ import (
 
 const (
 	shootCooldown            = time.Millisecond * 250
-	rotationRadiansPerSecond = 1.0 / 2.0 * math.Pi / 1000 // rad/s
+	rotationRadiansPerSecond = 1.0 / 2.0 * math.Pi / 3000 // rad/s
 	tankSpeed                = 0.03                       // m/s
 	barrelMaxSlope           = math.Pi / 4
 )
@@ -41,6 +41,7 @@ func NewPlayer(game *Game) *Player {
 		shootCooldown: NewTimer(shootCooldown),
 	}
 
+	// TODO
 	if game.serverAddress != "" {
 		p.netClient = NewNetClient(game.serverAddress)
 	}
@@ -124,7 +125,7 @@ func (p *Player) Update(tps float64) {
 
 	// new tank
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		p.Tank = NewRandomTank(p.game, p.Tank.tankBody.GetPosition(), p.Tank.tankBody.GetRotation().Angle())
+		p.Tank = NewRandomTank(p.game, p.Tank.tankBody.GetPosition(), float64(p.Tank.tankBody.GetRotation().Angle()))
 	}
 
 	// update tank(s)
