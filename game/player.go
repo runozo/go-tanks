@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	_ "image/png"
 	"math"
 	"time"
@@ -12,10 +11,10 @@ import (
 )
 
 const (
-	shootCooldown            = time.Millisecond * 250
-	rotationRadiansPerSecond = 1.0 / 2.0 * math.Pi / 3000 // rad/s
-	tankSpeed                = 0.03                       // m/s
-	barrelMaxSlope           = math.Pi / 4
+	shootCooldown  = time.Millisecond * 250
+	rotationSpeed  = 1.0 / 2.0 * math.Pi / 3000 // rad/s
+	tankSpeed      = 0.03                       // m/s
+	barrelMaxSlope = math.Pi / 4
 )
 
 type Player struct {
@@ -55,9 +54,9 @@ func (p *Player) Update(tps float64) {
 
 	// rotate tank
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		p.Tank.tankBody.SetAngularVelocity(-rotationRadiansPerSecond)
+		p.Tank.tankBody.SetAngularVelocity(-rotationSpeed)
 	} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		p.Tank.tankBody.SetAngularVelocity(rotationRadiansPerSecond)
+		p.Tank.tankBody.SetAngularVelocity(rotationSpeed)
 	} else {
 		p.Tank.tankBody.SetAngularVelocity(0)
 	}
@@ -65,12 +64,12 @@ func (p *Player) Update(tps float64) {
 	// rotate barrel
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		for i := 0; i < len(p.Tank.barrels); i++ {
-			p.Tank.barrels[i].relativeRotation -= rotationRadiansPerSecond
+			p.Tank.barrels[i].relativeRotation -= rotationSpeed
 		}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
 		for i := 0; i < len(p.Tank.barrels); i++ {
-			p.Tank.barrels[i].relativeRotation += rotationRadiansPerSecond
+			p.Tank.barrels[i].relativeRotation += rotationSpeed
 		}
 	}
 
@@ -79,19 +78,19 @@ func (p *Player) Update(tps float64) {
 	movementX := 0.0
 	movementY := 0.0
 
-	rot := float64(p.Tank.tankBody.GetRotation().Angle())
+	radians := float64(p.Tank.tankBody.GetRotation().Angle())
 
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		movementX += math.Sin(rot) * tankSpeed
-		movementY -= math.Cos(rot) * tankSpeed
+		movementX += math.Sin(radians) * tankSpeed
+		movementY -= math.Cos(radians) * tankSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		movementX -= math.Sin(rot) * tankSpeed
-		movementY += math.Cos(rot) * tankSpeed
+		movementX -= math.Sin(radians) * tankSpeed
+		movementY += math.Cos(radians) * tankSpeed
 	}
 
 	p.Tank.tankBody.SetLinearVelocity(b2.Vec2{X: float32(movementX), Y: float32(movementY)})
-	fmt.Println("Linear velocity:", float32(movementX), float32(movementY), movementX, movementY, p.Tank.tankBody.GetLinearVelocity())
+	// fmt.Println("Linear velocity:", float32(movementX), float32(movementY), movementX, movementY, p.Tank.tankBody.GetLinearVelocity())
 
 	// charge shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {

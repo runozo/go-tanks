@@ -1,7 +1,7 @@
 package game
 
 import (
-	"fmt"
+	"math"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -24,8 +24,8 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 	bodyDef := b2.DefaultBodyDef()
 	bodyDef.Position = position
 
-	b2CosSin := b2.ComputeCosSin(float32(rotation))
-	bodyDef.Rotation = b2.Rot{C: b2CosSin.Cosine, S: b2CosSin.Sine}
+	s, c := math.Sincos(rotation)
+	bodyDef.Rotation = b2.Rot{C: float32(c), S: float32(s)}
 	bodyDef.Type1 = b2.DynamicBody
 	shape := b2.MakeBox(float32(bodySprite.Bounds().Dx())/2, float32(bodySprite.Bounds().Dy())/2)
 	body := game.world.CreateBody(bodyDef)
@@ -64,7 +64,7 @@ func NewRandomTank(game *Game, position b2.Vec2, rotation float64) *Tank {
 	randomBarrelName := barrels[rand.Intn(len(barrels))]
 	randomBulletName := bullets[rand.Intn(len(bullets))]
 
-	fmt.Println("Random tank:", randomBodyName, randomBarrelName, randomBulletName)
+	// fmt.Println("Random tank:", randomBodyName, randomBarrelName, randomBulletName)
 
 	return NewTank(game, randomBodyName, randomBarrelName, randomBulletName, position, rotation)
 }
