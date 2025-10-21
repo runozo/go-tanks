@@ -27,7 +27,7 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 	s, c := math.Sincos(rotation)
 	bodyDef.Rotation = b2.Rot{C: float32(c), S: float32(s)}
 	bodyDef.Type1 = b2.DynamicBody
-	shape := b2.MakeBox(float32(bodySprite.Bounds().Dx())/2, float32(bodySprite.Bounds().Dy())/2)
+	shape := b2.MakeBox(float32(bodySprite.Bounds().Dx())/2.0, float32(bodySprite.Bounds().Dy())/2.0)
 	body := game.world.CreateBody(bodyDef)
 	// attach shape for collisions
 	body.CreatePolygonShape(b2.DefaultShapeDef(), shape)
