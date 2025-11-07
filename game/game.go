@@ -21,6 +21,12 @@ const (
 	fontSizeMedium  = 32
 	fontSizeSmall   = 22
 	numberOfEnemies = 5 // triple of enemies
+	FB_TANK         = byte(0b00010011)
+	FB_BULLET       = byte(0b00000011)
+	FB_ENEMY        = byte(0b00000111)
+	FB_BARREL       = byte(0b00001111)
+	FB_PLAYFIELD    = byte(0b11111111)
+	FB_PLAYER       = byte(0b00011011)
 )
 
 //go:embed assets/*

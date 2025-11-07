@@ -30,7 +30,10 @@ func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName stri
 	shape := b2.MakeBox(float32(bodySprite.Bounds().Dx())/2.0, float32(bodySprite.Bounds().Dy())/2.0)
 	body := game.world.CreateBody(bodyDef)
 	// attach shape for collisions
-	body.CreatePolygonShape(b2.DefaultShapeDef(), shape)
+	shapeDef := b2.DefaultShapeDef()
+	shapeDef.Filter.CategoryBits = uint64(FB_TANK)
+	shapeDef.Filter.MaskBits = uint64(FB_BULLET)
+	body.CreatePolygonShape(shapeDef, shape)
 
 	tank := &Tank{
 		bodySprite: bodySprite,

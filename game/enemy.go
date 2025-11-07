@@ -49,7 +49,7 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 
 	return &Enemy{
 		game:          game,
-		shootCooldown: NewTimer(time.Millisecond*2500 + time.Millisecond*time.Duration(rand.Intn(1000))),
+		shootCooldown: NewTimer(time.Millisecond*2500 + time.Millisecond*time.Duration(rand.Intn(10000))),
 		tank:          newTank,
 		bullets:       make([]*Bullet, 0),
 	}

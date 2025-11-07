@@ -52,10 +52,13 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 	s, c := math.Sincos(barrel.absoluteRotation)
 	bodyDef.Rotation = b2.Rot{C: float32(c), S: float32(s)}
 	bodyDef.Type1 = b2.DynamicBody
-	shape := b2.MakeBox(float32(bulletSpriteWidth/2.0), float32(bulletSpriteHeight/2.0))
 	body := game.world.CreateBody(bodyDef)
 	// attach shape for collisions
-	body.CreatePolygonShape(b2.DefaultShapeDef(), shape)
+	shapeDef := b2.DefaultShapeDef()
+	shapeDef.Filter.CategoryBits = uint64(FB_BULLET)
+	shapeDef.Filter.MaskBits = uint64(FB_TANK)
+	body.CreatePolygonShape(shapeDef, b2.MakeBox(float32(bulletSpriteWidth/2.0), float32(bulletSpriteHeight/2.0)))
+	body.SetBullet(1)
 	// fmt.Println("Barrel position", barrel.position.X, barrel.position.Y, "Bullet position", position.X, position.Y)
 
 	return &Bullet{
@@ -88,10 +91,10 @@ func (b *Bullet) Update(tps float64) {
 	b.elapsedTime += dt
 
 	//if b.altitude >= initialAltitude {
-	b.bulletBody.SetLinearVelocity(b2.Vec2{X: float32(sinRot * bulletSpeed * 0.1), Y: float32(cosRot * bulletSpeed * -0.1)})
 
 	gravityEffect := 0.5 * gravity * dt * dt
 	b.altitude += b.verticalSpeed*dt - gravityEffect
+	b.bulletBody.SetLinearVelocity(b2.Vec2{X: float32(sinRot * bulletSpeed * 0.1), Y: float32(cosRot * bulletSpeed * -0.1)})
 	b.verticalSpeed -= gravity * dt
 
 	actualSpeed := bulletSpeed * math.Cos(b.initialSlope)
@@ -110,8 +113,6 @@ func (b *Bullet) Update(tps float64) {
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
 	if !b.exploding && !b.exploded {
-		bulletHalfW := b.spriteWidth / 2
-		bulletHalfH := b.spriteHeight / 2
 		bulletAndBarrellHeight := b.barrelHeight + b.spriteHeight
 
 		// fmt.Println(b.altitude) // , "Scale", b.scale)
@@ -119,14 +120,14 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 
 		// center the bullet than scale
-		op.GeoM.Translate(float64(-bulletHalfW), float64(-bulletHalfH))
+		op.GeoM.Translate(float64(-b.spriteWidth/2), float64(-b.spriteHeight/2))
 		op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*scaleCoeff) // simulate bullet deflection (poorly)
-		op.GeoM.Translate(float64(bulletHalfW), float64(bulletHalfH))
+		op.GeoM.Translate(float64(b.spriteWidth/2), float64(b.spriteHeight/2))
 
 		// center the bullet and the barrel than rotate
-		op.GeoM.Translate(float64(-bulletHalfW), float64(-bulletAndBarrellHeight))
+		op.GeoM.Translate(float64(-b.spriteWidth/2), float64(-bulletAndBarrellHeight))
 		op.GeoM.Rotate(float64(b.bulletBody.GetRotation().Angle()))
-		op.GeoM.Translate(float64(bulletHalfW), float64(bulletAndBarrellHeight))
+		op.GeoM.Translate(float64(b.spriteWidth/2), float64(bulletAndBarrellHeight))
 
 		// true position of the bullet to draw
 		pos := b.bulletBody.GetPosition()
