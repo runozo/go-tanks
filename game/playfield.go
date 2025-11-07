@@ -55,13 +55,7 @@ func NewPlayfield(game *Game) *Playfield {
 
 func (p *Playfield) Update(tps float64) {
 	if p.wfc.IsRunning {
-		count := 0
-		for i := 0; i < len(p.wfc.Tiles); i++ {
-			if p.wfc.Tiles[i].Collapsed {
-				count++
-			}
-		}
-		p.progressBar.Update(float64(count) / float64(len(p.wfc.Tiles)) * 100)
+		p.progressBar.Update(float64(p.wfc.ProcessedTiles) / float64(p.wfc.TotalTiles) * 100)
 	}
 }
 
