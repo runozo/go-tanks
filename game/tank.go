@@ -5,10 +5,12 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/solarlune/resolv"
 )
 
 type Tank struct {
 	bodySprite *ebiten.Image
+	solid      *resolv.ConvexPolygon
 	barrels    []*Barrel
 	bodyWidth  float64
 	bodyHeight float64
@@ -16,27 +18,32 @@ type Tank struct {
 	Rotation   float64
 }
 
-func NewTank(game *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position Vector, rotation float64) *Tank {
+func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position Vector, rotation float64) *Tank {
 
-	bodySprite := game.assets.GetSprite(bodySpriteName)
+	bodySprite := g.assets.GetSprite(bodySpriteName)
+	spriteWidth := float64(bodySprite.Bounds().Dx())
+	spriteHeight := float64(bodySprite.Bounds().Dy())
 
 	tank := &Tank{
 		bodySprite: bodySprite,
-		bodyWidth:  float64(bodySprite.Bounds().Dx()),
-		bodyHeight: float64(bodySprite.Bounds().Dy()),
+		solid:      resolv.NewRectangle(position.X, position.Y, spriteWidth, spriteHeight),
+		bodyWidth:  spriteWidth,
+		bodyHeight: spriteHeight,
 		Position:   position,
 		Rotation:   rotation,
 		barrels:    make([]*Barrel, 0),
 	}
 
+	g.space.Add(tank.solid)
+
 	if bodySpriteName == "tankBody_huge_outline" {
 		// this bodies have 2 barrels each
 		tank.barrels = []*Barrel{
-			NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, Vector{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 4}),
-			NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, Vector{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 4 * 3}),
+			NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, Vector{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 4}),
+			NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, Vector{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 4 * 3}),
 		}
 	} else {
-		tank.barrels = []*Barrel{NewBarrel(game, barrelSpriteName, bulletSpriteName, tank, Vector{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 2})}
+		tank.barrels = []*Barrel{NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, Vector{X: tank.bodyWidth / 2, Y: tank.bodyHeight / 2})}
 	}
 
 	return tank
