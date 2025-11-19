@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	b2 "github.com/oliverbestmann/box2d-go"
 	"github.com/runozo/go-wave-function-collapse/assets"
+	"github.com/solarlune/resolv"
 )
 
 const (
@@ -21,10 +22,18 @@ const (
 	fontSizeMedium  = 32
 	fontSizeSmall   = 22
 	numberOfEnemies = 5 // *3
+	cellWidth       = 64
+	cellHeight      = 64
 )
 
 //go:embed assets/*
 var assetsFS embed.FS
+
+var (
+	TagPlayer    = resolv.NewTag("Player")
+	TagSolidWall = resolv.NewTag("SolidWall")
+	TagEnemy     = resolv.NewTag("Enemy")
+)
 
 type Vector struct {
 	X float64
@@ -41,7 +50,7 @@ type Game struct {
 	fontMedium    *text.GoTextFace
 	fontSmall     *text.GoTextFace
 	serverAddress string
-	world         *b2.World
+	space         *resolv.Space
 }
 
 func NewGame(serverAddress string) *Game {
@@ -76,11 +85,6 @@ func NewGame(serverAddress string) *Game {
 		log.Fatal(err)
 	}
 
-	// box2d config
-	worldDef := b2.DefaultWorldDef()
-	worldDef.Gravity = b2.Vec2{X: 0, Y: 0}
-	b2world := b2.CreateWorld(worldDef)
-
 	g := &Game{
 		assets:    assets,
 		width:     screenWidth,
@@ -97,20 +101,35 @@ func NewGame(serverAddress string) *Game {
 			Size:      fontSizeSmall,
 		},
 		serverAddress: serverAddress,
-		world:         &b2world,
+		space:         resolv.NewSpace(screenWidth, screenHeight, cellWidth, cellHeight),
 	}
 
-	g.players = append(g.players, NewPlayer(g))
+	// create new playfield
 
 	g.playfield = NewPlayfield(g)
 
+	// add players
+	playerSolids := resolv.ShapeCollection{}
+	p := NewPlayer(g)
+	g.players = append(g.players, p)
+	playerSolids = append(playerSolids, p.tank.solid)
+	g.space.Add(playerSolids...)
+
+	// add enemies
+
+	typesOfEnemies := []string{"hard", "medium", "easy"}
+	enemySolids := resolv.ShapeCollection{}
 	// add enemies one at a time so they don't overlap
 	for i := 0; i < numberOfEnemies; i++ {
-		g.enemies = append(g.enemies, NewEnemy(g, "hard"))
-		g.enemies = append(g.enemies, NewEnemy(g, "medium"))
-		g.enemies = append(g.enemies, NewEnemy(g, "easy"))
-
+		index := rand.Intn(len(typesOfEnemies))
+		e := NewEnemy(g, typesOfEnemies[index]) // random enemy
+		g.enemies = append(g.enemies, e)
+		enemySolids = append(enemySolids, e.tank.solid)
 	}
+
+	enemySolids.SetTags(TagEnemy)
+
+	g.space.Add(enemySolids...)
 
 	return g
 }

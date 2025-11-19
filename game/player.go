@@ -19,7 +19,7 @@ const (
 
 type Player struct {
 	game          *Game
-	Tank          *Tank
+	tank          *Tank
 	Bullets       []*Bullet
 	shootCooldown *Timer
 	netClient     *NetClient
@@ -34,7 +34,7 @@ func NewPlayer(game *Game) *Player {
 
 	p := &Player{
 		game:          game,
-		Tank:          NewRandomTank(game, position, 0),
+		tank:          NewRandomTank(game, position, 0),
 		shootCooldown: NewTimer(shootCooldown),
 	}
 
@@ -53,22 +53,22 @@ func (p *Player) Update(tps float64) {
 
 	// rotate tank
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		p.Tank.Rotation -= rotationSpeed
+		p.tank.Rotation -= rotationSpeed
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		p.Tank.Rotation += rotationSpeed
+		p.tank.Rotation += rotationSpeed
 	}
 
 	// rotate barrel
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		for i := 0; i < len(p.Tank.barrels); i++ {
-			p.Tank.barrels[i].relativeRotation -= rotationSpeed
+		for i := 0; i < len(p.tank.barrels); i++ {
+			p.tank.barrels[i].relativeRotation -= rotationSpeed
 		}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		for i := 0; i < len(p.Tank.barrels); i++ {
-			p.Tank.barrels[i].relativeRotation += rotationSpeed
+		for i := 0; i < len(p.tank.barrels); i++ {
+			p.tank.barrels[i].relativeRotation += rotationSpeed
 		}
 	}
 
@@ -76,22 +76,22 @@ func (p *Player) Update(tps float64) {
 	movementX := 0.0
 	movementY := 0.0
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		movementX += math.Sin(p.Tank.Rotation) * movementSpeed
-		movementY -= math.Cos(p.Tank.Rotation) * movementSpeed
+		movementX += math.Sin(p.tank.Rotation) * movementSpeed
+		movementY -= math.Cos(p.tank.Rotation) * movementSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		movementX -= math.Sin(p.Tank.Rotation) * movementSpeed
-		movementY += math.Cos(p.Tank.Rotation) * movementSpeed
+		movementX -= math.Sin(p.tank.Rotation) * movementSpeed
+		movementY += math.Cos(p.tank.Rotation) * movementSpeed
 	}
-	p.Tank.Position.X += movementX
-	p.Tank.Position.Y += movementY
+	p.tank.Position.X += movementX
+	p.tank.Position.Y += movementY
 
 	// charge shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
-		for i := 0; i < len(p.Tank.barrels); i++ {
-			p.Tank.barrels[i].slope += slopeSpeed
-			if p.Tank.barrels[i].slope > barrelMaxSlope {
-				p.Tank.barrels[i].slope = barrelMaxSlope
+		for i := 0; i < len(p.tank.barrels); i++ {
+			p.tank.barrels[i].slope += slopeSpeed
+			if p.tank.barrels[i].slope > barrelMaxSlope {
+				p.tank.barrels[i].slope = barrelMaxSlope
 			}
 
 		}
@@ -100,8 +100,8 @@ func (p *Player) Update(tps float64) {
 
 	// fire
 	yesFire := false
-	for i := 0; i < len(p.Tank.barrels); i++ {
-		if (p.Tank.barrels[i].slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.Tank.barrels[i].slope >= barrelMaxSlope) && p.shootCooldown.IsReady() {
+	for i := 0; i < len(p.tank.barrels); i++ {
+		if (p.tank.barrels[i].slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrels[i].slope >= barrelMaxSlope) && p.shootCooldown.IsReady() {
 			p.shootCooldown.Reset()
 			yesFire = true
 			// fmt.Println(len(p.bullets))
@@ -110,19 +110,19 @@ func (p *Player) Update(tps float64) {
 
 	// fire and reset barrels slope
 	if yesFire {
-		p.Bullets = append(p.Bullets, p.Tank.Fire()...)
-		for i := 0; i < len(p.Tank.barrels); i++ {
-			p.Tank.barrels[i].slope = 0.0
+		p.Bullets = append(p.Bullets, p.tank.Fire()...)
+		for i := 0; i < len(p.tank.barrels); i++ {
+			p.tank.barrels[i].slope = 0.0
 		}
 	}
 
 	// new tank
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		p.Tank = NewRandomTank(p.game, p.Tank.Position, p.Tank.Rotation)
+		p.tank = NewRandomTank(p.game, p.tank.Position, p.tank.Rotation)
 	}
 
 	// update tank(s)
-	p.Tank.Update(tps)
+	p.tank.Update(tps)
 
 	// update bullets
 	var activeBullets []*Bullet
@@ -137,11 +137,11 @@ func (p *Player) Update(tps float64) {
 	// send data to server
 	if p.netClient != nil {
 		buf := make([]byte, 8) // float64 is 8 bytes long
-		binary.LittleEndian.PutUint64(buf, math.Float64bits(p.Tank.Position.X))
+		binary.LittleEndian.PutUint64(buf, math.Float64bits(p.tank.Position.X))
 		p.netClient.SendData(buf)
 	}
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
-	p.Tank.Draw(screen)
+	p.tank.Draw(screen)
 }

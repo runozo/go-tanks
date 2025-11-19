@@ -95,7 +95,7 @@ func (b *Bullet) Update(tps float64) {
 	if b.exploding {
 		// check collision with players
 		for _, p := range b.game.players {
-			if doesIntersect(b.position, b.sprite.Bounds(), p.Tank.Position, p.Tank.bodySprite.Bounds()) {
+			if doesIntersect(b.position, b.sprite.Bounds(), p.tank.Position, p.tank.bodySprite.Bounds()) {
 				b.hasHitTarget = true
 				break
 			}
