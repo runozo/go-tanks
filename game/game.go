@@ -113,6 +113,7 @@ func NewGame(serverAddress string) *Game {
 	p := NewPlayer(g)
 	g.players = append(g.players, p)
 	playerSolids = append(playerSolids, p.tank.solid)
+	playerSolids.SetTags(TagPlayer)
 	g.space.Add(playerSolids...)
 
 	// add enemies
@@ -139,10 +140,6 @@ func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.playfield = NewPlayfield(g)
-		g.enemies = []*Enemy{}
-		g.enemies = append(g.enemies, NewEnemy(g, "hard"))
-		g.enemies = append(g.enemies, NewEnemy(g, "medium"))
-		g.enemies = append(g.enemies, NewEnemy(g, "easy"))
 	}
 
 	g.playfield.Update(tps)
