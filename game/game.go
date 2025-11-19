@@ -12,6 +12,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/runozo/go-wave-function-collapse/assets"
 	"github.com/solarlune/resolv"
 )
@@ -178,6 +179,33 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 	}
+
+	// debug shapes
+	g.space.ForEachShape(func(shape resolv.IShape, index, maxCount int) bool {
+
+		var drawColor color.Color = color.White
+
+		tags := shape.Tags()
+
+		if tags.Has(TagEnemy) && !tags.Has(TagSolidWall) {
+			drawColor = color.RGBA{255, 128, 35, 255}
+		}
+		if tags.Has(TagPlayer) {
+			drawColor = color.RGBA{32, 255, 128, 255}
+		}
+		switch o := shape.(type) {
+		case *resolv.Circle:
+			vector.StrokeCircle(screen, float32(o.Position().X), float32(o.Position().Y), float32(o.Radius()), 2, drawColor, false)
+		case *resolv.ConvexPolygon:
+
+			for _, l := range o.Lines() {
+				vector.StrokeLine(screen, float32(l.Start.X), float32(l.Start.Y), float32(l.End.X), float32(l.End.Y), 2, drawColor, false)
+			}
+		}
+
+		return true
+
+	})
 
 	str := "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield"
 	width, height := text.Measure(str, g.fontMedium, 0)
