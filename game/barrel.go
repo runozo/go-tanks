@@ -69,6 +69,7 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 
 	// define resolv shape
 	solid := resolv.NewRectangle(position.X, position.Y, spriteWidth, spriteHeight)
+	solid.SetRotation(tank.solid.Rotation())
 	solid.Tags().Set(TagBarrel)
 	game.space.Add(solid)
 
@@ -98,7 +99,7 @@ func (b *Barrel) Fire() *Bullet {
 }
 
 func (b *Barrel) Update(tps float64) {
-	b.solid.SetRotation(b.tank.solid.Rotation() + b.relativeRotation)
+	b.solid.SetRotation(-b.tank.solid.Rotation() - b.relativeRotation)
 	b.solid.SetPositionVec(b.tank.solid.Position().Add(b.offset))
 
 	if b.isFiring {
