@@ -31,15 +31,10 @@ const (
 var assetsFS embed.FS
 
 var (
-	TagPlayer    = resolv.NewTag("Player")
-	TagSolidWall = resolv.NewTag("SolidWall")
-	TagEnemy     = resolv.NewTag("Enemy")
+	TagPlayer = resolv.NewTag("Player")
+	TagBarrel = resolv.NewTag("Barrel")
+	TagEnemy  = resolv.NewTag("Enemy")
 )
-
-type Vector struct {
-	X float64
-	Y float64
-}
 
 type Game struct {
 	width         int
@@ -187,7 +182,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		tags := shape.Tags()
 
-		if tags.Has(TagEnemy) && !tags.Has(TagSolidWall) {
+		if tags.Has(TagEnemy) && !tags.Has(TagBarrel) {
 			drawColor = color.RGBA{255, 128, 35, 255}
 		}
 		if tags.Has(TagPlayer) {

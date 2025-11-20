@@ -6,24 +6,25 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/solarlune/resolv"
 )
 
 type ProgressBar struct {
 	Width       int
 	Height      int
-	Position    Vector
+	Position    resolv.Vector
 	Percent     float64
 	BorderWidth int
 	Font        *text.GoTextFace
 	Text        string
-	txtPos      Vector
+	txtPos      resolv.Vector
 }
 
 const (
 	barBorderWidth = 4
 )
 
-func NewProgressBar(width, height int, str string, position Vector, font *text.GoTextFace) *ProgressBar {
+func NewProgressBar(width, height int, str string, position resolv.Vector, font *text.GoTextFace) *ProgressBar {
 	txtwidth, txtheight := text.Measure(str+" 100%", font, 0)
 
 	x := position.X + float64(width)/2 - txtwidth/2
@@ -37,7 +38,7 @@ func NewProgressBar(width, height int, str string, position Vector, font *text.G
 		BorderWidth: barBorderWidth,
 		Font:        font,
 		Text:        str,
-		txtPos: Vector{
+		txtPos: resolv.Vector{
 			X: x,
 			Y: y,
 		},

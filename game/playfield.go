@@ -6,6 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/runozo/go-wave-function-collapse/assets"
 	"github.com/runozo/go-wave-function-collapse/wfc"
+	"github.com/solarlune/resolv"
 )
 
 const (
@@ -40,7 +41,7 @@ func NewPlayfield(game *Game) *Playfield {
 
 		wfc:         wfc.NewWfc(screenWidth/tileWidth+1, screenHeight/tileHeight+1, game.assets.TileEntries),
 		assets:      game.assets,
-		progressBar: NewProgressBar(400, 36, "Generating playfield", Vector{X: (screenWidth - 400) / 2, Y: (screenHeight - 36) / 2}, game.fontSmall),
+		progressBar: NewProgressBar(400, 36, "Generating playfield", resolv.Vector{X: (screenWidth - 400) / 2, Y: (screenHeight - 36) / 2}, game.fontSmall),
 		numOfTilesX: tilesX,
 		numOfTilesY: tilesY,
 	}
