@@ -48,7 +48,7 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 	noneIntersect := true
 	for {
 		for _, e := range game.enemies {
-			if doesIntersect(e.tank.Position, e.tank.bodySprite.Bounds(), newTank.Position, newTank.bodySprite.Bounds()) {
+			if doesIntersect(e.tank.solid.Position(), e.tank.bodySprite.Bounds(), newTank.solid.Position(), newTank.bodySprite.Bounds()) {
 				newPosition.X = float64(rand.Intn(screenWidth))
 				newPosition.Y = float64(rand.Intn(screenHeight - tileHeight))
 				noneIntersect = false
@@ -72,10 +72,10 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 }
 
 func (e *Enemy) Update(tps float64) {
-	playerPosition := e.game.players[0].tank.Position
+	playerPosition := e.game.players[0].tank.solid.Position()
 
 	for i := 0; i < len(e.tank.barrels); i++ {
-		e.tank.barrels[i].relativeRotation = math.Atan2(playerPosition.Y-e.tank.Position.Y, playerPosition.X-e.tank.Position.X) + math.Pi/2
+		e.tank.barrels[i].relativeRotation = math.Atan2(playerPosition.Y-e.tank.solid.Position().Y, playerPosition.X-e.tank.solid.Position().X) + math.Pi/2
 	}
 
 	// fires randomly

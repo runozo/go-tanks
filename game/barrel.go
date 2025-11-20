@@ -39,8 +39,8 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 	spriteHeight := float64(sprite.Bounds().Dy())
 
 	position := resolv.Vector{
-		X: tank.Position.X + offset.X - spriteWidth/2, // tank.bodyWidth/2 - spriteWidth/2,
-		Y: tank.Position.Y + offset.Y - spriteHeight,  // tank.bodyHeight/2 - spriteHeight,
+		X: tank.solid.Position().X + offset.X - spriteWidth/2, // tank.bodyWidth/2 - spriteWidth/2,
+		Y: tank.solid.Position().Y + offset.Y - spriteHeight,  // tank.bodyHeight/2 - spriteHeight,
 	}
 
 	shootAnimationSprites := []*ebiten.Image{
@@ -84,7 +84,7 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 		explosionHitTargetAnimationFrames: explosionHitTargetAnimationSprites,
 		offset:                            offset,
 		relativeRotation:                  0.0,
-		absoluteRotation:                  tank.Rotation,
+		absoluteRotation:                  tank.solid.Rotation(),
 		slope:                             0.0,
 		tank:                              tank,
 		isFiring:                          false,
@@ -100,7 +100,7 @@ func (b *Barrel) Fire() *Bullet {
 }
 
 func (b *Barrel) Update(tps float64) {
-	b.absoluteRotation = b.tank.Rotation + b.relativeRotation
+	b.absoluteRotation = b.tank.solid.Rotation() + b.relativeRotation
 
 	if b.isFiring {
 		b.shootAge += 1 / tps * 20
