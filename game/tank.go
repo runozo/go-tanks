@@ -14,8 +14,6 @@ type Tank struct {
 	barrels    []*Barrel
 	bodyWidth  float64
 	bodyHeight float64
-	Position   resolv.Vector
-	Rotation   float64
 }
 
 func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position resolv.Vector, rotation float64) *Tank {
@@ -29,11 +27,11 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 		solid:      resolv.NewRectangle(position.X, position.Y, spriteWidth, spriteHeight),
 		bodyWidth:  spriteWidth,
 		bodyHeight: spriteHeight,
-		Position:   position,
-		Rotation:   rotation,
 		barrels:    make([]*Barrel, 0),
 	}
 
+	tank.solid.Rotate(rotation)
+	tank.solid.SetPositionVec(position)
 	g.space.Add(tank.solid)
 
 	if bodySpriteName == "tankBody_huge_outline" {
@@ -86,7 +84,7 @@ func (t *Tank) Draw(screen *ebiten.Image) {
 	bodyHalfH := t.solid.Bounds().Height() / 2
 	op_body := &ebiten.DrawImageOptions{}
 	op_body.GeoM.Translate(-bodyHalfW, -bodyHalfH)
-	op_body.GeoM.Rotate(t.Rotation)
+	op_body.GeoM.Rotate(-t.solid.Rotation())
 	op_body.GeoM.Translate(bodyHalfW, bodyHalfH)
 	op_body.GeoM.Translate(t.solid.Center().X-bodyHalfW, t.solid.Center().Y-bodyHalfH)
 

@@ -47,6 +47,8 @@ func NewPlayer(game *Game) *Player {
 }
 
 func (p *Player) Update(tps float64) {
+	moveVec := resolv.Vector{}
+	rotation := 0.0
 	rotationSpeed := rotationPerSecond / tps
 	movementSpeed := tankSpeed / tps
 	slopeSpeed := barrelMaxSlope / tps
@@ -54,11 +56,11 @@ func (p *Player) Update(tps float64) {
 
 	// rotate tank
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		p.tank.Rotation -= rotationSpeed
+		rotation += rotationSpeed
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		p.tank.Rotation += rotationSpeed
+		rotation -= rotationSpeed
 	}
 
 	// rotate barrel
@@ -74,18 +76,20 @@ func (p *Player) Update(tps float64) {
 	}
 
 	// move
-	movementX := 0.0
-	movementY := 0.0
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		movementX += math.Sin(p.tank.Rotation) * movementSpeed
-		movementY -= math.Cos(p.tank.Rotation) * movementSpeed
+		moveVec.X -= math.Sin(p.tank.solid.Rotation()) * movementSpeed
+		moveVec.Y -= math.Cos(p.tank.solid.Rotation()) * movementSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		movementX -= math.Sin(p.tank.Rotation) * movementSpeed
-		movementY += math.Cos(p.tank.Rotation) * movementSpeed
+		moveVec.X += math.Sin(p.tank.solid.Rotation()) * movementSpeed
+		moveVec.Y += math.Cos(p.tank.solid.Rotation()) * movementSpeed
 	}
-	p.tank.Position.X += movementX
-	p.tank.Position.Y += movementY
+
+	// fmt.Println(moveVec)
+	// Add in the player's movement, clamping it to the maximum speed and incorporating friction.
+	// p.Movement = p.Movement.Add(moveVec).ClampMagnitude(maxSpd).SubMagnitude(friction)
+	p.tank.solid.Rotate(rotation)
+	p.tank.solid.MoveVec(moveVec)
 
 	// charge shoot
 	if p.shootCooldown.IsReady() && ebiten.IsKeyPressed(ebiten.KeySpace) {
@@ -119,7 +123,7 @@ func (p *Player) Update(tps float64) {
 
 	// new tank
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		p.tank = NewRandomTank(p.game, p.tank.Position, p.tank.Rotation)
+		p.tank = NewRandomTank(p.game, p.tank.solid.Position(), rotation)
 	}
 
 	// update tank(s)
@@ -138,7 +142,7 @@ func (p *Player) Update(tps float64) {
 	// send data to server
 	if p.netClient != nil {
 		buf := make([]byte, 8) // float64 is 8 bytes long
-		binary.LittleEndian.PutUint64(buf, math.Float64bits(p.tank.Position.X))
+		binary.LittleEndian.PutUint64(buf, math.Float64bits(p.tank.solid.Position().X))
 		p.netClient.SendData(buf)
 	}
 }

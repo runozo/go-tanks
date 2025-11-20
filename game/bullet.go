@@ -96,14 +96,14 @@ func (b *Bullet) Update(tps float64) {
 	if b.exploding {
 		// check collision with players
 		for _, p := range b.game.players {
-			if doesIntersect(b.position, b.sprite.Bounds(), p.tank.Position, p.tank.bodySprite.Bounds()) {
+			if doesIntersect(b.position, b.sprite.Bounds(), p.tank.solid.Position(), p.tank.bodySprite.Bounds()) {
 				b.hasHitTarget = true
 				break
 			}
 		}
 		// check collision with enemies
 		for _, e := range b.game.enemies {
-			if doesIntersect(b.position, b.sprite.Bounds(), e.tank.Position, e.tank.bodySprite.Bounds()) {
+			if doesIntersect(b.position, b.sprite.Bounds(), e.tank.solid.Position(), e.tank.bodySprite.Bounds()) {
 				b.hasHitTarget = true
 				break
 			}
