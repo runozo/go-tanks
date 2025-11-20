@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/solarlune/resolv"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 )
 
 type Bullet struct {
-	position                   Vector
+	position                   resolv.Vector
 	sprite                     *ebiten.Image
 	verticalSpeed, altitude    float64
 	currentSlope, initialSlope float64
@@ -39,9 +40,9 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 	bulletSpriteWidth := float64(bulletSprite.Bounds().Dx())
 	bulletSpriteHeight := float64(bulletSprite.Bounds().Dy())
 
-	position := Vector{
-		X: barrel.position.X + barrel.spriteWidth/2 - bulletSpriteWidth/2,
-		Y: barrel.position.Y - bulletSpriteHeight,
+	position := resolv.Vector{
+		X: barrel.solid.Center().X + barrel.spriteWidth/2 - bulletSpriteWidth/2,
+		Y: barrel.solid.Center().Y - bulletSpriteHeight,
 	}
 
 	// fmt.Println("Barrel position", barrel.position.X, barrel.position.Y, "Bullet position", position.X, position.Y)

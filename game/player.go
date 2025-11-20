@@ -8,6 +8,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/solarlune/resolv"
 )
 
 const (
@@ -27,7 +28,7 @@ type Player struct {
 
 func NewPlayer(game *Game) *Player {
 
-	position := Vector{
+	position := resolv.Vector{
 		X: screenWidth/2 + screenWidth/4,
 		Y: screenHeight / 2,
 	}

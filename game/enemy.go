@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/solarlune/resolv"
 )
 
 const (
@@ -36,7 +37,7 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 		"hard":   []string{"tankBody_huge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 	}
 
-	newPosition := Vector{
+	newPosition := resolv.Vector{
 		X: float64(rand.Intn(screenWidth)),
 		Y: float64(rand.Intn(screenHeight - tileHeight)),
 	}
