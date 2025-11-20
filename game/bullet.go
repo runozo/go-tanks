@@ -49,7 +49,7 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 
 	return &Bullet{
 		position:                 position,
-		rotation:                 barrel.solid.Rotation(),
+		rotation:                 -barrel.solid.Rotation(),
 		sprite:                   bulletSprite,
 		verticalSpeed:            bulletSpeed * math.Sin(barrel.slope),
 		currentSlope:             barrel.slope,

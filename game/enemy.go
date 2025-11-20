@@ -75,7 +75,7 @@ func (e *Enemy) Update(tps float64) {
 	playerPosition := e.game.players[0].tank.solid.Position()
 
 	for i := 0; i < len(e.tank.barrels); i++ {
-		e.tank.barrels[i].relativeRotation = math.Atan2(playerPosition.Y-e.tank.solid.Position().Y, playerPosition.X-e.tank.solid.Position().X) + math.Pi/2
+		e.tank.barrels[i].relativeRotation = math.Atan2(playerPosition.Y-e.tank.solid.Position().Y, playerPosition.X-e.tank.solid.Position().X) + math.Pi/2.0
 	}
 
 	// fires randomly
