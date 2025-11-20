@@ -10,18 +10,19 @@ import (
 
 const (
 	gravity         = 9.8
-	bulletSpeed     = 12.0
+	bulletSpeed     = 1.0
 	bulletMinScale  = 1.0
 	scaleCoeff      = 1.8
 	initialAltitude = 0.2
 )
 
 type Bullet struct {
-	position                   resolv.Vector
+	solid                      *resolv.ConvexPolygon
 	sprite                     *ebiten.Image
+	moveVec                    resolv.Vector
 	verticalSpeed, altitude    float64
 	currentSlope, initialSlope float64
-	rotation, scale            float64
+	scale                      float64
 	elapsedTime                float64
 	spriteWidth, spriteHeight  float64
 	barrelWidth                float64
@@ -47,9 +48,8 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 
 	// fmt.Println("Barrel position", barrel.position.X, barrel.position.Y, "Bullet position", position.X, position.Y)
 
-	return &Bullet{
-		position:                 position,
-		rotation:                 -barrel.solid.Rotation(),
+	b := Bullet{
+		solid:                    resolv.NewRectangle(position.X, position.Y, bulletSpriteWidth, bulletSpriteHeight),
 		sprite:                   bulletSprite,
 		verticalSpeed:            bulletSpeed * math.Sin(barrel.slope),
 		currentSlope:             barrel.slope,
@@ -69,46 +69,35 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 		hasHitTarget:             false,
 		game:                     game,
 	}
+
+	b.solid.SetRotation(-barrel.solid.Rotation())
+
+	return &b
 }
 
 func (b *Bullet) Update(tps float64) {
-
-	sinRot, cosRot := math.Sincos(b.rotation)
+	sinRot, cosRot := math.Sincos(b.solid.Rotation())
 	dt := 1.0 / tps
 	b.elapsedTime += dt
 
 	if b.altitude >= initialAltitude {
-		b.position.X += sinRot * bulletSpeed
-		b.position.Y -= cosRot * bulletSpeed
+		b.moveVec.X += sinRot * bulletSpeed
+		b.moveVec.Y -= cosRot * bulletSpeed
 
-		gravityEffect := 0.5 * gravity * dt * dt
+		gravityEffect := 0.00000005 * gravity * dt
 		b.altitude += b.verticalSpeed*dt - gravityEffect
 		b.verticalSpeed -= gravity * dt
 
 		actualSpeed := bulletSpeed * math.Cos(b.initialSlope)
 		b.currentSlope = math.Atan2(b.verticalSpeed, actualSpeed)
 		b.scale = b.altitude*scaleCoeff + bulletMinScale
-		// fmt.Println(b.currentSlope)
+
+		b.solid.MoveVec(b.moveVec)
 	} else {
 		b.exploding = true
 	}
 
 	if b.exploding {
-		// check collision with players
-		for _, p := range b.game.players {
-			if doesIntersect(b.position, b.sprite.Bounds(), p.tank.solid.Position(), p.tank.bodySprite.Bounds()) {
-				b.hasHitTarget = true
-				break
-			}
-		}
-		// check collision with enemies
-		for _, e := range b.game.enemies {
-			if doesIntersect(b.position, b.sprite.Bounds(), e.tank.solid.Position(), e.tank.bodySprite.Bounds()) {
-				b.hasHitTarget = true
-				break
-			}
-		}
-
 		b.explosionElapsedTime += dt * float64(len(b.explosionHitTargetFrames))
 	}
 }
@@ -130,11 +119,11 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 
 		// center the bullet and the barrel than rotate
 		op.GeoM.Translate(-bulletHalfW, -bulletAndBarrellHeight)
-		op.GeoM.Rotate(b.rotation)
+		op.GeoM.Rotate(-b.solid.Rotation())
 		op.GeoM.Translate(bulletHalfW, bulletAndBarrellHeight)
 
 		// true position of the bullet to draw
-		op.GeoM.Translate(b.position.X, b.position.Y)
+		op.GeoM.Translate(b.solid.Position().X, b.solid.Position().Y)
 		screen.DrawImage(b.sprite, op)
 	} else {
 		if b.hasHitTarget {
@@ -150,7 +139,7 @@ func (b *Bullet) drawExplosionHitTarget(screen *ebiten.Image) {
 	if int(b.explosionElapsedTime) < len(b.explosionHitTargetFrames) {
 		frame := b.explosionHitTargetFrames[int(b.explosionElapsedTime)]
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(b.position.X, b.position.Y)
+		op.GeoM.Translate(b.solid.Position().X, b.solid.Position().Y)
 		screen.DrawImage(frame, op)
 	} else {
 		b.exploded = true
@@ -162,7 +151,7 @@ func (b *Bullet) drawExplosion(screen *ebiten.Image) {
 	if int(b.explosionElapsedTime) < len(b.explosionFrames) {
 		frame := b.explosionFrames[int(b.explosionElapsedTime)]
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(b.position.X, b.position.Y)
+		op.GeoM.Translate(b.solid.Position().X, b.solid.Position().Y)
 		screen.DrawImage(frame, op)
 	} else {
 		b.exploded = true
