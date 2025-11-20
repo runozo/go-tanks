@@ -18,7 +18,6 @@ type Barrel struct {
 	explosionHitTargetAnimationFrames []*ebiten.Image
 	offset                            resolv.Vector
 	relativeRotation                  float64
-	absoluteRotation                  float64
 	slope                             float64
 	tank                              *Tank
 	isFiring                          bool
@@ -84,7 +83,6 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 		explosionHitTargetAnimationFrames: explosionHitTargetAnimationSprites,
 		offset:                            offset,
 		relativeRotation:                  0.0,
-		absoluteRotation:                  tank.solid.Rotation(),
 		slope:                             0.0,
 		tank:                              tank,
 		isFiring:                          false,
@@ -100,7 +98,8 @@ func (b *Barrel) Fire() *Bullet {
 }
 
 func (b *Barrel) Update(tps float64) {
-	b.absoluteRotation = b.tank.solid.Rotation() + b.relativeRotation
+	b.solid.SetRotation(b.tank.solid.Rotation() + b.relativeRotation)
+	b.solid.SetPositionVec(b.tank.solid.Position().Add(b.offset))
 
 	if b.isFiring {
 		b.shootAge += 1 / tps * 20
@@ -117,7 +116,7 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 	spriteHalfH := b.solid.Bounds().Height() / 2
 	op_barrel := &ebiten.DrawImageOptions{}
 	op_barrel.GeoM.Translate(-spriteHalfW, -spriteHalfH)
-	op_barrel.GeoM.Rotate(b.absoluteRotation)
+	op_barrel.GeoM.Rotate(-b.solid.Rotation())
 	op_barrel.GeoM.Translate(spriteHalfW, spriteHalfH)
 	op_barrel.GeoM.Translate(b.solid.Center().X-spriteHalfW, b.solid.Center().Y-spriteHalfH)
 	screen.DrawImage(b.sprite, op_barrel)
@@ -138,7 +137,7 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 
 		// then translate the frame to the barrel
 		op_shoot.GeoM.Translate(-shootHalfW, -shootAndBarrellheight)
-		op_shoot.GeoM.Rotate(b.absoluteRotation)
+		op_shoot.GeoM.Rotate(-b.solid.Rotation())
 		op_shoot.GeoM.Translate(shootHalfW, shootAndBarrellheight)
 		op_shoot.GeoM.Translate(
 			b.solid.Center().X-shootHalfW,
