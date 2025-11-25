@@ -38,8 +38,8 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 	spriteHeight := float64(sprite.Bounds().Dy())
 
 	position := resolv.Vector{
-		X: tank.solid.Position().X + offset.X - spriteWidth/2, // tank.bodyWidth/2 - spriteWidth/2,
-		Y: tank.solid.Position().Y + offset.Y - spriteHeight,  // tank.bodyHeight/2 - spriteHeight,
+		X: tank.solid.Position().X + offset.X, // tank.bodyWidth/2 - spriteWidth/2,
+		Y: tank.solid.Position().Y + offset.Y, // tank.bodyHeight/2 - spriteHeight,
 	}
 
 	shootAnimationSprites := []*ebiten.Image{
@@ -99,7 +99,7 @@ func (b *Barrel) Fire() *Bullet {
 }
 
 func (b *Barrel) Update(tps float64) {
-	b.solid.SetRotation(-b.tank.solid.Rotation() - b.relativeRotation)
+	b.solid.SetRotation(b.tank.solid.Rotation() + b.relativeRotation)
 	b.solid.SetPositionVec(b.tank.solid.Position().Add(b.offset))
 
 	if b.isFiring {
@@ -113,8 +113,8 @@ func (b *Barrel) Update(tps float64) {
 
 func (b *Barrel) Draw(screen *ebiten.Image) {
 	// barrel
-	spriteHalfW := b.solid.Bounds().Width() / 2
-	spriteHalfH := b.solid.Bounds().Height() / 2
+	spriteHalfW := b.spriteWidth / 2.0
+	spriteHalfH := b.spriteHeight / 2.0
 	op_barrel := &ebiten.DrawImageOptions{}
 	op_barrel.GeoM.Translate(-spriteHalfW, -spriteHalfH)
 	op_barrel.GeoM.Rotate(-b.solid.Rotation())

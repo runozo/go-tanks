@@ -41,7 +41,7 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 			NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, resolv.Vector{X: 0, Y: tank.bodyHeight / 4 * 3}),
 		}
 	} else {
-		tank.barrels = []*Barrel{NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, resolv.Vector{X: 0, Y: tank.bodyHeight / 2})}
+		tank.barrels = []*Barrel{NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, resolv.Vector{X: 0, Y: 0})}
 	}
 
 	return tank
@@ -80,8 +80,8 @@ func (t *Tank) Draw(screen *ebiten.Image) {
 	// Draw the tank
 
 	// body
-	bodyHalfW := t.solid.Bounds().Width() / 2
-	bodyHalfH := t.solid.Bounds().Height() / 2
+	bodyHalfW := float64(t.bodySprite.Bounds().Dx() / 2.0)
+	bodyHalfH := float64(t.bodySprite.Bounds().Dy() / 2.0)
 	op_body := &ebiten.DrawImageOptions{}
 	op_body.GeoM.Translate(-bodyHalfW, -bodyHalfH)
 	op_body.GeoM.Rotate(-t.solid.Rotation())
