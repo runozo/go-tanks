@@ -21,12 +21,12 @@ type Enemy struct {
 }
 
 func FlipVertical(source *ebiten.Image) *ebiten.Image {
-	result := ebiten.NewImage(source.Bounds().Dx(), source.Bounds().Dy())
+	flipped := ebiten.NewImage(source.Bounds().Dx(), source.Bounds().Dy())
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(1, -1)
 	op.GeoM.Translate(0, float64(source.Bounds().Dy()))
-	result.DrawImage(source, op)
-	return result
+	flipped.DrawImage(source, op)
+	return flipped
 }
 
 func NewEnemy(game *Game, flavor string) *Enemy {
@@ -75,7 +75,7 @@ func (e *Enemy) Update(tps float64) {
 	playerPosition := e.game.players[0].tank.solid.Position()
 
 	for i := 0; i < len(e.tank.barrels); i++ {
-		e.tank.barrels[i].relativeRotation = -math.Atan2(playerPosition.Y-e.tank.solid.Position().Y, playerPosition.X-e.tank.solid.Position().X)
+		e.tank.barrels[i].relativeRotation = -math.Atan2(playerPosition.Y-e.tank.solid.Position().Y, playerPosition.X-e.tank.solid.Position().X) - math.Pi/2
 	}
 
 	// fires randomly
