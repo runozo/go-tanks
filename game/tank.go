@@ -37,8 +37,8 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 	if bodySpriteName == "tankBody_huge_outline" {
 		// this bodies have 2 barrels each
 		tank.barrels = []*Barrel{
-			NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, resolv.Vector{X: 0, Y: tank.bodyHeight / 4}),
-			NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, resolv.Vector{X: 0, Y: tank.bodyHeight / 4 * 3}),
+			NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, resolv.Vector{X: 0, Y: -tank.bodyHeight / 2 / 2}),
+			NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, resolv.Vector{X: 0, Y: tank.bodyHeight / 2 / 2}),
 		}
 	} else {
 		tank.barrels = []*Barrel{NewBarrel(g, barrelSpriteName, bulletSpriteName, tank, resolv.Vector{X: 0, Y: 0})}
@@ -74,6 +74,14 @@ func (t *Tank) Update(tps float64) {
 	for i := 0; i < len(t.barrels); i++ {
 		t.barrels[i].Update(tps)
 	}
+
+	t.solid.IntersectionTest(resolv.IntersectionTestSettings{
+		TestAgainst: t.solid.SelectTouchingCells(1).FilterShapes(),
+		OnIntersect: func(set resolv.IntersectionSet) bool {
+			t.solid.MoveVec(set.MTV)
+			return true
+		},
+	})
 }
 
 func (t *Tank) Draw(screen *ebiten.Image) {
