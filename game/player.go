@@ -77,12 +77,14 @@ func (p *Player) Update(tps float64) {
 
 	// move
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		moveVec.X -= math.Sin(p.tank.solid.Rotation()) * movementSpeed
-		moveVec.Y -= math.Cos(p.tank.solid.Rotation()) * movementSpeed
+		s, c := math.Sincos(p.tank.solid.Rotation())
+		moveVec.X -= s * movementSpeed
+		moveVec.Y -= c * movementSpeed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		moveVec.X += math.Sin(p.tank.solid.Rotation()) * movementSpeed
-		moveVec.Y += math.Cos(p.tank.solid.Rotation()) * movementSpeed
+		s, c := math.Sincos(p.tank.solid.Rotation())
+		moveVec.X += s * movementSpeed
+		moveVec.Y += c * movementSpeed
 	}
 
 	// fmt.Println(moveVec)
