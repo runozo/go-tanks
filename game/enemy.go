@@ -45,22 +45,16 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0)
 
 	// don't overlap position with other enemies
-	noneIntersect := true
-	for {
-		for _, e := range game.enemies {
-			if doesIntersect(e.tank.solid.Position(), e.tank.bodySprite.Bounds(), newTank.solid.Position(), newTank.bodySprite.Bounds()) {
-				newPosition.X = float64(rand.Intn(screenWidth))
-				newPosition.Y = float64(rand.Intn(screenHeight - tileHeight))
-				noneIntersect = false
-				break
-			}
-			noneIntersect = true
-		}
-
-		if noneIntersect {
-			break
-		}
-		newTank = NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0)
+	for newTank.solid.IntersectionTest(resolv.IntersectionTestSettings{
+		TestAgainst: game.space.Shapes(),
+		OnIntersect: func(set resolv.IntersectionSet) bool {
+			newTank.solid.SetPositionVec(resolv.Vector{
+				X: float64(rand.Intn(screenWidth)),
+				Y: float64(rand.Intn(screenHeight - tileHeight)),
+			})
+			return false
+		},
+	}) {
 	}
 
 	return &Enemy{
