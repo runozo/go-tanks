@@ -9,10 +9,6 @@ import (
 	"github.com/solarlune/resolv"
 )
 
-const (
-	enemyOffset = 5
-)
-
 type Enemy struct {
 	game          *Game
 	tank          *Tank
@@ -30,21 +26,21 @@ func FlipVertical(source *ebiten.Image) *ebiten.Image {
 }
 
 func NewEnemy(game *Game, flavor string) *Enemy {
+	// flavors of enemies
 	flavors := map[string][]string{
-		// body barrel bullet
+		// body name, barrel name, bullet name
 		"easy":   []string{"tankBody_darkLarge", "specialBarrel1_outline", "bulletRed1_outline"},
 		"medium": []string{"tankBody_darkLarge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 		"hard":   []string{"tankBody_huge_outline", "specialBarrel1_outline", "bulletRed1_outline"},
 	}
 
-	newPosition := resolv.Vector{
+	// create a new enemy tank
+	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], resolv.Vector{
 		X: float64(rand.Intn(screenWidth)),
 		Y: float64(rand.Intn(screenHeight - tileHeight)),
-	}
+	}, 0)
 
-	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], newPosition, 0)
-
-	// don't overlap position with other enemies
+	// don't overlap position with other entities
 	for newTank.solid.IntersectionTest(resolv.IntersectionTestSettings{
 		TestAgainst: game.space.Shapes(),
 		OnIntersect: func(set resolv.IntersectionSet) bool {

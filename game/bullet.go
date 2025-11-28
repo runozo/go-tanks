@@ -84,7 +84,7 @@ func (b *Bullet) Update(tps float64) {
 		b.moveVec.X += sinRot * bulletSpeed
 		b.moveVec.Y -= cosRot * bulletSpeed
 
-		gravityEffect := 0.00000005 * gravity * dt
+		gravityEffect := 0.0000000005 * gravity * dt
 		b.altitude += b.verticalSpeed*dt - gravityEffect
 		b.verticalSpeed -= gravity * dt
 
