@@ -123,6 +123,7 @@ func (p *Player) Update(tps float64) {
 
 	// new tank
 	if ebiten.IsKeyPressed(ebiten.KeyT) && inpututil.IsKeyJustPressed(ebiten.KeyT) {
+		p.tank.Destroy()
 		p.tank = NewRandomTank(p.game, p.tank.solid.Position(), rotation)
 	}
 
