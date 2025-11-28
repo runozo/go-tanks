@@ -40,16 +40,22 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 	bulletSprite := barrel.bulletSprite
 	bulletSpriteWidth := float64(bulletSprite.Bounds().Dx())
 	bulletSpriteHeight := float64(bulletSprite.Bounds().Dy())
-
-	position := resolv.Vector{
-		X: barrel.solid.Center().X + barrel.spriteWidth/2 - bulletSpriteWidth/2,
-		Y: barrel.solid.Center().Y - bulletSpriteHeight,
-	}
+	s, c := math.Sincos(barrel.solid.Rotation())
+	// define resolv shape
+	solid := resolv.NewRectangle(
+		barrel.solid.Center().X-(barrel.spriteHeight+bulletSpriteHeight)*s,
+		barrel.solid.Center().Y-(barrel.spriteHeight+bulletSpriteHeight)*c,
+		bulletSpriteWidth,
+		bulletSpriteHeight,
+	)
+	solid.SetRotation(barrel.solid.Rotation())
+	solid.Tags().Set(TagBullet)
+	game.space.Add(solid)
 
 	// fmt.Println("Barrel position", barrel.position.X, barrel.position.Y, "Bullet position", position.X, position.Y)
 
 	b := Bullet{
-		solid:                    resolv.NewRectangle(position.X, position.Y, bulletSpriteWidth, bulletSpriteHeight),
+		solid:                    solid,
 		sprite:                   bulletSprite,
 		verticalSpeed:            bulletSpeed * math.Sin(barrel.slope),
 		currentSlope:             barrel.slope,
@@ -70,8 +76,6 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 		game:                     game,
 	}
 
-	b.solid.SetRotation(-barrel.solid.Rotation())
-
 	return &b
 }
 
@@ -80,50 +84,54 @@ func (b *Bullet) Update(tps float64) {
 	dt := 1.0 / tps
 	b.elapsedTime += dt
 
-	if b.altitude >= initialAltitude {
-		b.moveVec.X += sinRot * bulletSpeed
-		b.moveVec.Y -= cosRot * bulletSpeed
+	/*if b.altitude >= initialAltitude {*/
+	b.moveVec.X += sinRot * bulletSpeed
+	b.moveVec.Y -= cosRot * bulletSpeed
+	/*
+			gravityEffect := 0.0000000005 * gravity * dt
+			b.altitude += b.verticalSpeed*dt - gravityEffect
+			b.verticalSpeed -= gravity * dt
 
-		gravityEffect := 0.0000000005 * gravity * dt
-		b.altitude += b.verticalSpeed*dt - gravityEffect
-		b.verticalSpeed -= gravity * dt
+			actualSpeed := bulletSpeed * math.Cos(b.initialSlope)
+			b.currentSlope = math.Atan2(b.verticalSpeed, actualSpeed)
+			b.scale = b.altitude*scaleCoeff + bulletMinScale
 
-		actualSpeed := bulletSpeed * math.Cos(b.initialSlope)
-		b.currentSlope = math.Atan2(b.verticalSpeed, actualSpeed)
-		b.scale = b.altitude*scaleCoeff + bulletMinScale
+			b.solid.MoveVec(b.moveVec)
+		} else {
+			b.exploding = true
+		}
 
-		b.solid.MoveVec(b.moveVec)
-	} else {
-		b.exploding = true
-	}
-
-	if b.exploding {
-		b.explosionElapsedTime += dt * float64(len(b.explosionHitTargetFrames))
-	}
+		if b.exploding {
+			b.explosionElapsedTime += dt * float64(len(b.explosionHitTargetFrames))
+		}
+	*/
 }
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
 	if !b.exploding && !b.exploded {
 		bulletHalfW := b.spriteWidth / 2
 		bulletHalfH := b.spriteHeight / 2
-		bulletAndBarrellHeight := b.barrelHeight + b.spriteHeight
+		// bulletAndBarrellHeight := b.barrelHeight + b.spriteHeight
 
 		// fmt.Println(b.altitude) // , "Scale", b.scale)
 
 		op := &ebiten.DrawImageOptions{}
 
 		// center the bullet than scale
-		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
-		op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*scaleCoeff) // simulate bullet deflection (poorly)
-		op.GeoM.Translate(bulletHalfW, bulletHalfH)
+		/*
+			op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
+			op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*scaleCoeff) // simulate bullet deflection (poorly)
+			op.GeoM.Translate(bulletHalfW, bulletHalfH)
+		*/
 
 		// center the bullet and the barrel than rotate
-		op.GeoM.Translate(-bulletHalfW, -bulletAndBarrellHeight)
+		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
 		op.GeoM.Rotate(-b.solid.Rotation())
-		op.GeoM.Translate(bulletHalfW, bulletAndBarrellHeight)
+		op.GeoM.Translate(bulletHalfW, bulletHalfH)
 
 		// true position of the bullet to draw
-		op.GeoM.Translate(b.solid.Position().X, b.solid.Position().Y)
+		// fmt.Println(b.solid.Position().X, b.solid.Position().Y, -bulletHalfW, bulletHalfH)
+		op.GeoM.Translate(b.solid.Center().X-bulletHalfW, b.solid.Center().Y-bulletHalfH)
 		screen.DrawImage(b.sprite, op)
 	} else {
 		if b.hasHitTarget {

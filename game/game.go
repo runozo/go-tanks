@@ -34,6 +34,7 @@ var (
 	TagPlayer = resolv.NewTag("Player")
 	TagBarrel = resolv.NewTag("Barrel")
 	TagEnemy  = resolv.NewTag("Enemy")
+	TagBullet = resolv.NewTag("Bullet")
 )
 
 type Game struct {
