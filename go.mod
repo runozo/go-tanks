@@ -7,7 +7,7 @@ toolchain go1.24.5
 require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/hajimehoshi/ebiten/v2 v2.9.4
-	github.com/runozo/go-wave-function-collapse v1.0.5
+	github.com/runozo/go-wave-function-collapse v1.0.6
 	github.com/solarlune/resolv v0.8.1
 	golang.org/x/image v0.32.0
 )

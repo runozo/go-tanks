@@ -47,7 +47,16 @@ type Game struct {
 	fontSmall     *text.GoTextFace
 	serverAddress string
 	space         *resolv.Space
+	state         int
 }
+
+// game state
+const (
+	PLAYING = iota
+	PAUSED
+	RENDERINGPLAYFIELD
+	GAMEOVER
+)
 
 func NewGame(serverAddress string) *Game {
 	// Load sprite sheet
@@ -98,35 +107,12 @@ func NewGame(serverAddress string) *Game {
 		},
 		serverAddress: serverAddress,
 		space:         resolv.NewSpace(screenWidth, screenHeight, cellWidth, cellHeight),
+		state:         RENDERINGPLAYFIELD,
 	}
 
 	// create new playfield
 
 	g.playfield = NewPlayfield(g)
-
-	// add players
-	playerSolids := resolv.ShapeCollection{}
-	p := NewPlayer(g)
-	g.players = append(g.players, p)
-	playerSolids = append(playerSolids, p.tank.solid)
-	playerSolids.SetTags(TagPlayer)
-	g.space.Add(playerSolids...)
-
-	// add enemies
-
-	typesOfEnemies := []string{"hard", "medium", "easy"}
-	enemySolids := resolv.ShapeCollection{}
-	// add enemies one at a time so they don't overlap
-	for i := 0; i < numberOfEnemies; i++ {
-		index := rand.Intn(len(typesOfEnemies))
-		e := NewEnemy(g, typesOfEnemies[index]) // random enemy
-		g.enemies = append(g.enemies, e)
-		enemySolids = append(enemySolids, e.tank.solid)
-	}
-
-	enemySolids.SetTags(TagEnemy)
-
-	g.space.Add(enemySolids...)
 
 	return g
 }
@@ -134,13 +120,43 @@ func NewGame(serverAddress string) *Game {
 func (g *Game) Update() error {
 	tps := float64(ebiten.TPS())
 
+	if g.state == RENDERINGPLAYFIELD {
+		g.playfield.Update(tps)
+	}
+
+	if g.playfield.wfc.IsRendered && g.state == RENDERINGPLAYFIELD {
+		// add players
+		playerSolids := resolv.ShapeCollection{}
+		p := NewPlayer(g)
+		g.players = append(g.players, p)
+		playerSolids = append(playerSolids, p.tank.solid)
+		playerSolids.SetTags(TagPlayer)
+		g.space.Add(playerSolids...)
+
+		// add enemies
+
+		typesOfEnemies := []string{"hard", "medium", "easy"}
+		enemySolids := resolv.ShapeCollection{}
+		// add enemies one at a time so they don't overlap
+		for i := 0; i < numberOfEnemies; i++ {
+			index := rand.Intn(len(typesOfEnemies))
+			e := NewEnemy(g, typesOfEnemies[index]) // random enemy
+			g.enemies = append(g.enemies, e)
+			enemySolids = append(enemySolids, e.tank.solid)
+		}
+
+		enemySolids.SetTags(TagEnemy)
+
+		g.space.Add(enemySolids...)
+		g.state = PLAYING
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		g.state = RENDERINGPLAYFIELD
 		g.playfield = NewPlayfield(g)
 	}
 
-	g.playfield.Update(tps)
-
-	if !g.playfield.wfc.IsRunning {
+	if g.state == PLAYING {
 		for _, e := range g.enemies {
 			e.Update(tps)
 		}
