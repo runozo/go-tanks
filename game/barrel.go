@@ -32,11 +32,6 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 		sprite = FlipVertical(sprite)
 	}
 
-	bulletSprite := game.assets.GetSprite(bulletSpriteName)
-
-	spriteWidth := float64(sprite.Bounds().Dx())
-	spriteHeight := float64(sprite.Bounds().Dy())
-
 	position := resolv.Vector{
 		X: tank.solid.Position().X + offset.X, // tank.bodyWidth/2 - spriteWidth/2,
 		Y: tank.solid.Position().Y + offset.Y, // tank.bodyHeight/2 - spriteHeight,
@@ -68,7 +63,7 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 	}
 
 	// define resolv shape
-	solid := resolv.NewRectangle(position.X, position.Y, spriteWidth, spriteHeight)
+	solid := resolv.NewRectangle(position.X, position.Y, float64(sprite.Bounds().Dx()), float64(sprite.Bounds().Dy()))
 	solid.SetRotation(tank.solid.Rotation())
 	solid.Tags().Set(TagBarrel)
 	game.space.Add(solid)
@@ -76,9 +71,9 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 	return &Barrel{
 		sprite:                            sprite,
 		solid:                             solid,
-		spriteWidth:                       spriteWidth,
-		spriteHeight:                      spriteHeight,
-		bulletSprite:                      bulletSprite,
+		spriteWidth:                       float64(sprite.Bounds().Dx()),
+		spriteHeight:                      float64(sprite.Bounds().Dy()),
+		bulletSprite:                      game.assets.GetSprite(bulletSpriteName),
 		shootAnimationFrames:              shootAnimationSprites,
 		explosionAnimationFrames:          explosionAnimationSprites,
 		explosionHitTargetAnimationFrames: explosionHitTargetAnimationSprites,
@@ -96,6 +91,10 @@ func (b *Barrel) Fire() *Bullet {
 	b.isFiring = true
 	b.shootAge = 0
 	return NewBullet(b.game, b)
+}
+
+func (b *Barrel) Destroy() {
+	b.game.space.Remove(b.solid)
 }
 
 func (b *Barrel) Update(tps float64) {
@@ -142,7 +141,7 @@ func (b *Barrel) Draw(screen *ebiten.Image) {
 		op_shoot.GeoM.Translate(shootHalfW, shootAndBarrellheight)
 		op_shoot.GeoM.Translate(
 			b.solid.Center().X-shootHalfW,
-			b.solid.Center().Y-shootFrameHeight,
+			b.solid.Center().Y-shootAndBarrellheight,
 		)
 		screen.DrawImage(shootFrame, op_shoot)
 	}

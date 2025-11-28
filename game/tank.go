@@ -14,6 +14,7 @@ type Tank struct {
 	barrels    []*Barrel
 	bodyWidth  float64
 	bodyHeight float64
+	game       *Game
 }
 
 func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position resolv.Vector, rotation float64) *Tank {
@@ -28,6 +29,7 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 		bodyWidth:  spriteWidth,
 		bodyHeight: spriteHeight,
 		barrels:    make([]*Barrel, 0),
+		game:       g,
 	}
 
 	tank.solid.Rotate(rotation)
@@ -68,6 +70,14 @@ func (t *Tank) Fire() []*Bullet {
 		bullets[b] = t.barrels[b].Fire()
 	}
 	return bullets
+}
+
+func (t *Tank) Destroy() {
+	// barrel
+	for i := 0; i < len(t.barrels); i++ {
+		t.barrels[i].Destroy()
+	}
+	t.game.space.Remove(t.solid)
 }
 
 func (t *Tank) Update(tps float64) {
