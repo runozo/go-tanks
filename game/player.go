@@ -69,13 +69,14 @@ func (p *Player) Update(tps float64) {
 			p.tank.barrels[i].relativeRotation -= rotationSpeed
 		}
 	}
+
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
 		for i := 0; i < len(p.tank.barrels); i++ {
 			p.tank.barrels[i].relativeRotation += rotationSpeed
 		}
 	}
 
-	// move
+	// move tank
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		s, c := math.Sincos(p.tank.solid.Rotation())
 		moveVec.X -= s * movementSpeed
@@ -88,8 +89,6 @@ func (p *Player) Update(tps float64) {
 	}
 
 	// fmt.Println(moveVec)
-	// Add in the player's movement, clamping it to the maximum speed and incorporating friction.
-	// p.Movement = p.Movement.Add(moveVec).ClampMagnitude(maxSpd).SubMagnitude(friction)
 	p.tank.solid.Rotate(rotation)
 	p.tank.solid.MoveVec(moveVec)
 
@@ -105,10 +104,10 @@ func (p *Player) Update(tps float64) {
 		// fmt.Println(p.tank.barrel.slope)
 	}
 
-	// fire
+	// charge fire increasing barrel slope
 	yesFire := false
-	for i := 0; i < len(p.tank.barrels); i++ {
-		if (p.tank.barrels[i].slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || p.tank.barrels[i].slope >= barrelMaxSlope) && p.shootCooldown.IsReady() {
+	for _, barrel := range p.tank.barrels {
+		if (barrel.slope > 0.0 && inpututil.IsKeyJustReleased(ebiten.KeySpace) || barrel.slope >= barrelMaxSlope) && p.shootCooldown.IsReady() {
 			p.shootCooldown.Reset()
 			yesFire = true
 			// fmt.Println(len(p.bullets))
