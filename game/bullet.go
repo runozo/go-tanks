@@ -24,9 +24,7 @@ type Bullet struct {
 	currentSlope, initialSlope float64
 	scale                      float64
 	elapsedTime                float64
-	spriteWidth, spriteHeight  float64
-	barrelWidth                float64
-	barrelHeight               float64
+	bulletHalfW, bulletHalfH   float64
 	explosionElapsedTime       float64
 	explosionFrames            []*ebiten.Image
 	explosionHitTargetFrames   []*ebiten.Image
@@ -37,36 +35,33 @@ type Bullet struct {
 }
 
 func NewBullet(game *Game, barrel *Barrel) *Bullet {
-	bulletSprite := barrel.bulletSprite
-	bulletSpriteWidth := float64(bulletSprite.Bounds().Dx())
-	bulletSpriteHeight := float64(bulletSprite.Bounds().Dy())
-	s, c := math.Sincos(barrel.solid.Rotation())
+	bulletSpriteWidth := float64(barrel.bulletSprite.Bounds().Dx())
+	bulletSpriteHeight := float64(barrel.bulletSprite.Bounds().Dy())
+
 	// define resolv shape
+	s, c := math.Sincos(barrel.solid.Rotation())
 	solid := resolv.NewRectangle(
 		barrel.solid.Center().X-(barrel.spriteHeight+bulletSpriteHeight)*s,
 		barrel.solid.Center().Y-(barrel.spriteHeight+bulletSpriteHeight)*c,
 		bulletSpriteWidth,
 		bulletSpriteHeight,
 	)
+
 	solid.SetRotation(barrel.solid.Rotation())
 	solid.Tags().Set(TagBullet)
 	game.space.Add(solid)
 
-	// fmt.Println("Barrel position", barrel.position.X, barrel.position.Y, "Bullet position", position.X, position.Y)
-
 	b := Bullet{
 		solid:                    solid,
-		sprite:                   bulletSprite,
+		sprite:                   barrel.bulletSprite,
 		verticalSpeed:            bulletSpeed * math.Sin(barrel.slope),
 		currentSlope:             barrel.slope,
 		initialSlope:             barrel.slope,
 		altitude:                 initialAltitude,
 		scale:                    bulletMinScale,
 		elapsedTime:              0.0,
-		spriteWidth:              bulletSpriteWidth,
-		spriteHeight:             bulletSpriteHeight,
-		barrelWidth:              barrel.spriteWidth,
-		barrelHeight:             barrel.spriteHeight,
+		bulletHalfW:              bulletSpriteWidth / 2.0,
+		bulletHalfH:              bulletSpriteHeight / 2.0,
 		explosionElapsedTime:     0,
 		explosionFrames:          barrel.explosionAnimationFrames,
 		explosionHitTargetFrames: barrel.explosionHitTargetAnimationFrames,
@@ -109,12 +104,6 @@ func (b *Bullet) Update(tps float64) {
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
 	if !b.exploding && !b.exploded {
-		bulletHalfW := b.spriteWidth / 2
-		bulletHalfH := b.spriteHeight / 2
-		// bulletAndBarrellHeight := b.barrelHeight + b.spriteHeight
-
-		// fmt.Println(b.altitude) // , "Scale", b.scale)
-
 		op := &ebiten.DrawImageOptions{}
 
 		// center the bullet than scale
@@ -125,13 +114,12 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 		*/
 
 		// center the bullet and the barrel than rotate
-		op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
+		op.GeoM.Translate(-b.bulletHalfW, -b.bulletHalfH)
 		op.GeoM.Rotate(-b.solid.Rotation())
-		op.GeoM.Translate(bulletHalfW, bulletHalfH)
+		op.GeoM.Translate(b.bulletHalfW, b.bulletHalfH)
 
-		// true position of the bullet to draw
-		// fmt.Println(b.solid.Position().X, b.solid.Position().Y, -bulletHalfW, bulletHalfH)
-		op.GeoM.Translate(b.solid.Center().X-bulletHalfW, b.solid.Center().Y-bulletHalfH)
+		// actual position of the bullet to draw
+		op.GeoM.Translate(b.solid.Center().X-b.bulletHalfW, b.solid.Center().Y-b.bulletHalfH)
 		screen.DrawImage(b.sprite, op)
 	} else {
 		if b.hasHitTarget {
