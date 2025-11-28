@@ -32,9 +32,6 @@ type Playfield struct {
 // - a pointer to the newly created Playfield.
 func NewPlayfield(game *Game) *Playfield {
 
-	tilesX := game.width/tileWidth + 1
-	tilesY := game.height/tileHeight + 1
-
 	playfield := &Playfield{
 		width:  game.width,
 		height: game.height,
@@ -42,8 +39,8 @@ func NewPlayfield(game *Game) *Playfield {
 		wfc:         wfc.NewWfc(screenWidth/tileWidth+1, screenHeight/tileHeight+1, game.assets.TileEntries),
 		assets:      game.assets,
 		progressBar: NewProgressBar(400, 36, "Generating playfield", resolv.Vector{X: (screenWidth - 400) / 2, Y: (screenHeight - 36) / 2}, game.fontSmall),
-		numOfTilesX: tilesX,
-		numOfTilesY: tilesY,
+		numOfTilesX: game.width/tileWidth + 1,
+		numOfTilesY: game.height/tileHeight + 1,
 	}
 
 	playfield.progressBar.Update(0)
