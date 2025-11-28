@@ -75,13 +75,13 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 }
 
 func (b *Bullet) Update(tps float64) {
-	sinRot, cosRot := math.Sincos(b.solid.Rotation())
+	s, c := math.Sincos(b.solid.Rotation())
 	dt := 1.0 / tps
 	b.elapsedTime += dt
 
 	/*if b.altitude >= initialAltitude {*/
-	b.moveVec.X += sinRot * bulletSpeed
-	b.moveVec.Y -= cosRot * bulletSpeed
+	b.moveVec.X += s * bulletSpeed
+	b.moveVec.Y -= c * bulletSpeed
 	/*
 			gravityEffect := 0.0000000005 * gravity * dt
 			b.altitude += b.verticalSpeed*dt - gravityEffect

@@ -125,6 +125,7 @@ func (g *Game) Update() error {
 		g.playfield.Update(tps)
 	}
 
+	// prepare the game after playfield rendered
 	if g.playfield.wfc.IsRendered && g.state == RENDERINGPLAYFIELD {
 		// add players
 		playerSolids := resolv.ShapeCollection{}
