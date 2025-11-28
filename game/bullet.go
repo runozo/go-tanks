@@ -19,7 +19,6 @@ const (
 type Bullet struct {
 	solid                      *resolv.ConvexPolygon
 	sprite                     *ebiten.Image
-	moveVec                    resolv.Vector
 	verticalSpeed, altitude    float64
 	currentSlope, initialSlope float64
 	scale                      float64
@@ -37,6 +36,22 @@ type Bullet struct {
 func NewBullet(game *Game, barrel *Barrel) *Bullet {
 	bulletSpriteWidth := float64(barrel.bulletSprite.Bounds().Dx())
 	bulletSpriteHeight := float64(barrel.bulletSprite.Bounds().Dy())
+
+	explosionAnimationSprites := []*ebiten.Image{
+		game.assets.GetSprite("explosionSmoke1"),
+		game.assets.GetSprite("explosionSmoke2"),
+		game.assets.GetSprite("explosionSmoke3"),
+		game.assets.GetSprite("explosionSmoke4"),
+		game.assets.GetSprite("explosionSmoke5"),
+	}
+
+	explosionHitTargetAnimationSprites := []*ebiten.Image{
+		game.assets.GetSprite("explosion1"),
+		game.assets.GetSprite("explosion2"),
+		game.assets.GetSprite("explosion3"),
+		game.assets.GetSprite("explosion4"),
+		game.assets.GetSprite("explosion5"),
+	}
 
 	// define resolv shape
 	s, c := math.Sincos(barrel.solid.Rotation())
@@ -63,8 +78,8 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 		bulletHalfW:              bulletSpriteWidth / 2.0,
 		bulletHalfH:              bulletSpriteHeight / 2.0,
 		explosionElapsedTime:     0,
-		explosionFrames:          barrel.explosionAnimationFrames,
-		explosionHitTargetFrames: barrel.explosionHitTargetAnimationFrames,
+		explosionFrames:          explosionAnimationSprites,
+		explosionHitTargetFrames: explosionHitTargetAnimationSprites,
 		exploding:                false,
 		exploded:                 false,
 		hasHitTarget:             false,
@@ -75,13 +90,22 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 }
 
 func (b *Bullet) Update(tps float64) {
+	nearbyShapes := b.solid.SelectTouchingCells(4).FilterShapes()
 	s, c := math.Sincos(b.solid.Rotation())
 	dt := 1.0 / tps
 	b.elapsedTime += dt
 
 	/*if b.altitude >= initialAltitude {*/
-	b.moveVec.X += s * bulletSpeed
-	b.moveVec.Y -= c * bulletSpeed
+	b.solid.MoveVec(resolv.Vector{X: -s * bulletSpeed, Y: -c * bulletSpeed})
+	b.solid.IntersectionTest(resolv.IntersectionTestSettings{
+		TestAgainst: nearbyShapes.ByTags(TagEnemy | TagPlayer),
+		OnIntersect: func(set resolv.IntersectionSet) bool {
+			b.solid.MoveVec(set.MTV)
+			b.exploding = true
+			b.hasHitTarget = true
+			return true
+		},
+	})
 	/*
 			gravityEffect := 0.0000000005 * gravity * dt
 			b.altitude += b.verticalSpeed*dt - gravityEffect
@@ -95,11 +119,10 @@ func (b *Bullet) Update(tps float64) {
 		} else {
 			b.exploding = true
 		}
-
-		if b.exploding {
-			b.explosionElapsedTime += dt * float64(len(b.explosionHitTargetFrames))
-		}
 	*/
+	if b.exploding {
+		b.explosionElapsedTime += dt * float64(len(b.explosionHitTargetFrames))
+	}
 }
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
@@ -127,7 +150,9 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 		} else {
 			b.drawExplosion(screen)
 		}
-
+		if b.exploded {
+			b.game.space.Remove(b.solid)
+		}
 	}
 }
 

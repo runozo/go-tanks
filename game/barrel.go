@@ -8,21 +8,19 @@ import (
 )
 
 type Barrel struct {
-	sprite                            *ebiten.Image
-	solid                             *resolv.ConvexPolygon
-	spriteWidth                       float64
-	spriteHeight                      float64
-	bulletSprite                      *ebiten.Image
-	shootAnimationFrames              []*ebiten.Image
-	explosionAnimationFrames          []*ebiten.Image
-	explosionHitTargetAnimationFrames []*ebiten.Image
-	offset                            resolv.Vector
-	relativeRotation                  float64
-	slope                             float64
-	tank                              *Tank
-	isFiring                          bool
-	shootAge                          float64
-	game                              *Game
+	sprite               *ebiten.Image
+	solid                *resolv.ConvexPolygon
+	spriteWidth          float64
+	spriteHeight         float64
+	bulletSprite         *ebiten.Image
+	shootAnimationFrames []*ebiten.Image
+	offset               resolv.Vector
+	relativeRotation     float64
+	slope                float64
+	tank                 *Tank
+	isFiring             bool
+	shootAge             float64
+	game                 *Game
 }
 
 func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offset resolv.Vector) *Barrel {
@@ -46,22 +44,6 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 		game.assets.GetSprite("shotLarge"),
 	}
 
-	explosionAnimationSprites := []*ebiten.Image{
-		game.assets.GetSprite("explosionSmoke1"),
-		game.assets.GetSprite("explosionSmoke2"),
-		game.assets.GetSprite("explosionSmoke3"),
-		game.assets.GetSprite("explosionSmoke4"),
-		game.assets.GetSprite("explosionSmoke5"),
-	}
-
-	explosionHitTargetAnimationSprites := []*ebiten.Image{
-		game.assets.GetSprite("explosion1"),
-		game.assets.GetSprite("explosion2"),
-		game.assets.GetSprite("explosion3"),
-		game.assets.GetSprite("explosion4"),
-		game.assets.GetSprite("explosion5"),
-	}
-
 	// define resolv shape
 	solid := resolv.NewRectangle(position.X, position.Y, float64(sprite.Bounds().Dx()), float64(sprite.Bounds().Dy()))
 	solid.SetRotation(tank.solid.Rotation())
@@ -69,21 +51,19 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 	game.space.Add(solid)
 
 	return &Barrel{
-		sprite:                            sprite,
-		solid:                             solid,
-		spriteWidth:                       float64(sprite.Bounds().Dx()),
-		spriteHeight:                      float64(sprite.Bounds().Dy()),
-		bulletSprite:                      game.assets.GetSprite(bulletSpriteName),
-		shootAnimationFrames:              shootAnimationSprites,
-		explosionAnimationFrames:          explosionAnimationSprites,
-		explosionHitTargetAnimationFrames: explosionHitTargetAnimationSprites,
-		offset:                            offset,
-		relativeRotation:                  0.0,
-		slope:                             0.0,
-		tank:                              tank,
-		isFiring:                          false,
-		shootAge:                          0.0,
-		game:                              game,
+		sprite:               sprite,
+		solid:                solid,
+		spriteWidth:          float64(sprite.Bounds().Dx()),
+		spriteHeight:         float64(sprite.Bounds().Dy()),
+		bulletSprite:         game.assets.GetSprite(bulletSpriteName),
+		shootAnimationFrames: shootAnimationSprites,
+		offset:               offset,
+		relativeRotation:     0.0,
+		slope:                0.0,
+		tank:                 tank,
+		isFiring:             false,
+		shootAge:             0.0,
+		game:                 game,
 	}
 }
 
