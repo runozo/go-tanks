@@ -160,7 +160,7 @@ func (b *Bullet) drawExplosionHitTarget(screen *ebiten.Image) {
 	if int(b.explosionElapsedTime) < len(b.explosionHitTargetFrames) {
 		frame := b.explosionHitTargetFrames[int(b.explosionElapsedTime)]
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(b.solid.Position().X, b.solid.Position().Y)
+		op.GeoM.Translate(b.solid.Center().X-float64(frame.Bounds().Dx()/2), b.solid.Center().Y-float64(frame.Bounds().Dy()/2))
 		screen.DrawImage(frame, op)
 	} else {
 		b.exploded = true
@@ -172,7 +172,7 @@ func (b *Bullet) drawExplosion(screen *ebiten.Image) {
 	if int(b.explosionElapsedTime) < len(b.explosionFrames) {
 		frame := b.explosionFrames[int(b.explosionElapsedTime)]
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(b.solid.Position().X, b.solid.Position().Y)
+		op.GeoM.Translate(b.solid.Center().X-float64(frame.Bounds().Dx()/2), b.solid.Center().Y-float64(frame.Bounds().Dy()/2))
 		screen.DrawImage(frame, op)
 	} else {
 		b.exploded = true
