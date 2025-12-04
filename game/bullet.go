@@ -90,17 +90,19 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 }
 
 func (b *Bullet) Update(tps float64) {
-	nearbyShapes := b.solid.SelectTouchingCells(4).FilterShapes()
 	s, c := math.Sincos(b.solid.Rotation())
 	dt := 1.0 / tps
 	b.elapsedTime += dt
 
 	/*if b.altitude >= initialAltitude {*/
-	b.solid.MoveVec(resolv.Vector{X: -s * bulletSpeed, Y: -c * bulletSpeed})
+	nearbyShapes := b.solid.SelectTouchingCells(4).FilterShapes()
+	if !b.hasHitTarget {
+		b.solid.MoveVec(resolv.Vector{X: -s * bulletSpeed, Y: -c * bulletSpeed})
+	}
 	b.solid.IntersectionTest(resolv.IntersectionTestSettings{
 		TestAgainst: nearbyShapes.ByTags(TagEnemy | TagPlayer),
 		OnIntersect: func(set resolv.IntersectionSet) bool {
-			b.solid.MoveVec(set.MTV)
+			b.solid.MoveVec(resolv.Vector{X: 0, Y: 0})
 			b.exploding = true
 			b.hasHitTarget = true
 			return true
