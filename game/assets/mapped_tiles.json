@@ -2879,7 +2879,7 @@
         "width": 28,
         "height": 28,
         "weight": 7,
-        "type": "random"
+        "type": "obstacle"
     },
     {
         "name": "crateMetal_side",
@@ -2915,7 +2915,7 @@
         "width": 28,
         "height": 28,
         "weight": 21,
-        "type": "random"
+        "type": "obstacle"
     },
     {
         "name": "crateWood_side",
@@ -4625,7 +4625,7 @@
         "width": 64,
         "height": 64,
         "weight": 3,
-        "type": "random"
+        "type": "obstacle"
     },
     {
         "name": "treeBrown_leaf",
@@ -4661,7 +4661,7 @@
         "width": 36,
         "height": 36,
         "weight": 11,
-        "type": "random"
+        "type": "obstacle"
     },
     {
         "name": "treeBrown_twigs",
@@ -4679,7 +4679,7 @@
         "width": 26,
         "height": 22,
         "weight": 32,
-        "type": "random"
+        "type": "obstacle"
     },
     {
         "name": "treeGreen_large",
@@ -4697,7 +4697,7 @@
         "width": 64,
         "height": 64,
         "weight": 92,
-        "type": "random"
+        "type": "obstacle"
     },
     {
         "name": "treeGreen_leaf",
@@ -4733,7 +4733,7 @@
         "width": 36,
         "height": 36,
         "weight": 47,
-        "type": "random"
+        "type": "obstacle"
     },
     {
         "name": "treeGreen_twigs",
@@ -4751,7 +4751,7 @@
         "width": 26,
         "height": 22,
         "weight": 48,
-        "type": "random"
+        "type": "obstacle"
     },
     {
         "name": "wireCrooked",

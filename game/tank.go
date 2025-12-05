@@ -246,7 +246,7 @@ func (t *Tank) Update(tps float64) {
 		b.Update(tps)
 	}
 
-	otherTanks := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer)
+	otherTanks := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer | TagObstacle)
 	bulletObjects := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagBullet)
 	t.Object.IntersectionTest(resolv.IntersectionTestSettings{
 		TestAgainst: otherTanks,

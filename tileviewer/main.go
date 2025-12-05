@@ -49,7 +49,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	tileName := g.isOverTile()
 	if tileName != "" {
 		tileEntry := g.tileEntries[tileName]
-		text.Draw(screen, fmt.Sprintf(" %s X: %d, Y: %d, W: %d, H: %d", tileName, tileEntry.X, tileEntry.Y, tileEntry.Width, tileEntry.Height), mplusNormalFont, 10, g.spriteSheet.Bounds().Dy()+g.spriteSheetOffsetY+20, color.White)
+		text.Draw(screen, fmt.Sprintf(" %s X: %d, Y: %d, W: %d, H: %d T: %s", tileName, tileEntry.X, tileEntry.Y, tileEntry.Width, tileEntry.Height, tileEntry.Type), mplusNormalFont, 10, g.spriteSheet.Bounds().Dy()+g.spriteSheetOffsetY+20, color.White)
 
 		tileX := tileEntry.X
 		tileY := tileEntry.Y
