@@ -50,6 +50,7 @@ type Game struct {
 	serverAddress string
 	space         *resolv.Space
 	state         int
+	debug         bool
 }
 
 // game state
@@ -110,6 +111,7 @@ func NewGame(serverAddress string) *Game {
 		serverAddress: serverAddress,
 		space:         resolv.NewSpace(screenWidth, screenHeight, cellWidth, cellHeight),
 		state:         RENDERINGPLAYFIELD,
+		debug:         false,
 	}
 
 	// create new playfield
@@ -195,31 +197,33 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// debug shapes
-	g.space.ForEachShape(func(shape resolv.IShape, index, maxCount int) bool {
+	if g.debug {
+		g.space.ForEachShape(func(shape resolv.IShape, index, maxCount int) bool {
 
-		var drawColor color.Color = color.White
+			var drawColor color.Color = color.White
 
-		tags := shape.Tags()
+			tags := shape.Tags()
 
-		if tags.Has(TagEnemy) && !tags.Has(TagBarrel) {
-			drawColor = color.RGBA{255, 128, 35, 255}
-		}
-		if tags.Has(TagPlayer) {
-			drawColor = color.RGBA{32, 255, 128, 255}
-		}
-		switch o := shape.(type) {
-		case *resolv.Circle:
-			vector.StrokeCircle(screen, float32(o.Position().X), float32(o.Position().Y), float32(o.Radius()), 2, drawColor, false)
-		case *resolv.ConvexPolygon:
-
-			for _, l := range o.Lines() {
-				vector.StrokeLine(screen, float32(l.Start.X), float32(l.Start.Y), float32(l.End.X), float32(l.End.Y), 2, drawColor, false)
+			if tags.Has(TagEnemy) && !tags.Has(TagBarrel) {
+				drawColor = color.RGBA{255, 128, 35, 255}
 			}
-		}
+			if tags.Has(TagPlayer) {
+				drawColor = color.RGBA{32, 255, 128, 255}
+			}
+			switch o := shape.(type) {
+			case *resolv.Circle:
+				vector.StrokeCircle(screen, float32(o.Position().X), float32(o.Position().Y), float32(o.Radius()), 2, drawColor, false)
+			case *resolv.ConvexPolygon:
 
-		return true
+				for _, l := range o.Lines() {
+					vector.StrokeLine(screen, float32(l.Start.X), float32(l.Start.Y), float32(l.End.X), float32(l.End.Y), 2, drawColor, false)
+				}
+			}
 
-	})
+			return true
+
+		})
+	}
 
 	str := "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield"
 	width, height := text.Measure(str, g.fontMedium, 0)
