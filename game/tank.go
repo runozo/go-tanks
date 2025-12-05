@@ -11,8 +11,8 @@ type Tank struct {
 	bodySprite *ebiten.Image
 	solid      *resolv.ConvexPolygon
 	barrels    []*Barrel
-	bodyWidth  float64
-	bodyHeight float64
+	Width      float64
+	Height     float64
 	game       *Game
 	hit        bool
 }
@@ -26,8 +26,8 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName string, position resolv.V
 	tank := &Tank{
 		bodySprite: bodySprite,
 		solid:      resolv.NewRectangle(position.X, position.Y, spriteWidth, spriteHeight),
-		bodyWidth:  spriteWidth,
-		bodyHeight: spriteHeight,
+		Width:      spriteWidth,
+		Height:     spriteHeight,
 		barrels:    make([]*Barrel, 0),
 		game:       g,
 		hit:        false,
@@ -104,8 +104,8 @@ func (t *Tank) Draw(screen *ebiten.Image) {
 	// Draw the tank
 
 	// body
-	bodyHalfW := t.bodyWidth / 2.0
-	bodyHalfH := t.bodyHeight / 2.0
+	bodyHalfW := t.Width / 2.0
+	bodyHalfH := t.Height / 2.0
 	op_body := &ebiten.DrawImageOptions{}
 	op_body.GeoM.Translate(-bodyHalfW, -bodyHalfH)
 	op_body.GeoM.Rotate(-t.solid.Rotation())
