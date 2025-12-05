@@ -51,7 +51,7 @@ func NewExplosion(bullet *Bullet) *Explosion {
 }
 
 func (e *Explosion) Update(tps float64) {
-	e.frameCounter += 1.0 / tps * 5
+	e.frameCounter += 1.0 / tps * 8
 
 	nearbyShapes := e.solid.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer)
 	e.solid.IntersectionTest(resolv.IntersectionTestSettings{

@@ -83,9 +83,9 @@ func (b *Bullet) Update(tps float64) {
 			TestAgainst: nearbyShapes,
 			OnIntersect: func(set resolv.IntersectionSet) bool {
 				b.solid.MoveVec(resolv.Vector{X: 0, Y: 0})
+				b.hasHitTarget = true
 				b.explosion = NewExplosion(b)
 				b.game.space.Remove(b.solid)
-				b.hasHitTarget = true
 				return true
 			},
 		})
