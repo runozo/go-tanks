@@ -129,7 +129,14 @@ func (t *Tank) Destroy() {
 }
 
 func (t *Tank) Update(tps float64) {
+	moveVec := resolv.Vector{}
+	rotation := 0.0
+	rotationSpeed := rotationPerSecond / tps
+	movementSpeed := tankSpeed / tps
+	slopeSpeed := barrelMaxSlope / tps
+
 	if t.IsEnemy {
+		// enemy
 		for _, p := range t.game.Tanks {
 			if !p.IsEnemy {
 				playerPosition := p.Object.Center()
@@ -138,25 +145,22 @@ func (t *Tank) Update(tps float64) {
 					b.relativeRotation = -math.Atan2(playerPosition.Y-t.Object.Center().Y, playerPosition.X-t.Object.Center().X) - math.Pi/2
 				}
 
+				// ENEMY POWERFUL AI :)
+
 				// fires randomly
 				if t.ShootCooldown.IsReady() {
 					t.ShootCooldown.Reset()
 					randomSlope := rand.Float64() * barrelMaxSlope
-					for i := 0; i < len(t.barrels); i++ {
-						t.barrels[i].slope = randomSlope
+					for _, b := range t.barrels {
+						b.slope = randomSlope
 					}
 					t.Bullets = append(t.Bullets, t.Fire()...)
 				}
+				break // one player only
 			}
 		}
-
 	} else {
-		moveVec := resolv.Vector{}
-		rotation := 0.0
-		rotationSpeed := rotationPerSecond / tps
-		movementSpeed := tankSpeed / tps
-		slopeSpeed := barrelMaxSlope / tps
-
+		// player
 		// rotate tank
 		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 			rotation += rotationSpeed
@@ -238,8 +242,8 @@ func (t *Tank) Update(tps float64) {
 	}
 	t.Bullets = activeBullets
 
-	for i := 0; i < len(t.barrels); i++ {
-		t.barrels[i].Update(tps)
+	for _, b := range t.barrels {
+		b.Update(tps)
 	}
 
 	otherTanks := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer)
