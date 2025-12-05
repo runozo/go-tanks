@@ -80,18 +80,20 @@ func (b *Bullet) Update(tps float64) {
 	b.elapsedTime += dt
 
 	/*if b.altitude >= initialAltitude {*/
-	if !b.hasHitTarget {
+	if b.explosion == nil {
 		b.solid.MoveVec(resolv.Vector{X: -s * bulletSpeed, Y: -c * bulletSpeed})
-		nearbyShapes := b.solid.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer)
+		nearbyShapes := b.solid.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer | TagObstacle)
 		b.solid.IntersectionTest(resolv.IntersectionTestSettings{
 			TestAgainst: nearbyShapes,
 			OnIntersect: func(set resolv.IntersectionSet) bool {
 				b.solid.MoveVec(resolv.Vector{X: 0, Y: 0})
-				b.hasHitTarget = true
+
 				if b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagPlayer) {
+					b.hasHitTarget = true
 					b.barrel.tank.game.compScore++
 				}
 				if !b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagEnemy) {
+					b.hasHitTarget = true
 					b.barrel.tank.game.playerScore++
 				}
 

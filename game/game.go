@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"math/rand"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -36,6 +37,7 @@ var (
 	TagEnemy     = resolv.NewTag("Enemy")
 	TagBullet    = resolv.NewTag("Bullet")
 	TagExplosion = resolv.NewTag("Explosion")
+	TagObstacle  = resolv.NewTag("Obstacle")
 )
 
 func FlipVertical(source *ebiten.Image) *ebiten.Image {
@@ -53,6 +55,7 @@ type Game struct {
 	assets        *assets.Assets
 	Tanks         []*Tank
 	playfield     *Playfield
+	obstacles     []*Obstacle
 	fontMedium    *text.GoTextFace
 	fontSmall     *text.GoTextFace
 	serverAddress string
@@ -69,6 +72,9 @@ const (
 	PAUSED
 	RENDERINGPLAYFIELD
 	GAMEOVER
+	HELP
+	OPTIONS
+	INTRO
 )
 
 func NewGame(serverAddress string) *Game {
@@ -108,6 +114,7 @@ func NewGame(serverAddress string) *Game {
 		width:       screenWidth,
 		height:      screenHeight,
 		playfield:   nil,
+		obstacles:   []*Obstacle{},
 		compScore:   0,
 		playerScore: 0,
 		fontMedium: &text.GoTextFace{
@@ -142,10 +149,17 @@ func (g *Game) Update() error {
 
 	// prepare the game after playfield rendered
 	if g.playfield.wfc.IsRendered && g.state == RENDERINGPLAYFIELD {
+
+		// add obstacles
+		for range rand.Intn(50) {
+			// fmt.Println("obstacle")
+			g.obstacles = append(g.obstacles, NewObstacle(g))
+		}
+
 		// add players
 		g.Tanks = []*Tank{NewRandomTank(g, 0, false)}
-		// add enemies
 
+		// add enemies
 		for i := 0; i < numberOfEnemies; i++ {
 			g.Tanks = append(g.Tanks, NewRandomTank(g, 0, true))
 		}
@@ -153,8 +167,11 @@ func (g *Game) Update() error {
 		g.state = PLAYING
 	}
 
+	// recreate playfield
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.state = RENDERINGPLAYFIELD
+		g.space.RemoveAll()
+		g.obstacles = []*Obstacle{}
 		g.playfield = NewPlayfield(g)
 	}
 
@@ -169,7 +186,11 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.playfield.Draw(screen)
+
 	if !g.playfield.wfc.IsRunning {
+		for _, f := range g.obstacles {
+			f.Draw(screen)
+		}
 		for _, e := range g.Tanks {
 			e.Draw(screen)
 		}
