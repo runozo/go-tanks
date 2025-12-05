@@ -15,6 +15,7 @@ type Tank struct {
 	bodyWidth  float64
 	bodyHeight float64
 	game       *Game
+	hit        bool
 }
 
 func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position resolv.Vector, rotation float64) *Tank {
@@ -30,6 +31,7 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 		bodyHeight: spriteHeight,
 		barrels:    make([]*Barrel, 0),
 		game:       g,
+		hit:        false,
 	}
 
 	tank.solid.Rotate(rotation)
@@ -85,8 +87,17 @@ func (t *Tank) Update(tps float64) {
 		t.barrels[i].Update(tps)
 	}
 
+	otherTanks := t.solid.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer)
+	bullets := t.solid.SelectTouchingCells(2).FilterShapes().ByTags(TagBullet)
 	t.solid.IntersectionTest(resolv.IntersectionTestSettings{
-		TestAgainst: t.solid.SelectTouchingCells(1).FilterShapes(),
+		TestAgainst: otherTanks,
+		OnIntersect: func(set resolv.IntersectionSet) bool {
+			t.solid.MoveVec(set.MTV)
+			return true
+		},
+	})
+	t.solid.IntersectionTest(resolv.IntersectionTestSettings{
+		TestAgainst: bullets,
 		OnIntersect: func(set resolv.IntersectionSet) bool {
 			t.solid.MoveVec(set.MTV)
 			return true

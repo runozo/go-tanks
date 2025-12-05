@@ -31,10 +31,11 @@ const (
 var assetsFS embed.FS
 
 var (
-	TagPlayer = resolv.NewTag("Player")
-	TagBarrel = resolv.NewTag("Barrel")
-	TagEnemy  = resolv.NewTag("Enemy")
-	TagBullet = resolv.NewTag("Bullet")
+	TagPlayer    = resolv.NewTag("Player")
+	TagBarrel    = resolv.NewTag("Barrel")
+	TagEnemy     = resolv.NewTag("Enemy")
+	TagBullet    = resolv.NewTag("Bullet")
+	TagExplosion = resolv.NewTag("Explosion")
 )
 
 type Game struct {
