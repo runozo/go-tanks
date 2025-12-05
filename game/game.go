@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -38,12 +37,20 @@ var (
 	TagExplosion = resolv.NewTag("Explosion")
 )
 
+func FlipVertical(source *ebiten.Image) *ebiten.Image {
+	flipped := ebiten.NewImage(source.Bounds().Dx(), source.Bounds().Dy())
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(1, -1)
+	op.GeoM.Translate(0, float64(source.Bounds().Dy()))
+	flipped.DrawImage(source, op)
+	return flipped
+}
+
 type Game struct {
 	width         int
 	height        int
 	assets        *assets.Assets
-	players       []*Player
-	enemies       []*Enemy
+	Tanks         []*Tank
 	playfield     *Playfield
 	fontMedium    *text.GoTextFace
 	fontSmall     *text.GoTextFace
@@ -131,28 +138,13 @@ func (g *Game) Update() error {
 	// prepare the game after playfield rendered
 	if g.playfield.wfc.IsRendered && g.state == RENDERINGPLAYFIELD {
 		// add players
-		playerSolids := resolv.ShapeCollection{}
-		p := NewPlayer(g)
-		g.players = append(g.players, p)
-		playerSolids = append(playerSolids, p.tank.solid)
-		playerSolids.SetTags(TagPlayer)
-		g.space.Add(playerSolids...)
-
+		g.Tanks = []*Tank{NewRandomTank(g, 0, false)}
 		// add enemies
 
-		typesOfEnemies := []string{"hard", "medium", "easy"}
-		enemySolids := resolv.ShapeCollection{}
-		// add enemies one at a time so they don't overlap
 		for i := 0; i < numberOfEnemies; i++ {
-			index := rand.Intn(len(typesOfEnemies))
-			e := NewEnemy(g, typesOfEnemies[index]) // random enemy
-			g.enemies = append(g.enemies, e)
-			enemySolids = append(enemySolids, e.tank.solid)
+			g.Tanks = append(g.Tanks, NewRandomTank(g, 0, true))
 		}
 
-		enemySolids.SetTags(TagEnemy)
-
-		g.space.Add(enemySolids...)
 		g.state = PLAYING
 	}
 
@@ -162,12 +154,8 @@ func (g *Game) Update() error {
 	}
 
 	if g.state == PLAYING {
-		for _, e := range g.enemies {
-			e.Update(tps)
-		}
-
-		for _, p := range g.players {
-			p.Update(tps)
+		for _, t := range g.Tanks {
+			t.Update(tps)
 		}
 	}
 
@@ -177,20 +165,12 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.playfield.Draw(screen)
 	if !g.playfield.wfc.IsRunning {
-		for _, e := range g.enemies {
+		for _, e := range g.Tanks {
 			e.Draw(screen)
 		}
-		for _, p := range g.players {
-			p.Draw(screen)
-		}
 		// Draw bullet above all
-		for _, e := range g.enemies {
-			for _, bullet := range e.bullets {
-				bullet.Draw(screen)
-			}
-		}
-		for _, p := range g.players {
-			for _, bullet := range p.Bullets {
+		for _, t := range g.Tanks {
+			for _, bullet := range t.Bullets {
 				bullet.Draw(screen)
 			}
 		}

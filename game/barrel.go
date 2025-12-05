@@ -21,32 +21,32 @@ type Barrel struct {
 	shootAge             float64
 }
 
-func NewBarrel(game *Game, spriteName string, tank *Tank, offset resolv.Vector) *Barrel {
-	sprite := game.assets.GetSprite(spriteName)
+func NewBarrel(tank *Tank, spriteName, bulletSpriteName string, offset resolv.Vector) *Barrel {
+	sprite := tank.game.assets.GetSprite(spriteName)
 
 	if spriteName == "specialBarrel1_outline" {
 		sprite = FlipVertical(sprite)
 	}
 
 	position := resolv.Vector{
-		X: tank.solid.Center().X + offset.X, // tank.bodyWidth/2 - spriteWidth/2,
-		Y: tank.solid.Center().Y + offset.Y, // tank.bodyHeight/2 - spriteHeight,
+		X: tank.Object.Center().X + offset.X, // tank.bodyWidth/2 - spriteWidth/2,
+		Y: tank.Object.Center().Y + offset.Y, // tank.bodyHeight/2 - spriteHeight,
 	}
 
 	shootAnimationSprites := []*ebiten.Image{
-		game.assets.GetSprite("shotThin"),
-		game.assets.GetSprite("shotLarge"),
-		game.assets.GetSprite("shotOrange"),
-		game.assets.GetSprite("shotRed"),
-		game.assets.GetSprite("shotOrange"),
-		game.assets.GetSprite("shotLarge"),
+		tank.game.assets.GetSprite("shotThin"),
+		tank.game.assets.GetSprite("shotLarge"),
+		tank.game.assets.GetSprite("shotOrange"),
+		tank.game.assets.GetSprite("shotRed"),
+		tank.game.assets.GetSprite("shotOrange"),
+		tank.game.assets.GetSprite("shotLarge"),
 	}
 
 	// define resolv shape
 	solid := resolv.NewRectangle(position.X, position.Y, float64(sprite.Bounds().Dx()), float64(sprite.Bounds().Dy()))
-	solid.SetRotation(tank.solid.Rotation())
+	solid.SetRotation(tank.Object.Rotation())
 	solid.Tags().Set(TagBarrel)
-	game.space.Add(solid)
+	tank.game.space.Add(solid)
 
 	return &Barrel{
 		sprite:               sprite,
@@ -74,8 +74,8 @@ func (b *Barrel) Destroy() {
 }
 
 func (b *Barrel) Update(tps float64) {
-	b.solid.SetRotation(b.tank.solid.Rotation() + b.relativeRotation)
-	b.solid.SetPositionVec(b.tank.solid.Position().Add(b.offset))
+	b.solid.SetRotation(b.tank.Object.Rotation() + b.relativeRotation)
+	b.solid.SetPositionVec(b.tank.Object.Position().Add(b.offset))
 
 	if b.isFiring {
 		b.shootAge += 1 / tps * 20

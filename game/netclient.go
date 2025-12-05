@@ -48,8 +48,8 @@ func (c *NetClient) Close() {
 	<-timer.C
 }
 
-func (c *NetClient) SendPlayerData(player *Player) {
-	j, err := json.Marshal(player)
+func (c *NetClient) SendTankData(tank *Tank) {
+	j, err := json.Marshal(tank)
 	if err != nil {
 		log.Fatal("encode error:", err)
 	}
