@@ -36,16 +36,16 @@ func NewExplosion(bullet *Bullet) *Explosion {
 
 	e := &Explosion{
 		bullet:       bullet,
-		solid:        nil,
+		solid:        resolv.NewRectangle(bullet.solid.Center().X, bullet.solid.Center().Y, float64(frames[1].Bounds().Dx()), float64(frames[1].Bounds().Dy())),
 		frameCounter: 0.0,
 		frames:       frames,
 		hasHitTarget: bullet.hasHitTarget,
 	}
 
-	e.solid = resolv.NewRectangle(bullet.solid.Center().X, bullet.solid.Center().Y, float64(frames[1].Bounds().Dx()), float64(frames[1].Bounds().Dy()))
 	e.solid.Tags().Set(TagExplosion)
-	bullet.barrel.tank.game.space.Add(e.solid)
 	e.solid.SetData(e)
+
+	bullet.barrel.tank.game.space.Add(e.solid)
 
 	return e
 }

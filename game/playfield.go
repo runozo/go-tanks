@@ -21,15 +21,6 @@ type Playfield struct {
 	progressBar                             *ProgressBar
 }
 
-// NewPlayfield creates a new Playfield with the specified width, height, and assets.
-//
-// Parameters:
-// - width: the width of the Playfield in pixels.
-// - height: the height of the Playfield in pixels.
-// - assets: a pointer to the Assets struct containing the necessary assets for the Playfield.
-//
-// Returns:
-// - a pointer to the newly created Playfield.
 func NewPlayfield(game *Game) *Playfield {
 
 	playfield := &Playfield{

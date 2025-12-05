@@ -29,8 +29,8 @@ func NewBarrel(game *Game, spriteName string, tank *Tank, offset resolv.Vector) 
 	}
 
 	position := resolv.Vector{
-		X: tank.solid.Position().X + offset.X, // tank.bodyWidth/2 - spriteWidth/2,
-		Y: tank.solid.Position().Y + offset.Y, // tank.bodyHeight/2 - spriteHeight,
+		X: tank.solid.Center().X + offset.X, // tank.bodyWidth/2 - spriteWidth/2,
+		Y: tank.solid.Center().Y + offset.Y, // tank.bodyHeight/2 - spriteHeight,
 	}
 
 	shootAnimationSprites := []*ebiten.Image{
