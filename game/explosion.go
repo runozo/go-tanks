@@ -18,19 +18,19 @@ func NewExplosion(bullet *Bullet) *Explosion {
 
 	if bullet.hasHitTarget {
 		frames = []*ebiten.Image{
-			bullet.game.assets.GetSprite("explosion1"),
-			bullet.game.assets.GetSprite("explosion2"),
-			bullet.game.assets.GetSprite("explosion3"),
-			bullet.game.assets.GetSprite("explosion4"),
-			bullet.game.assets.GetSprite("explosion5"),
+			bullet.barrel.tank.game.assets.GetSprite("explosion1"),
+			bullet.barrel.tank.game.assets.GetSprite("explosion2"),
+			bullet.barrel.tank.game.assets.GetSprite("explosion3"),
+			bullet.barrel.tank.game.assets.GetSprite("explosion4"),
+			bullet.barrel.tank.game.assets.GetSprite("explosion5"),
 		}
 	} else {
 		frames = []*ebiten.Image{
-			bullet.game.assets.GetSprite("explosionSmoke1"),
-			bullet.game.assets.GetSprite("explosionSmoke2"),
-			bullet.game.assets.GetSprite("explosionSmoke3"),
-			bullet.game.assets.GetSprite("explosionSmoke4"),
-			bullet.game.assets.GetSprite("explosionSmoke5"),
+			bullet.barrel.tank.game.assets.GetSprite("explosionSmoke1"),
+			bullet.barrel.tank.game.assets.GetSprite("explosionSmoke2"),
+			bullet.barrel.tank.game.assets.GetSprite("explosionSmoke3"),
+			bullet.barrel.tank.game.assets.GetSprite("explosionSmoke4"),
+			bullet.barrel.tank.game.assets.GetSprite("explosionSmoke5"),
 		}
 	}
 
@@ -44,7 +44,7 @@ func NewExplosion(bullet *Bullet) *Explosion {
 
 	e.solid = resolv.NewRectangle(bullet.solid.Center().X, bullet.solid.Center().Y, float64(frames[1].Bounds().Dx()), float64(frames[1].Bounds().Dy()))
 	e.solid.Tags().Set(TagExplosion)
-	bullet.game.space.Add(e.solid)
+	bullet.barrel.tank.game.space.Add(e.solid)
 	e.solid.SetData(e)
 
 	return e
@@ -68,7 +68,7 @@ func (e *Explosion) Update(tps float64) {
 }
 
 func (e *Explosion) Destroy() {
-	e.bullet.game.space.Remove(e.solid)
+	e.bullet.barrel.tank.game.space.Remove(e.solid)
 }
 
 func (e *Explosion) Draw(screen *ebiten.Image) {

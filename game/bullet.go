@@ -10,10 +10,13 @@ import (
 
 const (
 	gravity         = 9.8
-	bulletSpeed     = 4.0
+	bulletSpeed     = 8.0
 	bulletMinScale  = 1.0
 	scaleCoeff      = 1.8
 	initialAltitude = 0.2
+	bulletType1     = "bulletSand3_outline"
+	bulletType2     = "bulletGreen3_outline"
+	bulletType3     = "bulletBlue3_outline"
 )
 
 type Bullet struct {
@@ -28,12 +31,13 @@ type Bullet struct {
 	exploding                  bool
 	exploded                   bool
 	hasHitTarget               bool
-	game                       *Game
+	barrel                     *Barrel
 }
 
-func NewBullet(game *Game, barrel *Barrel) *Bullet {
-	bulletSpriteWidth := float64(barrel.bulletSprite.Bounds().Dx())
-	bulletSpriteHeight := float64(barrel.bulletSprite.Bounds().Dy())
+func NewBullet(barrel *Barrel, flavor string) *Bullet {
+	bulletSprite := barrel.tank.game.assets.GetSprite(flavor)
+	bulletSpriteWidth := float64(bulletSprite.Bounds().Dx())
+	bulletSpriteHeight := float64(bulletSprite.Bounds().Dy())
 
 	// define resolv shape
 	s, c := math.Sincos(barrel.solid.Rotation())
@@ -47,11 +51,11 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 	solid.SetRotation(barrel.solid.Rotation())
 	solid.Tags().Set(TagBullet)
 
-	game.space.Add(solid)
+	barrel.tank.game.space.Add(solid)
 
 	b := Bullet{
 		solid:         solid,
-		sprite:        barrel.bulletSprite,
+		sprite:        bulletSprite,
 		verticalSpeed: bulletSpeed * math.Sin(barrel.slope),
 		currentSlope:  barrel.slope,
 		initialSlope:  barrel.slope,
@@ -63,7 +67,7 @@ func NewBullet(game *Game, barrel *Barrel) *Bullet {
 		exploding:     false,
 		exploded:      false,
 		hasHitTarget:  false,
-		game:          game,
+		barrel:        barrel,
 		explosion:     nil,
 	}
 
@@ -85,7 +89,7 @@ func (b *Bullet) Update(tps float64) {
 				b.solid.MoveVec(resolv.Vector{X: 0, Y: 0})
 				b.hasHitTarget = true
 				b.explosion = NewExplosion(b)
-				b.game.space.Remove(b.solid)
+				b.barrel.tank.game.space.Remove(b.solid)
 				return true
 			},
 		})

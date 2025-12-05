@@ -35,7 +35,7 @@ func NewEnemy(game *Game, flavor string) *Enemy {
 	}
 
 	// create a new enemy tank
-	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], flavors[flavor][2], resolv.Vector{
+	newTank := NewTank(game, flavors[flavor][0], flavors[flavor][1], resolv.Vector{
 		X: float64(rand.Intn(screenWidth)),
 		Y: float64(rand.Intn(screenHeight - tileHeight)),
 	}, 0)

@@ -12,7 +12,6 @@ type Barrel struct {
 	solid                *resolv.ConvexPolygon
 	spriteWidth          float64
 	spriteHeight         float64
-	bulletSprite         *ebiten.Image
 	shootAnimationFrames []*ebiten.Image
 	offset               resolv.Vector
 	relativeRotation     float64
@@ -20,10 +19,9 @@ type Barrel struct {
 	tank                 *Tank
 	isFiring             bool
 	shootAge             float64
-	game                 *Game
 }
 
-func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offset resolv.Vector) *Barrel {
+func NewBarrel(game *Game, spriteName string, tank *Tank, offset resolv.Vector) *Barrel {
 	sprite := game.assets.GetSprite(spriteName)
 
 	if spriteName == "specialBarrel1_outline" {
@@ -55,7 +53,6 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 		solid:                solid,
 		spriteWidth:          float64(sprite.Bounds().Dx()),
 		spriteHeight:         float64(sprite.Bounds().Dy()),
-		bulletSprite:         game.assets.GetSprite(bulletSpriteName),
 		shootAnimationFrames: shootAnimationSprites,
 		offset:               offset,
 		relativeRotation:     0.0,
@@ -63,18 +60,17 @@ func NewBarrel(game *Game, spriteName, bulletSpriteName string, tank *Tank, offs
 		tank:                 tank,
 		isFiring:             false,
 		shootAge:             0.0,
-		game:                 game,
 	}
 }
 
 func (b *Barrel) Fire() *Bullet {
 	b.isFiring = true
 	b.shootAge = 0
-	return NewBullet(b.game, b)
+	return NewBullet(b, bulletType2)
 }
 
 func (b *Barrel) Destroy() {
-	b.game.space.Remove(b.solid)
+	b.tank.game.space.Remove(b.solid)
 }
 
 func (b *Barrel) Update(tps float64) {
