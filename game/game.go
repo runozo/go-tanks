@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -19,7 +20,7 @@ import (
 const (
 	screenWidth     = 1960
 	screenHeight    = 1088
-	fontSizeMedium  = 32
+	fontSizeMedium  = 42
 	fontSizeSmall   = 22
 	numberOfEnemies = 5 // *3
 	cellWidth       = 64
@@ -58,6 +59,8 @@ type Game struct {
 	space         *resolv.Space
 	state         int
 	debug         bool
+	compScore     int
+	playerScore   int
 }
 
 // game state
@@ -101,10 +104,12 @@ func NewGame(serverAddress string) *Game {
 	}
 
 	g := &Game{
-		assets:    assets,
-		width:     screenWidth,
-		height:    screenHeight,
-		playfield: nil,
+		assets:      assets,
+		width:       screenWidth,
+		height:      screenHeight,
+		playfield:   nil,
+		compScore:   0,
+		playerScore: 0,
 		fontMedium: &text.GoTextFace{
 			Source:    textFS,
 			Direction: text.DirectionLeftToRight,
@@ -205,7 +210,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		})
 	}
 
-	str := "CURSOR KEYS: move tank, A/D: rotate barrel, SPACE: shoot, T: new random tank, P: generate new playfield"
+	str := "Your score: " + strconv.Itoa(g.playerScore) + " \t Comp score: " + strconv.Itoa(g.compScore)
 	width, height := text.Measure(str, g.fontMedium, 0)
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(float64((screen.Bounds().Dx()-int(width))/2), float64(height))
