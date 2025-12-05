@@ -56,6 +56,7 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 	} else {
 		tank.Object.Tags().Set(TagPlayer)
 	}
+	tank.Object.SetData(tank)
 	g.space.Add(tank.Object)
 
 	if bodySpriteName == "tankBody_huge_outline" {
@@ -122,8 +123,8 @@ func (t *Tank) Fire() []*Bullet {
 
 func (t *Tank) Destroy() {
 	// barrel
-	for i := 0; i < len(t.barrels); i++ {
-		t.barrels[i].Destroy()
+	for _, b := range t.barrels {
+		b.Destroy()
 	}
 	t.game.space.Remove(t.Object)
 }
@@ -137,15 +138,14 @@ func (t *Tank) Update(tps float64) {
 
 	if t.IsEnemy {
 		// enemy
-		for _, p := range t.game.Tanks {
-			if !p.IsEnemy {
-				playerPosition := p.Object.Center()
+		for _, player := range t.game.Tanks {
+			// ENEMY POWERFUL AI :)
+			if !player.IsEnemy {
+				playerPosition := player.Object.Center()
 
 				for _, b := range t.barrels {
 					b.relativeRotation = -math.Atan2(playerPosition.Y-t.Object.Center().Y, playerPosition.X-t.Object.Center().X) - math.Pi/2
 				}
-
-				// ENEMY POWERFUL AI :)
 
 				// fires randomly
 				if t.ShootCooldown.IsReady() {

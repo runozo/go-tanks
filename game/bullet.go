@@ -88,6 +88,13 @@ func (b *Bullet) Update(tps float64) {
 			OnIntersect: func(set resolv.IntersectionSet) bool {
 				b.solid.MoveVec(resolv.Vector{X: 0, Y: 0})
 				b.hasHitTarget = true
+				if b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagPlayer) {
+					b.barrel.tank.game.compScore++
+				}
+				if !b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagEnemy) {
+					b.barrel.tank.game.playerScore++
+				}
+
 				b.explosion = NewExplosion(b)
 				b.barrel.tank.game.space.Remove(b.solid)
 				return true
