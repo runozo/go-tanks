@@ -247,7 +247,7 @@ func (t *Tank) Update(tps float64) {
 	}
 
 	otherTanks := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer | TagObstacle)
-	bulletObjects := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagBullet)
+	// bulletObjects := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagBullet)
 	t.Object.IntersectionTest(resolv.IntersectionTestSettings{
 		TestAgainst: otherTanks,
 		OnIntersect: func(set resolv.IntersectionSet) bool {
@@ -255,13 +255,15 @@ func (t *Tank) Update(tps float64) {
 			return true
 		},
 	})
-	t.Object.IntersectionTest(resolv.IntersectionTestSettings{
-		TestAgainst: bulletObjects,
-		OnIntersect: func(set resolv.IntersectionSet) bool {
-			t.Object.MoveVec(set.MTV)
-			return true
-		},
-	})
+	/*
+		t.Object.IntersectionTest(resolv.IntersectionTestSettings{
+			TestAgainst: bulletObjects,
+			OnIntersect: func(set resolv.IntersectionSet) bool {
+				t.Object.MoveVec(set.MTV)
+				return true
+			},
+		})
+	*/
 }
 
 func (t *Tank) Draw(screen *ebiten.Image) {
