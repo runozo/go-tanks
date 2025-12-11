@@ -7,7 +7,6 @@ import (
 	"image/color"
 	"log"
 	"math/rand"
-	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -55,6 +54,7 @@ type Game struct {
 	assets        *assets.Assets
 	Tanks         []*Tank
 	playfield     *Playfield
+	scoreLine     *ScoreLine
 	obstacles     []*Obstacle
 	fontMedium    *text.GoTextFace
 	fontSmall     *text.GoTextFace
@@ -62,8 +62,6 @@ type Game struct {
 	space         *resolv.Space
 	state         int
 	debug         bool
-	compScore     int
-	playerScore   int
 }
 
 // game state
@@ -110,13 +108,11 @@ func NewGame(serverAddress string) *Game {
 	}
 
 	g := &Game{
-		assets:      assets,
-		width:       screenWidth,
-		height:      screenHeight,
-		playfield:   nil,
-		obstacles:   []*Obstacle{},
-		compScore:   0,
-		playerScore: 0,
+		assets:    assets,
+		width:     screenWidth,
+		height:    screenHeight,
+		playfield: nil,
+		obstacles: []*Obstacle{},
 		fontMedium: &text.GoTextFace{
 			Source:    textFS,
 			Direction: text.DirectionLeftToRight,
@@ -164,6 +160,8 @@ func (g *Game) Update() error {
 			g.Tanks = append(g.Tanks, NewRandomTank(g, 0, true))
 		}
 
+		g.scoreLine = NewScoreLine(g)
+
 		g.state = PLAYING
 	}
 
@@ -187,7 +185,8 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.playfield.Draw(screen)
 
-	if !g.playfield.wfc.IsRunning {
+	if g.state == PLAYING {
+
 		for _, f := range g.obstacles {
 			f.Draw(screen)
 		}
@@ -200,6 +199,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				bullet.Draw(screen)
 			}
 		}
+
+		g.scoreLine.Draw(screen)
 	}
 
 	// debug shapes
@@ -230,13 +231,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		})
 	}
-
-	str := "Your score: " + strconv.Itoa(g.playerScore) + " \t Comp score: " + strconv.Itoa(g.compScore)
-	width, height := text.Measure(str, g.fontMedium, 0)
-	op := &text.DrawOptions{}
-	op.GeoM.Translate(float64((screen.Bounds().Dx()-int(width))/2), float64(height))
-	op.ColorScale.ScaleWithColor(color.Black)
-	text.Draw(screen, str, g.fontMedium, op)
 
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %0.2f", ebiten.ActualTPS()))
 }

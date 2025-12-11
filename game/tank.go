@@ -206,7 +206,6 @@ func (t *Tank) Update(tps float64) {
 				if t.barrels[i].slope > barrelMaxSlope {
 					t.barrels[i].slope = barrelMaxSlope
 				}
-
 			}
 			// fmt.Println(t.barrel.slope)
 		}

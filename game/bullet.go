@@ -90,11 +90,11 @@ func (b *Bullet) Update(tps float64) {
 
 				if b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagPlayer) {
 					b.hasHitTarget = true
-					b.barrel.tank.game.compScore++
+					b.barrel.tank.game.scoreLine.IncrementEnemy()
 				}
 				if !b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagEnemy) {
 					b.hasHitTarget = true
-					b.barrel.tank.game.playerScore++
+					b.barrel.tank.game.scoreLine.IncrementPlayer()
 				}
 
 				b.explosion = NewExplosion(b)
