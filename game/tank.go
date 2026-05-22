@@ -56,8 +56,6 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 	} else {
 		tank.Object.Tags().Set(TagPlayer)
 	}
-	tank.Object.SetData(tank)
-	g.space.Add(tank.Object)
 
 	if bodySpriteName == "tankBody_huge_outline" {
 		// this bodies have 2 barrels each
@@ -69,21 +67,55 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 		tank.barrels = []*Barrel{NewBarrel(tank, barrelSpriteName, bulletSpriteName, resolv.Vector{X: 0, Y: 0})}
 	}
 
-	// don't overlap position with other entities
-	// TODO: select a position near the other tank, not random
-	for tank.Object.IntersectionTest(resolv.IntersectionTestSettings{
-		TestAgainst: g.space.Shapes(),
-		OnIntersect: func(set resolv.IntersectionSet) bool {
+	tank.Object.SetData(tank)
+
+	maxAttempts := 50
+	validSpawn := false
+
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		collision := false
+
+		tank.Object.IntersectionTest(resolv.IntersectionTestSettings{
+			TestAgainst: g.space.Shapes(),
+			OnIntersect: func(set resolv.IntersectionSet) bool {
+				collision = true
+				return false // Stop at first collision
+			},
+		})
+
+		if !collision {
+			validSpawn = true
+			break // Spece found!
+		}
+
+		if len(g.Tanks) > 0 {
+			targetTank := g.Tanks[rand.Intn(len(g.Tanks))]
+
+			// Random offset
+			offsetX := (rand.Float64() - 0.5) * 500
+			offsetY := (rand.Float64() - 0.5) * 500
+
+			// Check if the new position is out of bounds
+			newX := math.Max(0, math.Min(targetTank.Object.Position().X+offsetX, float64(screenWidth-int(spriteWidth))))
+			newY := math.Max(0, math.Min(targetTank.Object.Position().Y+offsetY, float64(screenHeight-int(spriteHeight))))
+
+			tank.Object.SetPositionVec(resolv.Vector{X: newX, Y: newY})
+		} else {
+			// Random if there are no tanks
 			tank.Object.SetPositionVec(resolv.Vector{
-				X: float64(rand.Intn(screenWidth - tileWidth)),
-				Y: float64(rand.Intn(screenHeight - tileHeight)),
+				X: float64(rand.Intn(screenWidth - int(spriteWidth))),
+				Y: float64(rand.Intn(screenHeight - int(spriteHeight))),
 			})
-			fmt.Println("Intersect!")
-			return true
-		},
-	}) {
-		fmt.Println(len(g.space.Shapes()))
+		}
 	}
+
+	if !validSpawn {
+		fmt.Println("Warning: tank spawn failed due to collision!")
+		return nil
+	}
+
+	// Add tank to resolv space only now
+	g.space.Add(tank.Object)
 
 	return tank
 }
