@@ -59,6 +59,8 @@ type Game struct {
 	fontMedium    *text.GoTextFace
 	fontSmall     *text.GoTextFace
 	serverAddress string
+	netClient     *NetClient
+	networkTanks  map[string]*Tank
 	space         *resolv.Space
 	state         int
 	debug         bool
@@ -124,6 +126,7 @@ func NewGame(serverAddress string) *Game {
 			Size:      fontSizeSmall,
 		},
 		serverAddress: serverAddress,
+		networkTanks:  make(map[string]*Tank),
 		space:         resolv.NewSpace(screenWidth, screenHeight, cellWidth, cellHeight),
 		state:         RENDERINGPLAYFIELD,
 		debug:         false,
@@ -132,6 +135,10 @@ func NewGame(serverAddress string) *Game {
 	// create new playfield
 
 	g.playfield = NewPlayfield(g)
+
+	if serverAddress != "" {
+		g.netClient = NewNetClient(serverAddress)
+	}
 
 	return g
 }
@@ -174,6 +181,35 @@ func (g *Game) Update() error {
 	}
 
 	if g.state == PLAYING {
+		// --- LETTURA DATI DI RETE ---
+		if g.netClient != nil {
+		NetworkLoop:
+			for {
+				select {
+				case payload := <-g.netClient.IncomingTanks:
+					// Abbiamo ricevuto un dato!
+					remoteTank, exists := g.networkTanks[payload.ID]
+
+					if !exists {
+						// È un giocatore nuovo, creiamo un tank per lui!
+						// Disabilitiamo l'IA passandogli 'true' o creando una logica apposita per i giocatori remoti
+						remoteTank = NewRandomTank(g, payload.Rotation, false)
+						remoteTank.IsEnemy = payload.IsEnemy // Sovrascriviamo se necessario
+						g.networkTanks[payload.ID] = remoteTank
+						g.Tanks = append(g.Tanks, remoteTank) // Aggiungiamolo alla lista per disegnarlo
+					}
+
+					// Aggiorniamo posizione e rotazione in base a quanto dice il server
+					remoteTank.Object.SetPositionVec(resolv.Vector{X: payload.X, Y: payload.Y})
+					remoteTank.Object.Rotate(payload.Rotation)
+
+				default:
+					// Niente più messaggi in coda, usciamo dal ciclo
+					break NetworkLoop
+				}
+			}
+		}
+		// update tanks
 		for _, t := range g.Tanks {
 			t.Update(tps)
 		}

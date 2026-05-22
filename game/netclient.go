@@ -11,9 +11,18 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type TankPayload struct {
+	ID       string  `json:"id"` // <- Fondamentale per riconoscere chi si muove!
+	X        float64 `json:"x"`
+	Y        float64 `json:"y"`
+	Rotation float64 `json:"r"`
+	IsEnemy  bool    `json:"is_enemy"`
+}
+
 type NetClient struct {
-	client    *websocket.Conn
-	interrupt chan os.Signal
+	client        *websocket.Conn
+	interrupt     chan os.Signal
+	IncomingTanks chan TankPayload // <- Canale per inviare i dati al loop di gioco
 }
 
 func NewNetClient(serverAddress string) *NetClient {
@@ -24,17 +33,34 @@ func NewNetClient(serverAddress string) *NetClient {
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
-	//	defer c.Close()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
 	nc := &NetClient{
-		client:    c,
-		interrupt: interrupt,
+		client:        c,
+		interrupt:     interrupt,
+		IncomingTanks: make(chan TankPayload, 100), // Bufferizziamo fino a 100 aggiornamenti
 	}
 	go nc.readLoop()
 	return nc
+}
+
+func (c *NetClient) readLoop() {
+	for {
+		_, message, err := c.client.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			return
+		}
+
+		// Decodifichiamo il JSON in arrivo
+		var payload TankPayload
+		if err := json.Unmarshal(message, &payload); err == nil {
+			// Lo spediamo al thread principale tramite il channel
+			c.IncomingTanks <- payload
+		}
+	}
 }
 
 func (c *NetClient) Close() {
@@ -49,12 +75,20 @@ func (c *NetClient) Close() {
 }
 
 func (c *NetClient) SendTankData(tank *Tank) {
-	j, err := json.Marshal(tank)
-	if err != nil {
-		log.Fatal("encode error:", err)
+	payload := TankPayload{
+		ID:       tank.ID,
+		X:        tank.Object.Center().X,
+		Y:        tank.Object.Center().Y,
+		Rotation: tank.Object.Rotation(),
+		IsEnemy:  tank.IsEnemy,
 	}
 
-	// HERE ARE YOUR BYTES!!!!
+	j, err := json.Marshal(payload)
+	if err != nil {
+		log.Println("encode error:", err)
+		return // Meglio non usare log.Fatal qui, altrimenti il gioco crasha se c'è un glitch di rete
+	}
+
 	c.SendData(j)
 }
 
@@ -64,17 +98,4 @@ func (c *NetClient) SendData(data []byte) {
 		log.Println("write:", err)
 		return
 	}
-}
-
-func (c *NetClient) readLoop() {
-
-	for {
-		_, message, err := c.client.ReadMessage()
-		if err != nil {
-			log.Println("read:", err)
-			return
-		}
-		log.Printf("recv: %s", message)
-	}
-
 }
