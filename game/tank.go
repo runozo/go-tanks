@@ -85,7 +85,7 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 
 		if !collision {
 			validSpawn = true
-			break // Spece found!
+			break // Space found!
 		}
 
 		if len(g.Tanks) > 0 {
