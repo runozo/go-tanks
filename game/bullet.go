@@ -137,26 +137,21 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 
 	if b.altitude > 0.1 {
 		// Bullet shadow
-		// --- 1. DISEGNO L'OMBRA (SUL TERRENO) ---
 		opShadow := &ebiten.DrawImageOptions{}
 
-		// Centriamo lo sprite per scalarlo e ruotarlo
 		opShadow.GeoM.Translate(-b.bulletHalfW, -b.bulletHalfH)
 
-		// Calcoliamo la scala inversa: se il proiettile raddoppia (2.0), l'ombra si dimezza (0.5)
+		// Scale shadow
 		shadowScale := 1.0 / b.scale
 		opShadow.GeoM.Scale(shadowScale, shadowScale)
 
-		// Ruotiamo l'ombra
 		opShadow.GeoM.Rotate(-b.solid.Rotation())
 
-		// Posizioniamo l'ombra al suolo
 		opShadow.GeoM.Translate(b.solid.Center().X, b.solid.Center().Y)
 
 		shadowAlpha := float32(1.0 * shadowScale)
 		opShadow.ColorScale.Scale(0, 0, 0, shadowAlpha)
 
-		// Disegniamo prima l'ombra
 		screen.DrawImage(b.sprite, opShadow)
 	}
 
