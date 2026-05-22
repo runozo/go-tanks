@@ -2,12 +2,14 @@ package game
 
 import (
 	"fmt"
+	"image/color"
 	"math"
 	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/solarlune/resolv"
 )
 
@@ -169,26 +171,47 @@ func (t *Tank) Update(tps float64) {
 	slopeSpeed := barrelMaxSlope / tps
 
 	if t.IsEnemy {
-		// enemy
-		for _, player := range t.game.Tanks {
-			// ENEMY POWERFUL AI :)
-			if !player.IsEnemy {
-				playerPosition := player.Object.Center()
+		// --- NUOVA IA: RICERCA DEL GIOCATORE PIÙ VICINO ---
+		var closestPlayer *Tank
+		minDistance := math.MaxFloat64
+		enemyCenter := t.Object.Center()
 
+		// Cicliamo su tutti i tank per trovare il giocatore più vicino
+		for _, tank := range t.game.Tanks {
+			if !tank.IsEnemy {
+				playerCenter := tank.Object.Center()
+
+				// Calcoliamo la distanza tra questo nemico e il potenziale bersaglio
+				dx := playerCenter.X - enemyCenter.X
+				dy := playerCenter.Y - enemyCenter.Y
+				distance := math.Hypot(dx, dy)
+
+				// Se è più vicino del precedente trovato, lo memorizziamo
+				if distance < minDistance {
+					minDistance = distance
+					closestPlayer = tank
+				}
+			}
+		}
+
+		// Se abbiamo individuato un bersaglio valido nel raggio d'azione
+		if closestPlayer != nil {
+			targetPosition := closestPlayer.Object.Center()
+
+			// Ruotiamo la canna (o le canne) verso il giocatore più vicino
+			for _, b := range t.barrels {
+				b.relativeRotation = -math.Atan2(targetPosition.Y-enemyCenter.Y, targetPosition.X-enemyCenter.X) - math.Pi/2
+			}
+
+			// Spara autonomamente seguendo il cooldown del timer
+			if t.ShootCooldown.IsReady() {
+				t.ShootCooldown.Reset()
+				// I nemici scelgono un'inclinazione (gittata) casuale per simulare l'imprecisione
+				randomSlope := rand.Float64() * barrelMaxSlope
 				for _, b := range t.barrels {
-					b.relativeRotation = -math.Atan2(playerPosition.Y-t.Object.Center().Y, playerPosition.X-t.Object.Center().X) - math.Pi/2
+					b.slope = randomSlope
 				}
-
-				// fires randomly
-				if t.ShootCooldown.IsReady() {
-					t.ShootCooldown.Reset()
-					randomSlope := rand.Float64() * barrelMaxSlope
-					for _, b := range t.barrels {
-						b.slope = randomSlope
-					}
-					t.Bullets = append(t.Bullets, t.Fire()...)
-				}
-				break // one player only
+				t.Bullets = append(t.Bullets, t.Fire()...)
 			}
 		}
 	} else {
@@ -286,15 +309,6 @@ func (t *Tank) Update(tps float64) {
 			return true
 		},
 	})
-	/*
-		t.Object.IntersectionTest(resolv.IntersectionTestSettings{
-			TestAgainst: bulletObjects,
-			OnIntersect: func(set resolv.IntersectionSet) bool {
-				t.Object.MoveVec(set.MTV)
-				return true
-			},
-		})
-	*/
 }
 
 func (t *Tank) Draw(screen *ebiten.Image) {
@@ -314,5 +328,38 @@ func (t *Tank) Draw(screen *ebiten.Image) {
 	// barrel
 	for i := 0; i < len(t.barrels); i++ {
 		t.barrels[i].Draw(screen)
+	}
+
+	// --- DISEGNO DEL MIRINO (Solo per il Player) ---
+	if !t.IsEnemy {
+		for _, b := range t.barrels {
+			// Mostriamo il mirino solo se il giocatore sta caricando il colpo
+			if b.slope > 0 {
+				// Calcoliamo la distanza stimata in base all'inclinazione (slope).
+				// barrelMaxSlope è l'inclinazione massima. Mappiamo questo valore
+				// su una distanza in pixel sullo schermo (es. 600 pixel di gittata massima).
+				maxDistance := 600.0 // Puoi aggiustare questo valore per farlo coincidere con la fisica esatta
+				distance := (b.slope / barrelMaxSlope) * maxDistance
+
+				// Calcoliamo la direzione in cui punta la canna
+				s, c := math.Sincos(b.solid.Rotation())
+
+				// Troviamo le coordinate del bersaglio
+				targetX := b.solid.Center().X - s*distance
+				targetY := b.solid.Center().Y - c*distance
+
+				// Colore del mirino: rosso semitrasparente
+				crosshairColor := color.RGBA{R: 255, G: 50, B: 50, A: 150}
+
+				// 1. Cerchio esterno del mirino
+				vector.StrokeCircle(screen, float32(targetX), float32(targetY), 15, 2, crosshairColor, true)
+
+				// 2. Linea orizzontale
+				vector.StrokeLine(screen, float32(targetX-22), float32(targetY), float32(targetX+22), float32(targetY), 2, crosshairColor, true)
+
+				// 3. Linea verticale
+				vector.StrokeLine(screen, float32(targetX), float32(targetY-22), float32(targetX), float32(targetY+22), 2, crosshairColor, true)
+			}
+		}
 	}
 }
