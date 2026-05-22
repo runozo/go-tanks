@@ -44,6 +44,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	spriteSheetOptions := &ebiten.DrawImageOptions{}
 	spriteSheetOptions.GeoM.Translate(float64(g.spriteSheetOffsetX), float64(g.spriteSheetOffsetY))
+	screen.Fill(color.Black)
 	screen.DrawImage(g.spriteSheet, spriteSheetOptions)
 
 	tileName := g.isOverTile()
