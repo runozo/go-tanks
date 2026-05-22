@@ -17,8 +17,8 @@ build:
 .PHONY: build
 
 buildwin:
-	GOOS=windows go build -ldflags="-s -w -v" -o ./cmd/go-tanks.exe
-	upx -9 ./cmd/go-tanks.exe
+	GOOS=windows go build -ldflags="-s -w -v" -o ./cmd/go-tanks-win.exe
+	upx -9 ./cmd/go-tanks-win.exe
 
 .PHONY: run
 
