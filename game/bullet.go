@@ -173,7 +173,7 @@ func (b *Bullet) Draw(screen *ebiten.Image) {
 
 	op.GeoM.Rotate(-b.solid.Rotation())
 
-	visualOffsetY := -b.altitude * 24.0
+	visualOffsetY := -b.altitude * 12.0
 	op.GeoM.Translate(b.solid.Center().X, b.solid.Center().Y+visualOffsetY)
 
 	screen.DrawImage(b.sprite, op)
