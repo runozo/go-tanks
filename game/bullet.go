@@ -130,25 +130,25 @@ func (b *Bullet) Update(tps float64) {
 }
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
-	if b.explosion == nil {
-		op := &ebiten.DrawImageOptions{}
-
-		// center the bullet than scale
-		/*
-			op.GeoM.Translate(-bulletHalfW, -bulletHalfH)
-			op.GeoM.Scale(b.scale, b.scale-math.Abs(b.currentSlope)*scaleCoeff) // simulate bullet deflection (poorly)
-			op.GeoM.Translate(bulletHalfW, bulletHalfH)
-		*/
-
-		// center the bullet and the barrel than rotate
-		op.GeoM.Translate(-b.bulletHalfW, -b.bulletHalfH)
-		op.GeoM.Rotate(-b.solid.Rotation())
-		op.GeoM.Translate(b.bulletHalfW, b.bulletHalfH)
-
-		// actual position of the bullet to draw
-		op.GeoM.Translate(b.solid.Center().X-b.bulletHalfW, b.solid.Center().Y-b.bulletHalfH)
-		screen.DrawImage(b.sprite, op)
-	} else {
+	if b.explosion != nil {
 		b.explosion.Draw(screen)
+		return
 	}
+
+	op := &ebiten.DrawImageOptions{}
+
+	op.GeoM.Translate(-b.bulletHalfW, -b.bulletHalfH)
+
+	// Apply graphics mod
+	scaleY := b.scale - math.Abs(b.currentSlope)*scaleCoeff
+	if scaleY < 0.1 {
+		scaleY = 0.1 // Avoid sprite mirror
+	}
+	op.GeoM.Scale(b.scale, scaleY)
+
+	op.GeoM.Rotate(-b.solid.Rotation())
+
+	op.GeoM.Translate(b.solid.Center().X, b.solid.Center().Y)
+
+	screen.DrawImage(b.sprite, op)
 }
