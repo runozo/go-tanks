@@ -75,14 +75,37 @@ func NewBullet(barrel *Barrel, flavor string) *Bullet {
 }
 
 func (b *Bullet) Update(tps float64) {
-	s, c := math.Sincos(b.solid.Rotation())
+	if b.explosion != nil {
+		b.explosion.Update(tps)
+		return
+	}
+
 	dt := 1.0 / tps
 	b.elapsedTime += dt
 
-	/*if b.altitude >= initialAltitude {*/
-	if b.explosion == nil {
-		b.solid.MoveVec(resolv.Vector{X: -s * bulletSpeed, Y: -c * bulletSpeed})
+	// Physics Calculation (Gravity and Altitude)
+	b.verticalSpeed -= gravity * dt
+	b.altitude += b.verticalSpeed * dt
+
+	actualSpeed := bulletSpeed * math.Cos(b.initialSlope)
+	b.currentSlope = math.Atan2(b.verticalSpeed, actualSpeed)
+
+	// We calculate the visual scale to simulate the height (the higher it is, the bigger it is)
+	if b.altitude > initialAltitude {
+		b.scale = (b.altitude * scaleCoeff) + bulletMinScale
+	} else {
+		b.scale = bulletMinScale
+	}
+
+	s, c := math.Sincos(b.solid.Rotation())
+	// We use actualSpeed ​​instead of bulletSpeed ​​to slow down the horizontal motion if fired very high
+	b.solid.MoveVec(resolv.Vector{X: -s * actualSpeed, Y: -c * actualSpeed})
+
+	// Let's prevent it from exploding instantly (elapsedTime > 0.1) and check that it has "fallen"
+	if b.altitude <= initialAltitude && b.elapsedTime > 0.1 {
+
 		nearbyShapes := b.solid.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer | TagObstacle)
+
 		b.solid.IntersectionTest(resolv.IntersectionTestSettings{
 			TestAgainst: nearbyShapes,
 			OnIntersect: func(set resolv.IntersectionSet) bool {
@@ -96,30 +119,14 @@ func (b *Bullet) Update(tps float64) {
 					b.hasHitTarget = true
 					b.barrel.tank.game.scoreLine.IncrementPlayer()
 				}
-
-				b.explosion = NewExplosion(b)
-				b.barrel.tank.game.space.Remove(b.solid)
-				return true
+				return true // Stops the test at the first entity hit
 			},
 		})
-	} else {
-		b.explosion.Update(tps)
+
+		// The projectile fell: it explodes regardless of whether it hit someone or the empty ground
+		b.explosion = NewExplosion(b)
+		b.barrel.tank.game.space.Remove(b.solid)
 	}
-
-	/*
-			gravityEffect := 0.0000000005 * gravity * dt
-			b.altitude += b.verticalSpeed*dt - gravityEffect
-			b.verticalSpeed -= gravity * dt
-
-			actualSpeed := bulletSpeed * math.Cos(b.initialSlope)
-			b.currentSlope = math.Atan2(b.verticalSpeed, actualSpeed)
-			b.scale = b.altitude*scaleCoeff + bulletMinScale
-
-			b.solid.MoveVec(b.moveVec)
-		} else {
-			b.exploding = true
-		}
-	*/
 }
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
