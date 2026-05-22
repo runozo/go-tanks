@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -20,6 +21,7 @@ const (
 )
 
 type Tank struct {
+	ID            string
 	Sprite        *ebiten.Image
 	Object        *resolv.ConvexPolygon
 	barrels       []*Barrel
@@ -39,6 +41,7 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 	spriteHeight := float64(bodySprite.Bounds().Dy())
 
 	tank := &Tank{
+		ID:            uuid.New().String(),
 		Sprite:        bodySprite,
 		Object:        resolv.NewRectangle(position.X, position.Y, spriteWidth, spriteHeight),
 		Width:         spriteWidth,
@@ -273,6 +276,19 @@ func (t *Tank) Update(tps float64) {
 			for i := 0; i < len(t.barrels); i++ {
 				t.barrels[i].slope = 0.0
 			}
+		}
+
+		// fire and reset barrels slope
+		if yesFire {
+			t.Bullets = append(t.Bullets, t.Fire()...)
+			for i := 0; i < len(t.barrels); i++ {
+				t.barrels[i].slope = 0.0
+			}
+		}
+
+		// --- NETWORKING: Send data to server ---
+		if t.game.netClient != nil {
+			t.game.netClient.SendTankData(t)
 		}
 	}
 
