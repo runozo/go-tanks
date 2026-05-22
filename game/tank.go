@@ -171,22 +171,18 @@ func (t *Tank) Update(tps float64) {
 	slopeSpeed := barrelMaxSlope / tps
 
 	if t.IsEnemy {
-		// --- NUOVA IA: RICERCA DEL GIOCATORE PIÙ VICINO ---
 		var closestPlayer *Tank
 		minDistance := math.MaxFloat64
 		enemyCenter := t.Object.Center()
 
-		// Cicliamo su tutti i tank per trovare il giocatore più vicino
 		for _, tank := range t.game.Tanks {
 			if !tank.IsEnemy {
 				playerCenter := tank.Object.Center()
 
-				// Calcoliamo la distanza tra questo nemico e il potenziale bersaglio
 				dx := playerCenter.X - enemyCenter.X
 				dy := playerCenter.Y - enemyCenter.Y
 				distance := math.Hypot(dx, dy)
 
-				// Se è più vicino del precedente trovato, lo memorizziamo
 				if distance < minDistance {
 					minDistance = distance
 					closestPlayer = tank
@@ -194,19 +190,15 @@ func (t *Tank) Update(tps float64) {
 			}
 		}
 
-		// Se abbiamo individuato un bersaglio valido nel raggio d'azione
 		if closestPlayer != nil {
 			targetPosition := closestPlayer.Object.Center()
 
-			// Ruotiamo la canna (o le canne) verso il giocatore più vicino
 			for _, b := range t.barrels {
 				b.relativeRotation = -math.Atan2(targetPosition.Y-enemyCenter.Y, targetPosition.X-enemyCenter.X) - math.Pi/2
 			}
 
-			// Spara autonomamente seguendo il cooldown del timer
 			if t.ShootCooldown.IsReady() {
 				t.ShootCooldown.Reset()
-				// I nemici scelgono un'inclinazione (gittata) casuale per simulare l'imprecisione
 				randomSlope := rand.Float64() * barrelMaxSlope
 				for _, b := range t.barrels {
 					b.slope = randomSlope
