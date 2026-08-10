@@ -27,7 +27,6 @@
   <a id="repo" href="https://github.com/shpaker/go-tanks" target="_blank" rel="noopener">github.com/runozo/go-tanks</a>
   <script src="wasm_exec.js"></script>
   <script>
-    // На сенсорных устройствах клавиатурная подсказка не нужна
     if (navigator.maxTouchPoints > 0 || "ontouchstart" in window) {
       document.getElementById("hint").textContent =
         "Tap the menu to start · D-pad: move · button: fire";
@@ -39,7 +38,7 @@
         try {
           return await WebAssembly.instantiateStreaming(
             fetch("go-tanks.wasm"), go.importObject);
-        } catch (_) { /* неверный MIME у локального сервера — fallback ниже */ }
+        } catch (_) { /* fallback */ }
       }
       const buf = await (await fetch("go-tanks.wasm")).arrayBuffer();
       return await WebAssembly.instantiate(buf, go.importObject);
