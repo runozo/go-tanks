@@ -48,7 +48,7 @@ build-windows:
 
 build-all: build-macos build-windows
     #!/bin/bash
-    echo "macOS и Windows сборки готовы"
+    echo "macOS and Windows builds"
 
 build-wasm:
     #!/bin/bash
@@ -197,7 +197,7 @@ install-tools:
     echo "Installing development tools..."
     {{gocmd}} install mvdan.cc/gofumpt@latest
     {{gocmd}} install github.com/segmentio/golines@latest
-    {{gocmd}} install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+    {{gocmd}} install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
     echo "Tools installed. Make sure \$GOBIN or \$(go env GOPATH)/bin is in your PATH"
 
 # Проверки качества кода
