@@ -281,3 +281,11 @@ jobs:
 
       - name: Build application
         run: just build
+      - name: Build with Just for GHPages
+        run: just build-wasm
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist/web/
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v5
