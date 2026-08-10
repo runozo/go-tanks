@@ -13,7 +13,7 @@ build:
     set -euo pipefail
     VERSION="dev-$(date -u +%Y-%m-%dT%H:%M)"
     echo "Building application (version $VERSION)..."
-    {{gocmd}} build -ldflags "-X github.com/shpaker/tnk9x/internal/app.Version=${VERSION}" -o {{binary_name}} -v ./cmd
+    {{gocmd}} build -ldflags "-X github.com/runozo/go-tanks/internal/app.Version=${VERSION}" -o {{binary_name}} -v ./cmd
     echo "Build completed: {{binary_name}} (version $VERSION)"
 
 build-macos:
@@ -26,9 +26,9 @@ build-macos:
     release_output="{{binary_name}}_darwin_arm64"
     debug_output="{{binary_name}}_darwin_arm64_debug"
     echo "Building macOS (Apple Silicon) release $VERSION -> $out_dir/$release_output"
-    GOOS="darwin" GOARCH="arm64" CGO_ENABLED=1 {{gocmd}} build -trimpath -ldflags "-s -w -X github.com/shpaker/tnk9x/internal/app.Version=${VERSION}" -o "$out_dir/$release_output" ./cmd
+    GOOS="darwin" GOARCH="arm64" CGO_ENABLED=1 {{gocmd}} build -trimpath -ldflags "-s -w -X github.com/runozo/go-tanks/internal/app.Version=${VERSION}" -o "$out_dir/$release_output" ./cmd
     echo "Building macOS (Apple Silicon) debug $VERSION -> $out_dir/$debug_output"
-    GOOS="darwin" GOARCH="arm64" CGO_ENABLED=1 {{gocmd}} build -ldflags "-X github.com/shpaker/tnk9x/internal/app.Version=${VERSION} -X github.com/shpaker/tnk9x/internal/app.DebugFlag=true" -o "$out_dir/$debug_output" ./cmd
+    GOOS="darwin" GOARCH="arm64" CGO_ENABLED=1 {{gocmd}} build -ldflags "-X github.com/runozo/go-tanks/internal/app.Version=${VERSION} -X github.com/runozo/go-tanks/internal/app.DebugFlag=true" -o "$out_dir/$debug_output" ./cmd
     echo "macOS builds stored in $out_dir"
 
 build-windows:
@@ -41,9 +41,9 @@ build-windows:
     release_output="{{binary_name}}_windows_amd64.exe"
     debug_output="{{binary_name}}_windows_amd64_debug.exe"
     echo "Building Windows (x64) release $VERSION -> $out_dir/$release_output"
-    GOOS="windows" GOARCH="amd64" CGO_ENABLED=0 {{gocmd}} build -trimpath -ldflags "-s -w -X github.com/shpaker/tnk9x/internal/app.Version=${VERSION}" -o "$out_dir/$release_output" ./cmd
+    GOOS="windows" GOARCH="amd64" CGO_ENABLED=0 {{gocmd}} build -trimpath -ldflags "-s -w -X github.com/runozo/go-tanks/internal/app.Version=${VERSION}" -o "$out_dir/$release_output" ./cmd
     echo "Building Windows (x64) debug $VERSION -> $out_dir/$debug_output"
-    GOOS="windows" GOARCH="amd64" CGO_ENABLED=0 {{gocmd}} build -ldflags "-X github.com/shpaker/tnk9x/internal/app.Version=${VERSION} -X github.com/shpaker/tnk9x/internal/app.DebugFlag=true" -o "$out_dir/$debug_output" ./cmd
+    GOOS="windows" GOARCH="amd64" CGO_ENABLED=0 {{gocmd}} build -ldflags "-X github.com/runozo/go-tanks/internal/app.Version=${VERSION} -X github.com/runozo/go-tanks/internal/app.DebugFlag=true" -o "$out_dir/$debug_output" ./cmd
     echo "Windows builds stored in $out_dir"
 
 build-all: build-macos build-windows
@@ -58,7 +58,7 @@ build-wasm:
     mkdir -p "$out_dir"
     VERSION="dev-$(date -u +%Y-%m-%dT%H:%M)"
     echo "Building WebAssembly (version $VERSION) -> $out_dir"
-    GOOS="js" GOARCH="wasm" {{gocmd}} build -trimpath -ldflags "-s -w -X github.com/shpaker/tnk9x/internal/app.Version=${VERSION}" -o "$out_dir/{{binary_name}}.wasm" ./cmd
+    GOOS="js" GOARCH="wasm" {{gocmd}} build -trimpath -ldflags "-s -w -X github.com/runozo/go-tanks/internal/app.Version=${VERSION}" -o "$out_dir/{{binary_name}}.wasm" ./cmd
     cp "$({{gocmd}} env GOROOT)/lib/wasm/wasm_exec.js" "$out_dir/"
     cp web/index.html "$out_dir/"
     echo "WASM build stored in $out_dir"
@@ -158,7 +158,7 @@ dev:
     set -euo pipefail
     VERSION="dev-$(date -u +%Y-%m-%dT%H:%M)"
     echo "Running in development mode (version $VERSION)..."
-    {{gocmd}} run -ldflags "-X github.com/shpaker/tnk9x/internal/app.Version=${VERSION}" ./cmd
+    {{gocmd}} run -ldflags "-X github.com/runozo/go-tanks/internal/app.Version=${VERSION}" ./cmd
 
 # Форматирование
 fmt:
