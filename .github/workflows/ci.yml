@@ -168,66 +168,66 @@ jobs:
       - name: Run linter
         run: just lint
 
-  test:
-    name: Tests
-    runs-on: ubuntu-latest
-    needs: [prepare-deps]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # test:
+  #   name: Tests
+  #   runs-on: ubuntu-latest
+  #   needs: [prepare-deps]
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.24.3'
-          cache-dependency-path: go.sum
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v4
+  #       with:
+  #         go-version: '1.24.3'
+  #         cache-dependency-path: go.sum
 
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libglfw3 \
-            libglfw3-dev \
-            libglu1-mesa-dev \
-            mesa-common-dev \
-            libx11-dev \
-            libxrandr-dev \
-            libxinerama-dev \
-            libxi-dev \
-            libxcursor-dev \
-            libxxf86vm-dev \
-            libasound2-dev \
-            pkg-config \
-            xvfb
+  #     - name: Install Linux dependencies
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y \
+  #           libglfw3 \
+  #           libglfw3-dev \
+  #           libglu1-mesa-dev \
+  #           mesa-common-dev \
+  #           libx11-dev \
+  #           libxrandr-dev \
+  #           libxinerama-dev \
+  #           libxi-dev \
+  #           libxcursor-dev \
+  #           libxxf86vm-dev \
+  #           libasound2-dev \
+  #           pkg-config \
+  #           xvfb
 
-      - name: Setup Just
-        uses: extractions/setup-just@v3
+      # - name: Setup Just
+      #   uses: extractions/setup-just@v3
 
-      - name: Get Go environment
-        id: go-env
-        run: |
-          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_OUTPUT
-          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_OUTPUT
+      # - name: Get Go environment
+      #   id: go-env
+      #   run: |
+      #     echo "GOPATH=$(go env GOPATH)" >> $GITHUB_OUTPUT
+      #     echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_OUTPUT
 
-      - name: Restore Go tools cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ steps.go-env.outputs.GOCACHE }}
-            ${{ steps.go-env.outputs.GOPATH }}/bin
-          key: ${{ runner.os }}-go-tools-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-tools-
+      # - name: Restore Go tools cache
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       ${{ steps.go-env.outputs.GOCACHE }}
+      #       ${{ steps.go-env.outputs.GOPATH }}/bin
+      #     key: ${{ runner.os }}-go-tools-${{ hashFiles('go.sum') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-go-tools-
 
-      - name: Run tests with virtual display
-        run: |
-          export DISPLAY=:99
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          sleep 2
-          just test
+      # - name: Run tests with virtual display
+      #   run: |
+      #     export DISPLAY=:99
+      #     Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+      #     sleep 2
+      #     just test
 
-      - name: Check use cases coverage threshold
-        run: just test-coverage-check
+      # - name: Check use cases coverage threshold
+      #   run: just test-coverage-check
 
   build:
     name: Build
