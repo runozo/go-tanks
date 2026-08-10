@@ -1,6 +1,6 @@
 module github.com/runozo/go-tanks
 
-go 1.26.5
+go 1.24.3
 
 require (
 	github.com/google/uuid v1.6.0
