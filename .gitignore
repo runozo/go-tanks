@@ -26,3 +26,6 @@ go.work
 
 dist/
 go-tanks
+
+# runtime maps (created by the in-game editor)
+maps/

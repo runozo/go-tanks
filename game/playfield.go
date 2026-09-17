@@ -45,3 +45,20 @@ func (p *Playfield) Draw(screen *ebiten.Image) {
 		}
 	}
 }
+
+// TileAt returns the tile name under a world-space pixel position, or "" when
+// the position falls outside the playfield.
+func (p *Playfield) TileAt(px, py int) string {
+	if p.mapData == nil {
+		return ""
+	}
+	if px < 0 || py < 0 {
+		return ""
+	}
+	x := px / tileWidth
+	y := py / tileHeight
+	if x < 0 || x >= p.mapData.Width || y < 0 || y >= p.mapData.Height {
+		return ""
+	}
+	return p.mapData.Tiles[y][x]
+}

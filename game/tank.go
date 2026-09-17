@@ -52,6 +52,9 @@ type Tank struct {
 	IsRemote   bool          // driven by the network, not by local input/AI
 	netTarget  resolv.Vector // interpolated target from the last network transform
 	netTargetR float64
+	// Track imprint state
+	trackDist  float64       // distance travelled since the last decal
+	prevCenter resolv.Vector // center at the previous frame
 }
 
 func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position resolv.Vector, rotation float64, isEnemy bool) *Tank {
@@ -533,6 +536,32 @@ func (t *Tank) Update(tps float64) {
 			return true
 		},
 	})
+
+	t.leaveTracksOnMovement()
+}
+
+// leaveTracksOnMovement accumulates the travelled distance and drops track
+// decals whenever enough distance has been covered on soft terrain.
+func (t *Tank) leaveTracksOnMovement() {
+	center := t.Object.Center()
+
+	// First update: just record the position, nothing to detect yet.
+	if t.prevCenter == (resolv.Vector{}) {
+		t.prevCenter = center
+		return
+	}
+
+	moved := math.Hypot(center.X-t.prevCenter.X, center.Y-t.prevCenter.Y)
+	t.prevCenter = center
+	if moved <= 0 {
+		return
+	}
+
+	t.trackDist += moved
+	for t.trackDist >= trackSpacing {
+		t.trackDist -= trackSpacing
+		t.game.leaveTracks(t)
+	}
 }
 
 // sendFireToServer broadcasts a bullet fire event so that other clients can

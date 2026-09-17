@@ -70,6 +70,7 @@ type Game struct {
 	myClientID    string
 	netTick       uint64
 	explosions    []*Explosion // standalone explosions (multiplayer fallback)
+	decals        []TrackDecal // tank-track imprints on soft terrain
 	space         *resolv.Space
 	maps          []*Map
 	mapName       string
@@ -249,6 +250,7 @@ func (g *Game) Update() error {
 		g.space.RemoveAll()
 		g.obstacles = []*Obstacle{}
 		g.Tanks = nil
+		g.decals = nil
 		g.playfield = NewPlayfield(g)
 	}
 
@@ -269,6 +271,8 @@ func (g *Game) Update() error {
 			}
 		}
 
+		g.updateDecals(tps)
+
 		// standalone explosions (multiplayer fallback)
 		active := g.explosions[:0]
 		for _, e := range g.explosions {
@@ -285,6 +289,8 @@ func (g *Game) Update() error {
 
 // setupSinglePlayer builds the single-player match once the playfield is ready.
 func (g *Game) setupSinglePlayer() {
+	g.decals = nil
+
 	m := g.playfield.mapData
 
 	// add obstacles (authored in the map)
@@ -350,6 +356,7 @@ func (g *Game) exitEditor(play bool) {
 	g.space.RemoveAll()
 	g.obstacles = []*Obstacle{}
 	g.Tanks = nil
+	g.decals = nil
 	g.playfield = NewPlayfield(g)
 	g.state = RENDERINGPLAYFIELD
 }
@@ -439,6 +446,7 @@ func (g *Game) applySnapshot(msg NetMessage) {
 	// The server owns the map selection.
 	g.mapName = msg.MapName
 	g.playfield = NewPlayfield(g)
+	g.decals = nil
 
 	// obstacles (shared, authored in the map file)
 	for _, o := range g.playfield.mapData.Obstacles {
@@ -605,6 +613,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.playfield != nil {
 		g.playfield.Draw(screen)
 	}
+
+	// tank tracks are drawn just above the terrain
+	g.drawDecals(screen)
 
 	if g.state == PLAYING {
 
