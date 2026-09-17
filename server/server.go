@@ -76,7 +76,6 @@ type hub struct {
 	enemies    []*serverEnemy
 	bullets    []*serverBullet
 	nextBullet int64
-	tick       uint64
 
 	playerScore map[string]int
 	compScore   int

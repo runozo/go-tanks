@@ -420,11 +420,11 @@ func (e *Editor) Draw(screen *ebiten.Image) {
 		fy := float32(py)
 		switch p.kind {
 		case toolPlayerSpawn:
-			vector.DrawFilledRect(screen, fx, fy, paletteCell, paletteCell, color.RGBA{32, 180, 96, 255}, false)
+			vector.FillRect(screen, fx, fy, paletteCell, paletteCell, color.RGBA{32, 180, 96, 255}, false)
 		case toolEnemySpawn:
-			vector.DrawFilledRect(screen, fx, fy, paletteCell, paletteCell, color.RGBA{180, 60, 60, 255}, false)
+			vector.FillRect(screen, fx, fy, paletteCell, paletteCell, color.RGBA{180, 60, 60, 255}, false)
 		case toolErase:
-			vector.DrawFilledRect(screen, fx, fy, paletteCell, paletteCell, color.RGBA{90, 90, 96, 255}, false)
+			vector.FillRect(screen, fx, fy, paletteCell, paletteCell, color.RGBA{90, 90, 96, 255}, false)
 		default:
 			e.drawScaled(screen, p.tile, float64(px), float64(py), paletteCell)
 		}
