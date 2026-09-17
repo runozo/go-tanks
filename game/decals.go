@@ -1,7 +1,6 @@
 package game
 
 import (
-	"math"
 	"math/rand"
 	"strings"
 
@@ -10,10 +9,9 @@ import (
 )
 
 const (
-	trackSpacing    = 26.0 // px of travel between successive track decals
-	trackOffsetFrac = 0.55 // how far the two tracks sit from the tank center line
-	trackLifetime   = 6.0  // seconds before a track decal fades away
-	trackCap        = 600  // maximum number of decals kept at once
+	trackSpacing  = 26.0 // px of travel between successive track decals
+	trackLifetime = 6.0  // seconds before a track decal fades away
+	trackCap      = 600  // maximum number of decals kept at once
 )
 
 var trackNames = []string{"tracksLarge", "tracksSmall", "tracksDouble"}
@@ -26,34 +24,25 @@ type TrackDecal struct {
 	age      float64
 }
 
-// leaveTracks may drop a pair of track imprints (left + right track) behind the
-// tank, but only on soft ground (anything that is not a road).
+// leaveTracks may drop a track imprint behind the tank, but only on soft ground
+// (anything that is not a road). Each track sprite already shows both treads,
+// so a single decal centered on the tank (at its rotation) is enough.
 func (g *Game) leaveTracks(t *Tank) {
 	if g.playfield == nil {
 		return
 	}
 
 	center := t.Object.Center()
-	rot := t.Object.Rotation()
-
-	// perpendicular to the facing direction (-sin R, -cos R)
-	p := resolv.Vector{X: -math.Cos(rot), Y: math.Sin(rot)}
-	off := float64(t.Width) / 2 * trackOffsetFrac
-
-	left := resolv.Vector{X: center.X - p.X*off, Y: center.Y - p.Y*off}
-	right := resolv.Vector{X: center.X + p.X*off, Y: center.Y + p.Y*off}
+	if !g.isSoftGround(center) {
+		return
+	}
 
 	spr := g.assets.GetSprite(trackNames[rand.Intn(len(trackNames))])
 	if spr == nil {
 		return
 	}
 
-	if g.isSoftGround(left) {
-		g.addDecal(left.X, left.Y, rot, spr)
-	}
-	if g.isSoftGround(right) {
-		g.addDecal(right.X, right.Y, rot, spr)
-	}
+	g.addDecal(center.X, center.Y, t.Object.Rotation(), spr)
 }
 
 func (g *Game) isSoftGround(p resolv.Vector) bool {
