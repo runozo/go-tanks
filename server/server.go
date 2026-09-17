@@ -127,12 +127,12 @@ func (h *hub) serveWS(w http.ResponseWriter, r *http.Request) {
 	// The first message must be a join.
 	_, raw, err := conn.ReadMessage()
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return
 	}
 	var join protocol.NetMessage
 	if err := json.Unmarshal(raw, &join); err != nil || join.Type != protocol.MsgJoin {
-		conn.Close()
+		_ = conn.Close()
 		return
 	}
 
