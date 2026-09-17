@@ -42,12 +42,12 @@
             "above": [],
             "below": []
         },
-        "type": "grass",
+        "type": "ground",
         "x": 192,
         "y": 384,
         "width": 64,
         "height": 64,
-        "weight": 500
+        "weight": 1500
     },
     {
         "name": "tileGrass2",
@@ -92,12 +92,12 @@
             "above": [],
             "below": []
         },
-        "type": "grass",
+        "type": "ground",
         "x": 192,
         "y": 320,
         "width": 64,
         "height": 64,
-        "weight": 500
+        "weight": 1500
     },
     {
         "name": "tileGrass_roadCornerLL",
@@ -148,12 +148,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 64,
         "y": 320,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 16
     },
     {
         "name": "tileGrass_roadCornerLR",
@@ -204,12 +204,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 64,
         "y": 384,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 16
     },
     {
         "name": "tileGrass_roadCornerUL",
@@ -260,12 +260,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 0,
         "y": 64,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 16
     },
     {
         "name": "tileGrass_roadCornerUR",
@@ -316,12 +316,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 192,
         "y": 256,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 16
     },
     {
         "name": "tileGrass_roadCrossing",
@@ -378,12 +378,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 0,
         "y": 319,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 40
     },
     {
         "name": "tileGrass_roadCrossingRound",
@@ -440,12 +440,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 64,
         "y": 0,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 40
     },
     {
         "name": "tileGrass_roadEast",
@@ -493,15 +493,17 @@
                 "tileGrass_roadTransitionW",
                 "tileGrass_roadTransitionW_dirt"
             ],
-            "above": ["fenceYellow"],
+            "above": [
+                "fenceYellow"
+            ],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 64,
         "y": 128,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 10
     },
     {
         "name": "tileGrass_roadNorth",
@@ -549,15 +551,18 @@
                 "tileGrass_roadSplitW",
                 "tileGrass_transitionW"
             ],
-            "above": ["fenceYellow", "fenceRed"],
+            "above": [
+                "fenceYellow",
+                "fenceRed"
+            ],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 192,
         "y": 192,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 10
     },
     {
         "name": "tileGrass_roadSplitE",
@@ -611,12 +616,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 192,
         "y": 64,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 30
     },
     {
         "name": "tileGrass_roadSplitN",
@@ -670,12 +675,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 192,
         "y": 128,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 30
     },
     {
         "name": "tileGrass_roadSplitS",
@@ -729,12 +734,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 64,
         "y": 64,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 30
     },
     {
         "name": "tileGrass_roadSplitW",
@@ -788,12 +793,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 64,
         "y": 256,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 30
     },
     {
         "name": "tileGrass_roadTransitionE",
@@ -833,10 +838,13 @@
                 "tileGrass_roadTransitionW",
                 "tileGrass_roadTransitionW_dirt"
             ],
-            "above": ["fenceYellow", "fenceRed"],
+            "above": [
+                "fenceYellow",
+                "fenceRed"
+            ],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 192,
         "y": 0,
         "width": 64,
@@ -884,7 +892,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 320,
         "y": 64,
         "width": 64,
@@ -932,7 +940,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 320,
         "y": 0,
         "width": 64,
@@ -980,7 +988,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 256,
         "y": 448,
         "width": 64,
@@ -1028,7 +1036,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 256,
         "y": 384,
         "width": 64,
@@ -1076,7 +1084,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 256,
         "y": 320,
         "width": 64,
@@ -1124,7 +1132,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 256,
         "y": 256,
         "width": 64,
@@ -1172,7 +1180,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 256,
         "y": 192,
         "width": 64,
@@ -1214,7 +1222,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 256,
         "y": 128,
         "width": 64,
@@ -1256,7 +1264,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 256,
         "y": 64,
         "width": 64,
@@ -1298,7 +1306,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 256,
         "y": 0,
         "width": 64,
@@ -1340,7 +1348,7 @@
             "above": [],
             "below": []
         },
-        "type": "roadgrass",
+        "type": "ground",
         "x": 192,
         "y": 448,
         "width": 64,
@@ -1390,12 +1398,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 128,
         "y": 0,
         "width": 64,
         "height": 64,
-        "weight": 500
+        "weight": 1500
     },
     {
         "name": "tileSand2",
@@ -1445,7 +1453,7 @@
         "y": 448,
         "width": 64,
         "height": 64,
-        "weight": 500
+        "weight": 1500
     },
     {
         "name": "tileSand_roadCornerLL",
@@ -1496,12 +1504,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 0,
         "y": 255,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 16
     },
     {
         "name": "tileSand_roadCornerLR",
@@ -1552,12 +1560,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 0,
         "y": 191,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 16
     },
     {
         "name": "tileSand_roadCornerUL",
@@ -1608,12 +1616,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 0,
         "y": 0,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 16
     },
     {
         "name": "tileSand_roadCornerUR",
@@ -1664,12 +1672,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 0,
         "y": 383,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 16
     },
     {
         "name": "tileSand_roadCrossing",
@@ -1726,12 +1734,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 320,
         "y": 128,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 40
     },
     {
         "name": "tileSand_roadCrossingRound",
@@ -1788,12 +1796,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 128,
         "y": 448,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 40
     },
     {
         "name": "tileSand_roadEast",
@@ -1844,12 +1852,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 128,
         "y": 384,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 10
     },
     {
         "name": "tileSand_roadNorth",
@@ -1897,15 +1905,18 @@
                 "tileSand_roadNorth",
                 "tileSand_roadSplitW"
             ],
-            "above": ["fenceYellow", "fenceRed"],
+            "above": [
+                "fenceYellow",
+                "fenceRed"
+            ],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 128,
         "y": 320,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 10
     },
     {
         "name": "tileSand_roadSplitE",
@@ -1959,12 +1970,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 128,
         "y": 256,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 30
     },
     {
         "name": "tileSand_roadSplitN",
@@ -2018,12 +2029,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 128,
         "y": 192,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 30
     },
     {
         "name": "tileSand_roadSplitS",
@@ -2077,12 +2088,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 128,
         "y": 128,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 30
     },
     {
         "name": "tileSand_roadSplitW",
@@ -2136,12 +2147,12 @@
             "above": [],
             "below": []
         },
-        "type": "roadsand",
+        "type": "ground",
         "x": 128,
         "y": 64,
         "width": 64,
         "height": 64,
-        "weight": 20
+        "weight": 30
     },
     {
         "name": "barrelBlack_side",
@@ -4790,4 +4801,3 @@
         "type": "random"
     }
 ]
-

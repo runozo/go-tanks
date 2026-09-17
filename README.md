@@ -4,7 +4,7 @@ A game with tanks<!-- >, try it on https://runozo.github.io/go-tanks/ -->
 
 ## Running
 
-```make run```
+```just run```
 
 ## Controls
 |Key|Function
