@@ -286,6 +286,13 @@ func (t *Tank) ballisticSlope(dist, tps float64) float64 {
 	return 0.5 * math.Asin(sin2)
 }
 
+// barrelWorldRotation returns the world rotation the barrel must have so that
+// a bullet fired from `from` flies toward `to`. Bullets travel along the
+// forward direction (-sin R, -cos R), hence R = -atan2(dy,dx) - pi/2.
+func barrelWorldRotation(from, to resolv.Vector) float64 {
+	return -math.Atan2(to.Y-from.Y, to.X-from.X) - math.Pi/2
+}
+
 // updateEnemyAI drives an enemy tank: it seeks/orbits the closest target while
 // avoiding obstacles, and fires at it with a ballistic aim.
 func (t *Tank) updateEnemyAI(tps float64) {
@@ -374,9 +381,13 @@ func (t *Tank) updateEnemyAI(tps float64) {
 		t.enemyEvasiveFrames = enemyEvasiveTime
 	}
 
-	// aim the barrels at the target (horizontal aim)
+	// aim the barrels at the target: the barrel solid rotation is
+	// tankRotation + relativeRotation, so relativeRotation must encode the
+	// world aim minus the current tank rotation, otherwise the turret would
+	// rotate together with the tank body.
+	worldAim := barrelWorldRotation(enemyCenter, targetCenter)
 	for _, b := range t.barrels {
-		b.relativeRotation = -math.Atan2(targetCenter.Y-enemyCenter.Y, targetCenter.X-enemyCenter.X) - math.Pi/2
+		b.relativeRotation = worldAim - t.Object.Rotation()
 	}
 
 	// fire with ballistic slope when the target is in range

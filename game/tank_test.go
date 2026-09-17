@@ -36,6 +36,39 @@ func TestRotationForHeading(t *testing.T) {
 	}
 }
 
+// TestBarrelWorldRotation verifies that the relativeRotation used to aim the
+// turret compensates the tank rotation: regardless of how the tank body is
+// rotated, a bullet fired from the barrel (whose solid rotation is
+// tankRotation + relativeRotation) flies exactly towards the target.
+func TestBarrelWorldRotation(t *testing.T) {
+	from := resolv.Vector{X: 100, Y: 100}
+	targets := []resolv.Vector{
+		{X: 400, Y: 100}, // east
+		{X: 100, Y: 400}, // south
+		{X: 10, Y: 50},   // north-west
+		{X: 800, Y: 700}, // south-east
+	}
+	for _, tankRotation := range []float64{0, math.Pi / 4, math.Pi, -math.Pi / 3, 2.4} {
+		for _, to := range targets {
+			worldAim := barrelWorldRotation(from, to)
+			rel := worldAim - tankRotation
+			solidRotation := tankRotation + rel
+
+			s, c := math.Sincos(solidRotation)
+			forward := resolv.Vector{X: -s, Y: -c}
+
+			dx, dy := to.X-from.X, to.Y-from.Y
+			len := math.Hypot(dx, dy)
+			want := resolv.Vector{X: dx / len, Y: dy / len}
+
+			if math.Abs(forward.X-want.X) > 1e-9 || math.Abs(forward.Y-want.Y) > 1e-9 {
+				t.Errorf("tankRot %.4f, target (%v): bullet flies (%v), want (%v)",
+					tankRotation, to, forward, want)
+			}
+		}
+	}
+}
+
 // TestBallisticSlope verifies the slope computed by ballisticSlope actually
 // reaches the requested distance, using the bullet physics of bullet.go:
 //
