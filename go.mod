@@ -6,7 +6,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/hajimehoshi/ebiten/v2 v2.9.9
-	github.com/runozo/go-wave-function-collapse v1.0.6
 	github.com/solarlune/resolv v0.8.1
 )
 

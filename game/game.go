@@ -13,7 +13,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
-	"github.com/runozo/go-wave-function-collapse/assets"
+	"github.com/runozo/go-tanks/internal/assets"
 	"github.com/solarlune/resolv"
 )
 
@@ -29,6 +29,9 @@ const (
 
 //go:embed assets/*
 var assetsFS embed.FS
+
+//go:embed maps/*.json
+var mapsFS embed.FS
 
 var (
 	TagPlayer    = resolv.NewTag("Player")
@@ -62,6 +65,8 @@ type Game struct {
 	netClient     *NetClient
 	networkTanks  map[string]*Tank
 	space         *resolv.Space
+	maps          []*Map
+	mapName       string
 	state         int
 	debug         bool
 }
@@ -77,7 +82,7 @@ const (
 	INTRO
 )
 
-func NewGame(serverAddress string) *Game {
+func NewGame(serverAddress, mapName string) *Game {
 	// Load sprite sheet
 	spriteSheetData, err := assetsFS.ReadFile("assets/allSprites_default.png")
 	if err != nil {
@@ -93,6 +98,11 @@ func NewGame(serverAddress string) *Game {
 		spriteSheetData,
 		jsonData,
 	)
+
+	mapsData, err := loadMaps(assets)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Load fonts
 	fontData, err := assetsFS.ReadFile("assets/gomarice_no_continue.ttf")
@@ -128,6 +138,8 @@ func NewGame(serverAddress string) *Game {
 		serverAddress: serverAddress,
 		networkTanks:  make(map[string]*Tank),
 		space:         resolv.NewSpace(screenWidth, screenHeight, cellWidth, cellHeight),
+		maps:          mapsData,
+		mapName:       mapName,
 		state:         RENDERINGPLAYFIELD,
 		debug:         false,
 	}
@@ -143,6 +155,50 @@ func NewGame(serverAddress string) *Game {
 	return g
 }
 
+// loadMaps reads every embedded map definition and validates it against the
+// available sprite map.
+func loadMaps(sprites *assets.Assets) ([]*Map, error) {
+	entries, err := mapsFS.ReadDir("maps")
+	if err != nil {
+		return nil, err
+	}
+
+	var maps []*Map
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		data, err := mapsFS.ReadFile("maps/" + e.Name())
+		if err != nil {
+			return nil, err
+		}
+		m, err := parseMap(data, sprites)
+		if err != nil {
+			return nil, fmt.Errorf("loading %s: %w", e.Name(), err)
+		}
+		maps = append(maps, m)
+	}
+
+	if len(maps) == 0 {
+		return nil, fmt.Errorf("no maps found in maps/")
+	}
+
+	return maps, nil
+}
+
+// pickMap returns the map selected by g.mapName if set, otherwise a random one.
+func (g *Game) pickMap() *Map {
+	if g.mapName != "" {
+		for _, m := range g.maps {
+			if m.Name == g.mapName {
+				return m
+			}
+		}
+		log.Fatalf("map %q not found", g.mapName)
+	}
+	return g.maps[rand.Intn(len(g.maps))]
+}
+
 func (g *Game) Update() error {
 	tps := float64(ebiten.TPS())
 
@@ -150,21 +206,32 @@ func (g *Game) Update() error {
 		g.playfield.Update(tps)
 	}
 
-	// prepare the game after playfield rendered
-	if g.playfield.wfc.IsRendered && g.state == RENDERINGPLAYFIELD {
+	// prepare the game after the map is ready
+	if g.playfield.ready && g.state == RENDERINGPLAYFIELD {
 
-		// add obstacles
-		for range rand.Intn(50) {
-			// fmt.Println("obstacle")
-			g.obstacles = append(g.obstacles, NewObstacle(g))
+		m := g.playfield.mapData
+
+		// add obstacles (authored in the map)
+		for _, o := range m.Obstacles {
+			g.obstacles = append(g.obstacles, NewObstacleAt(g, o))
 		}
 
-		// add players
-		g.Tanks = []*Tank{NewRandomTank(g, 0, false)}
+		// add player at the authored spawn (or a random position as fallback)
+		if m.PlayerSpawn != nil {
+			g.Tanks = []*Tank{NewTankAt(g, resolv.Vector{X: m.PlayerSpawn.X, Y: m.PlayerSpawn.Y}, m.PlayerSpawn.Rotation, false)}
+		} else {
+			g.Tanks = []*Tank{NewRandomTank(g, 0, false)}
+		}
 
-		// add enemies
-		for i := 0; i < numberOfEnemies; i++ {
-			g.Tanks = append(g.Tanks, NewRandomTank(g, 0, true))
+		// add enemies at the authored spawns (or random as fallback)
+		if len(m.EnemySpawns) > 0 {
+			for _, s := range m.EnemySpawns {
+				g.Tanks = append(g.Tanks, NewTankAt(g, resolv.Vector{X: s.X, Y: s.Y}, s.Rotation, true))
+			}
+		} else {
+			for i := 0; i < numberOfEnemies; i++ {
+				g.Tanks = append(g.Tanks, NewRandomTank(g, 0, true))
+			}
 		}
 
 		g.scoreLine = NewScoreLine(g)

@@ -1,12 +1,10 @@
 package game
 
 import (
-	_ "image/png"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/runozo/go-wave-function-collapse/assets"
-	"github.com/runozo/go-wave-function-collapse/wfc"
-	"github.com/solarlune/resolv"
+	"github.com/runozo/go-tanks/internal/assets"
 )
 
 const (
@@ -14,56 +12,36 @@ const (
 	tileHeight = 64
 )
 
+// Playfield is a hand-authored level (a Map) rendered on top of the screen.
+// Unlike the previous WFC-based generation, tiles are fixed and authored, so
+// the layout is always deterministic.
 type Playfield struct {
-	width, height, numOfTilesX, numOfTilesY int
-	wfc                                     *wfc.Wfc
-	assets                                  *assets.Assets
-	progressBar                             *ProgressBar
+	assets  *assets.Assets
+	mapData *Map
+	ready   bool
 }
 
+// NewPlayfield builds a Playfield from the map chosen on the Game (by name, or
+// a random one among those embedded).
 func NewPlayfield(game *Game) *Playfield {
-
-	playfield := &Playfield{
-		width:  game.width,
-		height: game.height,
-
-		wfc:         wfc.NewWfc(screenWidth/tileWidth+1, screenHeight/tileHeight+1, game.assets.TileEntries),
-		assets:      game.assets,
-		progressBar: NewProgressBar(400, 36, "Generating playfield", resolv.Vector{X: (screenWidth - 400) / 2, Y: (screenHeight - 36) / 2}, game.fontSmall),
-		numOfTilesX: game.width/tileWidth + 1,
-		numOfTilesY: game.height/tileHeight + 1,
+	pf := &Playfield{
+		assets:  game.assets,
+		mapData: game.pickMap(),
+		ready:   true,
 	}
-
-	playfield.progressBar.Update(0)
-
-	go playfield.wfc.StartRender()
-
-	return playfield
+	log.Printf("Playfield: using map %q (%dx%d)", pf.mapData.Name, pf.mapData.Width, pf.mapData.Height)
+	return pf
 }
 
-func (p *Playfield) Update(tps float64) {
-	if p.wfc.IsRunning {
-		p.progressBar.Update(float64(p.wfc.ProcessedTiles) / float64(p.wfc.TotalTiles) * 100)
-	}
-}
+func (p *Playfield) Update(tps float64) {}
 
 func (p *Playfield) Draw(screen *ebiten.Image) {
-	var i int
-	for y := 0; y < screenHeight; y += tileHeight {
-		for x := 0; x < screenWidth; x += tileWidth {
+	for y := 0; y < p.mapData.Height; y++ {
+		for x := 0; x < p.mapData.Width; x++ {
+			name := p.mapData.Tiles[y][x]
 			ops := &ebiten.DrawImageOptions{}
-			ops.GeoM.Translate(float64(x), float64(y))
-			if p.wfc.Tiles[i].Collapsed {
-				screen.DrawImage(p.assets.GetSprite(p.wfc.Tiles[i].Name), ops)
-			} else {
-				screen.DrawImage(ebiten.NewImage(tileWidth, tileHeight), ops)
-			}
-			i++
+			ops.GeoM.Translate(float64(x*tileWidth), float64(y*tileHeight))
+			screen.DrawImage(p.assets.GetSprite(name), ops)
 		}
 	}
-
-	if p.wfc.IsRunning {
-		p.progressBar.Draw(screen)
-	}
-
 }

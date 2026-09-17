@@ -125,7 +125,8 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 	return tank
 }
 
-func NewRandomTank(game *Game, rotation float64, isEnemy bool) *Tank {
+// pickTankSprites returns a random (body, barrel, bullet) sprite set for a tank.
+func pickTankSprites(isEnemy bool) (string, string, string) {
 	enemyBodies := []string{"tankBody_darkLarge", "tankBody_darkLarge_outline", "tankBody_huge_outline"}
 	enemyBarrels := []string{"specialBarrel1_outline"}
 	enemyBullets := []string{"bulletRed1_outline"}
@@ -134,18 +135,29 @@ func NewRandomTank(game *Game, rotation float64, isEnemy bool) *Tank {
 	playerBarrels := []string{"tankDark_barrel1_outline", "tankDark_barrel2_outline", "tankDark_barrel3_outline", "tankGreen_barrel1", "tankGreen_barrel1_outline", "tankGreen_barrel2", "tankGreen_barrel2_outline", "tankGreen_barrel3", "tankGreen_barrel3_outline", "tankRed_barrel1", "tankRed_barrel1_outline", "tankRed_barrel2_outline", "tankRed_barrel3_outline", "tankSand_barrel2_outline", "tankSand_barrel3_outline"}
 	playerBullets := []string{"bulletRed1_outline"}
 
-	randomBodyName := playerBodies[rand.Intn(len(playerBodies))]
-	randomBarrelName := playerBarrels[rand.Intn(len(playerBarrels))]
-	randomBulletName := playerBullets[rand.Intn(len(playerBullets))]
-
 	if isEnemy {
-		randomBodyName = enemyBodies[rand.Intn(len(enemyBodies))]
-		randomBarrelName = enemyBarrels[rand.Intn(len(enemyBarrels))]
-		randomBulletName = enemyBullets[rand.Intn(len(enemyBullets))]
+		return enemyBodies[rand.Intn(len(enemyBodies))],
+			enemyBarrels[rand.Intn(len(enemyBarrels))],
+			enemyBullets[rand.Intn(len(enemyBullets))]
 	}
+
+	return playerBodies[rand.Intn(len(playerBodies))],
+		playerBarrels[rand.Intn(len(playerBarrels))],
+		playerBullets[rand.Intn(len(playerBullets))]
+}
+
+func NewRandomTank(game *Game, rotation float64, isEnemy bool) *Tank {
+	randomBodyName, randomBarrelName, randomBulletName := pickTankSprites(isEnemy)
 
 	position := resolv.Vector{X: float64(rand.Intn(screenWidth - tileWidth)), Y: float64(rand.Intn(screenHeight - tileHeight))}
 
+	return NewTank(game, randomBodyName, randomBarrelName, randomBulletName, position, rotation, isEnemy)
+}
+
+// NewTankAt creates a tank with random sprites but placed at an authored
+// position (used for hand-authored map spawn points).
+func NewTankAt(game *Game, position resolv.Vector, rotation float64, isEnemy bool) *Tank {
+	randomBodyName, randomBarrelName, randomBulletName := pickTankSprites(isEnemy)
 	return NewTank(game, randomBodyName, randomBarrelName, randomBulletName, position, rotation, isEnemy)
 }
 
