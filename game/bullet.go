@@ -32,6 +32,10 @@ type Bullet struct {
 	exploded                   bool
 	hasHitTarget               bool
 	barrel                     *Barrel
+	// visual marks a bullet replicated from the network: it is simulated for
+	// rendering only and never checks collisions nor updates the score.
+	visual bool
+	netID  int64 // id assigned by the server (enemy fire), for hit matching
 }
 
 func NewBullet(barrel *Barrel, flavor string) *Bullet {
@@ -104,28 +108,42 @@ func (b *Bullet) Update(tps float64) {
 	// Let's prevent it from exploding instantly (elapsedTime > 0.1) and check that it has "fallen"
 	if b.altitude <= initialAltitude && b.elapsedTime > 0.1 {
 
-		nearbyShapes := b.solid.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer | TagObstacle)
+		if !b.visual {
+			nearbyShapes := b.solid.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer | TagObstacle)
 
-		b.solid.IntersectionTest(resolv.IntersectionTestSettings{
-			TestAgainst: nearbyShapes,
-			OnIntersect: func(set resolv.IntersectionSet) bool {
-				b.solid.MoveVec(resolv.Vector{X: 0, Y: 0})
+			b.solid.IntersectionTest(resolv.IntersectionTestSettings{
+				TestAgainst: nearbyShapes,
+				OnIntersect: func(set resolv.IntersectionSet) bool {
+					b.solid.MoveVec(resolv.Vector{X: 0, Y: 0})
 
-				if b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagPlayer) {
-					b.hasHitTarget = true
-					b.barrel.tank.game.scoreLine.IncrementEnemy()
-				}
-				if !b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagEnemy) {
-					b.hasHitTarget = true
-					b.barrel.tank.game.scoreLine.IncrementPlayer()
-				}
-				return true // Stops the test at the first entity hit
-			},
-		})
+					if b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagPlayer) {
+						b.hasHitTarget = true
+						if b.barrel.tank.game.netClient == nil {
+							b.barrel.tank.game.scoreLine.IncrementEnemy()
+						}
+					}
+					if !b.barrel.tank.IsEnemy && set.OtherShape.Tags().Has(TagEnemy) {
+						b.hasHitTarget = true
+						if b.barrel.tank.game.netClient != nil {
+							// Multiplayer: report the hit to the server, which
+							// owns the score and the enemy AI.
+							if hitTank, ok := set.OtherShape.Data().(*Tank); ok {
+								b.barrel.tank.game.netClient.SendHit(hitTank.ID)
+							}
+						} else {
+							b.barrel.tank.game.scoreLine.IncrementPlayer()
+						}
+					}
+					return true // Stops the test at the first entity hit
+				},
+			})
+		}
 
 		// The projectile fell: it explodes regardless of whether it hit someone or the empty ground
 		b.explosion = NewExplosion(b)
-		b.barrel.tank.game.space.Remove(b.solid)
+		if !b.visual {
+			b.barrel.tank.game.space.Remove(b.solid)
+		}
 	}
 }
 

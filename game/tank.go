@@ -48,6 +48,10 @@ type Tank struct {
 	enemyEvasiveFrames int
 	enemyLastPos       resolv.Vector
 	enemyOrbitSign     float64 // strafe/orbit direction (+1 or -1), random per enemy
+	// Network state
+	IsRemote   bool          // driven by the network, not by local input/AI
+	netTarget  resolv.Vector // interpolated target from the last network transform
+	netTargetR float64
 }
 
 func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position resolv.Vector, rotation float64, isEnemy bool) *Tank {
@@ -425,7 +429,10 @@ func (t *Tank) Update(tps float64) {
 	movementSpeed := tankSpeed / tps
 	slopeSpeed := barrelMaxSlope / tps
 
-	if t.IsEnemy {
+	if t.IsRemote {
+		// Driven by network transforms: only interpolate, never use input/AI.
+		t.networkLerp(tps)
+	} else if t.IsEnemy {
 		t.updateEnemyAI(tps)
 	} else {
 		// player
@@ -491,6 +498,7 @@ func (t *Tank) Update(tps float64) {
 		// fire and reset barrels slope
 		if yesFire {
 			t.Bullets = append(t.Bullets, t.Fire()...)
+			t.sendFireToServer(t.Bullets[len(t.Bullets)-1])
 			for i := 0; i < len(t.barrels); i++ {
 				t.barrels[i].slope = 0.0
 			}
@@ -499,20 +507,48 @@ func (t *Tank) Update(tps float64) {
 		// fire and reset barrels slope
 		if yesFire {
 			t.Bullets = append(t.Bullets, t.Fire()...)
+			t.sendFireToServer(t.Bullets[len(t.Bullets)-1])
 			for i := 0; i < len(t.barrels); i++ {
 				t.barrels[i].slope = 0.0
 			}
 		}
 
-		// --- NETWORKING: Send data to server ---
+		// --- NETWORKING: Send local transform to the server ---
 		if t.game.netClient != nil {
-			t.game.netClient.SendTankData(t)
+			center := t.Object.Center()
+			t.game.netClient.SendTransform(center.X, center.Y, t.Object.Rotation())
 		}
 	}
 
 	t.ShootCooldown.Update()
 
-	// update bullets
+	t.updateWeapons(tps)
+
+	// tank-vs-tank / tank-vs-obstacle collision resolution
+	otherTanks := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer | TagObstacle)
+	t.Object.IntersectionTest(resolv.IntersectionTestSettings{
+		TestAgainst: otherTanks,
+		OnIntersect: func(set resolv.IntersectionSet) bool {
+			t.Object.MoveVec(set.MTV)
+			return true
+		},
+	})
+}
+
+// sendFireToServer broadcasts a bullet fire event so that other clients can
+// render the projectile.
+func (t *Tank) sendFireToServer(b *Bullet) {
+	if t.game.netClient == nil {
+		return
+	}
+	center := b.solid.Center()
+	t.game.netClient.SendFire(center.X, center.Y, b.solid.Rotation(), b.initialSlope, bulletType2)
+}
+
+// updateWeapons advances the barrels and the bullets of the tank without any
+// input or AI logic. It is used directly for server-driven enemy tanks in
+// multiplayer (whose transforms come from the server).
+func (t *Tank) updateWeapons(tps float64) {
 	var activeBullets []*Bullet
 	for _, bullet := range t.Bullets {
 		bullet.Update(tps)
@@ -525,16 +561,28 @@ func (t *Tank) Update(tps float64) {
 	for _, b := range t.barrels {
 		b.Update(tps)
 	}
+}
 
-	otherTanks := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagEnemy | TagPlayer | TagObstacle)
-	// bulletObjects := t.Object.SelectTouchingCells(2).FilterShapes().ByTags(TagBullet)
-	t.Object.IntersectionTest(resolv.IntersectionTestSettings{
-		TestAgainst: otherTanks,
-		OnIntersect: func(set resolv.IntersectionSet) bool {
-			t.Object.MoveVec(set.MTV)
-			return true
-		},
-	})
+// networkLerp smoothly moves a remote tank toward its latest network target,
+// hiding the 20Hz server updates.
+func (t *Tank) networkLerp(tps float64) {
+	dt := 1.0 / tps
+	factor := 1.0 - math.Exp(-15.0*dt)
+
+	center := t.Object.Center()
+	next := resolv.Vector{
+		X: center.X + (t.netTarget.X-center.X)*factor,
+		Y: center.Y + (t.netTarget.Y-center.Y)*factor,
+	}
+	t.Object.SetPositionVec(next)
+
+	diff := shortestAngle(t.netTargetR - t.Object.Rotation())
+	t.Object.SetRotation(t.Object.Rotation() + diff*factor)
+}
+
+// shortestAngle returns the smallest signed difference between two angles.
+func shortestAngle(diff float64) float64 {
+	return math.Atan2(math.Sin(diff), math.Cos(diff))
 }
 
 func (t *Tank) Draw(screen *ebiten.Image) {

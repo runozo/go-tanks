@@ -30,6 +30,12 @@ func (s *ScoreLine) IncrementEnemy() {
 	s.Enemy += 1
 }
 
+// Set overwrites the score with server-provided values (multiplayer).
+func (s *ScoreLine) Set(player, comp int) {
+	s.Player = player
+	s.Enemy = comp
+}
+
 func (s *ScoreLine) Reset() {
 	s.Enemy = 0
 	s.Player = 0

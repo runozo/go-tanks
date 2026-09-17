@@ -8,12 +8,14 @@ import (
 	"log"
 	"math/rand"
 
+	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/runozo/go-tanks/internal/assets"
+	"github.com/runozo/go-tanks/internal/maps"
 	"github.com/solarlune/resolv"
 )
 
@@ -29,9 +31,6 @@ const (
 
 //go:embed assets/*
 var assetsFS embed.FS
-
-//go:embed maps/*.json
-var mapsFS embed.FS
 
 var (
 	TagPlayer    = resolv.NewTag("Player")
@@ -64,6 +63,11 @@ type Game struct {
 	serverAddress string
 	netClient     *NetClient
 	networkTanks  map[string]*Tank
+	netEnemies    map[string]*Tank // server-simulated enemies (multiplayer)
+	localPlayer   *Tank
+	myClientID    string
+	netTick       uint64
+	explosions    []*Explosion // standalone explosions (multiplayer fallback)
 	space         *resolv.Space
 	maps          []*Map
 	mapName       string
@@ -137,6 +141,7 @@ func NewGame(serverAddress, mapName string) *Game {
 		},
 		serverAddress: serverAddress,
 		networkTanks:  make(map[string]*Tank),
+		netEnemies:    make(map[string]*Tank),
 		space:         resolv.NewSpace(screenWidth, screenHeight, cellWidth, cellHeight),
 		maps:          mapsData,
 		mapName:       mapName,
@@ -144,12 +149,14 @@ func NewGame(serverAddress, mapName string) *Game {
 		debug:         false,
 	}
 
-	// create new playfield
-
-	g.playfield = NewPlayfield(g)
-
 	if serverAddress != "" {
-		g.netClient = NewNetClient(serverAddress)
+		// Multiplayer: the session (map, enemies, players) comes from the
+		// server snapshot; the playfield is created when it arrives.
+		g.myClientID = uuid.NewString()
+		g.netClient = NewNetClient(serverAddress, g.myClientID)
+	} else {
+		// Single player: build the playfield immediately.
+		g.playfield = NewPlayfield(g)
 	}
 
 	return g
@@ -158,32 +165,21 @@ func NewGame(serverAddress, mapName string) *Game {
 // loadMaps reads every embedded map definition and validates it against the
 // available sprite map.
 func loadMaps(sprites *assets.Assets) ([]*Map, error) {
-	entries, err := mapsFS.ReadDir("maps")
+	all, err := maps.All()
 	if err != nil {
 		return nil, err
 	}
 
-	var maps []*Map
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-		data, err := mapsFS.ReadFile("maps/" + e.Name())
-		if err != nil {
+	for _, m := range all {
+		if err := m.Validate(func(name string) bool {
+			_, ok := sprites.TileEntries[name]
+			return ok
+		}); err != nil {
 			return nil, err
 		}
-		m, err := parseMap(data, sprites)
-		if err != nil {
-			return nil, fmt.Errorf("loading %s: %w", e.Name(), err)
-		}
-		maps = append(maps, m)
 	}
 
-	if len(maps) == 0 {
-		return nil, fmt.Errorf("no maps found in maps/")
-	}
-
-	return maps, nil
+	return all, nil
 }
 
 // pickMap returns the map selected by g.mapName if set, otherwise a random one.
@@ -202,98 +198,341 @@ func (g *Game) pickMap() *Map {
 func (g *Game) Update() error {
 	tps := float64(ebiten.TPS())
 
+	if g.netClient != nil {
+		g.processNetMessages()
+	}
+
 	if g.state == RENDERINGPLAYFIELD {
-		g.playfield.Update(tps)
+		if g.playfield != nil {
+			g.playfield.Update(tps)
+		}
+
+		// prepare the game once the map is ready (single player: immediately,
+		// multiplayer: after the server snapshot builds the playfield).
+		if g.playfield != nil && g.playfield.ready && g.state == RENDERINGPLAYFIELD {
+			g.setupSinglePlayer()
+		}
 	}
 
-	// prepare the game after the map is ready
-	if g.playfield.ready && g.state == RENDERINGPLAYFIELD {
-
-		m := g.playfield.mapData
-
-		// add obstacles (authored in the map)
-		for _, o := range m.Obstacles {
-			g.obstacles = append(g.obstacles, NewObstacleAt(g, o))
-		}
-
-		// add player at the authored spawn (or a random position as fallback)
-		if m.PlayerSpawn != nil {
-			g.Tanks = []*Tank{NewTankAt(g, resolv.Vector{X: m.PlayerSpawn.X, Y: m.PlayerSpawn.Y}, m.PlayerSpawn.Rotation, false)}
-		} else {
-			g.Tanks = []*Tank{NewRandomTank(g, 0, false)}
-		}
-
-		// add enemies at the authored spawns (or random as fallback)
-		if len(m.EnemySpawns) > 0 {
-			for _, s := range m.EnemySpawns {
-				g.Tanks = append(g.Tanks, NewTankAt(g, resolv.Vector{X: s.X, Y: s.Y}, s.Rotation, true))
-			}
-		} else {
-			for i := 0; i < numberOfEnemies; i++ {
-				g.Tanks = append(g.Tanks, NewRandomTank(g, 0, true))
-			}
-		}
-
-		g.scoreLine = NewScoreLine(g)
-
-		g.state = PLAYING
-	}
-
-	// recreate playfield
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+	// recreate playfield (single player only; the network session is owned
+	// by the server)
+	if g.netClient == nil && inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.state = RENDERINGPLAYFIELD
 		g.space.RemoveAll()
 		g.obstacles = []*Obstacle{}
+		g.Tanks = nil
 		g.playfield = NewPlayfield(g)
 	}
 
 	if g.state == PLAYING {
-		// --- LETTURA DATI DI RETE ---
 		if g.netClient != nil {
-		NetworkLoop:
-			for {
-				select {
-				case payload := <-g.netClient.IncomingTanks:
-					// Abbiamo ricevuto un dato!
-					remoteTank, exists := g.networkTanks[payload.ID]
-
-					if !exists {
-						// È un giocatore nuovo, creiamo un tank per lui!
-						// Disabilitiamo l'IA passandogli 'true' o creando una logica apposita per i giocatori remoti
-						remoteTank = NewRandomTank(g, payload.Rotation, false)
-						remoteTank.IsEnemy = payload.IsEnemy // Sovrascriviamo se necessario
-						g.networkTanks[payload.ID] = remoteTank
-						g.Tanks = append(g.Tanks, remoteTank) // Aggiungiamolo alla lista per disegnarlo
-					}
-
-					// Aggiorniamo posizione e rotazione in base a quanto dice il server
-					remoteTank.Object.SetPositionVec(resolv.Vector{X: payload.X, Y: payload.Y})
-					remoteTank.Object.Rotate(payload.Rotation)
-
-				default:
-					// Niente più messaggi in coda, usciamo dal ciclo
-					break NetworkLoop
-				}
-			}
+			g.sendLocalTransform()
 		}
-		// update tanks
+
+		// update tanks (local player input, remote tank interpolation)
 		for _, t := range g.Tanks {
 			t.Update(tps)
 		}
+
+		// update server-driven enemies (visuals and replicated bullets only)
+		if g.netClient != nil {
+			for _, e := range g.netEnemies {
+				e.updateWeapons(tps)
+			}
+		}
+
+		// standalone explosions (multiplayer fallback)
+		active := g.explosions[:0]
+		for _, e := range g.explosions {
+			e.Update(tps)
+			if !e.bullet.exploded {
+				active = append(active, e)
+			}
+		}
+		g.explosions = active
 	}
 
 	return nil
 }
 
+// setupSinglePlayer builds the single-player match once the playfield is ready.
+func (g *Game) setupSinglePlayer() {
+	m := g.playfield.mapData
+
+	// add obstacles (authored in the map)
+	for _, o := range m.Obstacles {
+		g.obstacles = append(g.obstacles, NewObstacleAt(g, o))
+	}
+
+	// add player at the authored spawn (or a random position as fallback)
+	if m.PlayerSpawn != nil {
+		g.Tanks = []*Tank{NewTankAt(g, resolv.Vector{X: m.PlayerSpawn.X, Y: m.PlayerSpawn.Y}, m.PlayerSpawn.Rotation, false)}
+	} else {
+		g.Tanks = []*Tank{NewRandomTank(g, 0, false)}
+	}
+
+	// add enemies at the authored spawns (or random as fallback)
+	if len(m.EnemySpawns) > 0 {
+		for _, s := range m.EnemySpawns {
+			g.Tanks = append(g.Tanks, NewTankAt(g, resolv.Vector{X: s.X, Y: s.Y}, s.Rotation, true))
+		}
+	} else {
+		for i := 0; i < numberOfEnemies; i++ {
+			g.Tanks = append(g.Tanks, NewRandomTank(g, 0, true))
+		}
+	}
+
+	g.scoreLine = NewScoreLine(g)
+
+	g.state = PLAYING
+}
+
+// ---------------------------------------------------------------------------
+// Networking (multiplayer)
+// ---------------------------------------------------------------------------
+
+// processNetMessages drains the incoming network queue.
+func (g *Game) processNetMessages() {
+	for {
+		select {
+		case msg := <-g.netClient.Incoming:
+			g.handleNetMessage(msg)
+		default:
+			return
+		}
+	}
+}
+
+func (g *Game) handleNetMessage(msg NetMessage) {
+	switch msg.Type {
+	case msgSnapshot:
+		g.applySnapshot(msg)
+
+	case msgTransform:
+		g.ensureNetTank(msg.ClientID, msg.X, msg.Y, msg.R)
+
+	case msgFire:
+		g.applyRemoteFire(msg)
+
+	case msgEnemyState:
+		g.applyEnemyState(msg)
+
+	case msgEnemyFire:
+		g.applyEnemyFire(msg)
+
+	case msgEnemyHitPlayer:
+		g.applyEnemyHitPlayer(msg)
+
+	case msgScore:
+		if g.scoreLine != nil {
+			g.scoreLine.Set(msg.Score.Player, msg.Score.Comp)
+		}
+
+	case msgLeave:
+		if t, ok := g.networkTanks[msg.ClientID]; ok {
+			t.Destroy()
+			delete(g.networkTanks, msg.ClientID)
+			for i, tt := range g.Tanks {
+				if tt == t {
+					g.Tanks = append(g.Tanks[:i], g.Tanks[i+1:]...)
+					break
+				}
+			}
+		}
+	}
+}
+
+// applySnapshot builds the whole multiplayer session from the server state.
+func (g *Game) applySnapshot(msg NetMessage) {
+	if g.playfield != nil {
+		return // session already started
+	}
+
+	// The server owns the map selection.
+	g.mapName = msg.MapName
+	g.playfield = NewPlayfield(g)
+
+	// obstacles (shared, authored in the map file)
+	for _, o := range g.playfield.mapData.Obstacles {
+		g.obstacles = append(g.obstacles, NewObstacleAt(g, o))
+	}
+
+	// enemy visuals, driven by the server
+	for _, es := range msg.Enemies {
+		t := NewTankAt(g, resolv.Vector{X: es.X, Y: es.Y}, es.R, true)
+		t.ID = es.ID
+		t.Object.SetRotation(es.R)
+		if len(t.barrels) > 0 {
+			t.barrels[0].relativeRotation = es.Aim - es.R
+		}
+		g.netEnemies[es.ID] = t
+	}
+
+	// remote players already in the session
+	for _, p := range msg.Players {
+		if p.ClientID == g.myClientID {
+			continue
+		}
+		g.ensureNetTank(p.ClientID, p.X, p.Y, p.R)
+	}
+
+	// local player at the authored spawn
+	sp := g.playfield.mapData.PlayerSpawn
+	pos := resolv.Vector{X: float64(screenWidth) / 2, Y: float64(screenHeight) / 2}
+	if sp != nil {
+		pos = resolv.Vector{X: sp.X, Y: sp.Y}
+	}
+	g.localPlayer = NewTankAt(g, pos, 0, false)
+	g.Tanks = append(g.Tanks, g.localPlayer)
+
+	g.scoreLine = NewScoreLine(g)
+	g.scoreLine.Set(msg.Score.Player, msg.Score.Comp)
+
+	log.Printf("session started on map %q with %d players and %d enemies", g.mapName, len(msg.Players), len(msg.Enemies))
+	g.state = PLAYING
+}
+
+// ensureNetTank returns the remote tank for clientID, creating it on first
+// sight and updating its interpolation target.
+func (g *Game) ensureNetTank(clientID string, x, y, r float64) *Tank {
+	if t, ok := g.networkTanks[clientID]; ok {
+		t.netTarget = resolv.Vector{X: x, Y: y}
+		t.netTargetR = r
+		return t
+	}
+
+	t := NewTankAt(g, resolv.Vector{X: x, Y: y}, r, false)
+	t.IsRemote = true
+	t.ID = clientID
+	g.networkTanks[clientID] = t
+	g.Tanks = append(g.Tanks, t)
+
+	return t
+}
+
+// applyRemoteFire renders a projectile fired by a remote player.
+func (g *Game) applyRemoteFire(msg NetMessage) {
+	t := g.ensureNetTank(msg.ClientID, msg.X, msg.Y, msg.R)
+	if len(t.barrels) == 0 {
+		return
+	}
+	b := t.barrels[0]
+	b.relativeRotation = msg.R - t.Object.Rotation()
+	b.slope = msg.Slope
+	bullet := b.Fire()
+	bullet.visual = true
+	t.Bullets = append(t.Bullets, bullet)
+}
+
+// applyEnemyState updates the server-driven enemy visuals.
+func (g *Game) applyEnemyState(msg NetMessage) {
+	for _, es := range msg.Enemies {
+		e, ok := g.netEnemies[es.ID]
+		if !ok {
+			e = NewTankAt(g, resolv.Vector{X: es.X, Y: es.Y}, es.R, true)
+			e.ID = es.ID
+			g.netEnemies[es.ID] = e
+		}
+		e.Object.SetPositionVec(resolv.Vector{X: es.X, Y: es.Y})
+		e.Object.SetRotation(es.R)
+		if len(e.barrels) > 0 {
+			e.barrels[0].relativeRotation = es.Aim - e.Object.Rotation()
+		}
+	}
+}
+
+// applyEnemyFire renders a projectile fired by a server-simulated enemy.
+func (g *Game) applyEnemyFire(msg NetMessage) {
+	e, ok := g.netEnemies[msg.EnemyID]
+	if !ok || len(e.barrels) == 0 {
+		return
+	}
+	b := e.barrels[0]
+	b.relativeRotation = msg.R - e.Object.Rotation()
+	b.slope = msg.Slope
+	bullet := b.Fire()
+	bullet.visual = true
+	bullet.netID = msg.BulletID
+	e.Bullets = append(e.Bullets, bullet)
+}
+
+// applyEnemyHitPlayer shows the impact of an enemy bullet on a player: the
+// matching visual bullet is forced to land on the player, producing an
+// explosion (Server-authoritative).
+func (g *Game) applyEnemyHitPlayer(msg NetMessage) {
+	var target *Tank
+	if msg.ClientID == g.myClientID {
+		target = g.localPlayer
+	} else {
+		target = g.networkTanks[msg.ClientID]
+	}
+	if target == nil {
+		return
+	}
+
+	pos := target.Object.Center()
+
+	// Force the matching enemy bullet to land right on the player.
+	for _, e := range g.netEnemies {
+		for _, b := range e.Bullets {
+			if b.netID == msg.BulletID {
+				b.solid.SetPositionVec(pos)
+				b.hasHitTarget = true
+				b.altitude = initialAltitude
+				b.elapsedTime = 0.2
+				return
+			}
+		}
+	}
+
+	// Fallback: if the bullet visual was not found, spawn an explosion at the
+	// player's position using a dummy bullet.
+	b := &Bullet{
+		solid:        resolv.NewRectangle(pos.X, pos.Y, 8, 8),
+		hasHitTarget: true,
+		barrel:       &Barrel{tank: target},
+	}
+	e := NewExplosion(b)
+	target.game.explosions = append(target.game.explosions, e)
+}
+
+// sendLocalTransform relays the local player's transform at 20Hz.
+func (g *Game) sendLocalTransform() {
+	if g.localPlayer == nil {
+		return
+	}
+	g.netTick++
+	if g.netTick%3 != 0 {
+		return
+	}
+	center := g.localPlayer.Object.Center()
+	g.netClient.SendTransform(center.X, center.Y, g.localPlayer.Object.Rotation())
+}
+
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.playfield.Draw(screen)
+	if g.playfield != nil {
+		g.playfield.Draw(screen)
+	}
 
 	if g.state == PLAYING {
 
 		for _, f := range g.obstacles {
 			f.Draw(screen)
 		}
+
+		// server-driven enemies (multiplayer) are drawn above the terrain
+		if g.netClient != nil {
+			for _, e := range g.netEnemies {
+				e.Draw(screen)
+			}
+		}
+
 		for _, e := range g.Tanks {
+			e.Draw(screen)
+		}
+
+		// standalone explosions
+		for _, e := range g.explosions {
 			e.Draw(screen)
 		}
 		// Draw bullet above all
