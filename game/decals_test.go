@@ -46,6 +46,38 @@ func TestIsSoftGround(t *testing.T) {
 	}
 }
 
+// TestTrackSpriteForBody verifies track decal selection is matched to the tank
+// body size, and that the "_outline" suffix does not change it.
+func TestTrackSpriteForBody(t *testing.T) {
+	tests := []struct {
+		body string
+		want string
+	}{
+		{"tankBody_huge", "tracksLarge"},
+		{"tankBody_huge_outline", "tracksLarge"},
+		{"tankBody_bigRed", "tracksDouble"},
+		{"tankBody_bigRed_outline", "tracksDouble"},
+		{"tankBody_darkLarge", "tracksDouble"},
+		{"tankBody_darkLarge_outline", "tracksDouble"},
+		{"tankBody_red", "tracksSmall"},
+		{"tankBody_red_outline", "tracksSmall"},
+		{"tankBody_blue", "tracksSmall"},
+		{"tankBody_blue_outline", "tracksSmall"},
+		{"tankBody_dark", "tracksSmall"},
+		{"tankBody_dark_outline", "tracksSmall"},
+		{"tankBody_green", "tracksSmall"},
+		{"tankBody_green_outline", "tracksSmall"},
+		{"tankBody_sand", "tracksSmall"},
+		{"tankBody_sand_outline", "tracksSmall"},
+	}
+	for _, tc := range tests {
+		got := trackSpriteForBody(tc.body)
+		if got != tc.want {
+			t.Errorf("trackSpriteForBody(%q) = %q, want %q", tc.body, got, tc.want)
+		}
+	}
+}
+
 // TestTileAt verifies the cell lookup and clamping.
 func TestTileAt(t *testing.T) {
 	m := &maps.Map{

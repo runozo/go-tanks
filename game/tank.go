@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"math"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -53,8 +54,25 @@ type Tank struct {
 	netTarget  resolv.Vector // interpolated target from the last network transform
 	netTargetR float64
 	// Track imprint state
-	trackDist  float64       // distance travelled since the last decal
-	prevCenter resolv.Vector // center at the previous frame
+	trackDist   float64       // distance travelled since the last decal
+	prevCenter  resolv.Vector // center at the previous frame
+	trackSprite string        // track decal sprite matched to the body size
+}
+
+// trackSpriteForBody returns the track decal sprite matched to the tank body
+// size: huge bodies use tracksLarge, medium "big"/"Large" bodies use
+// tracksDouble, and the regular bodies use tracksSmall. The "_outline" suffix
+// is ignored, so outlined and plain variants share the same track.
+func trackSpriteForBody(bodyName string) string {
+	base := strings.TrimSuffix(bodyName, "_outline")
+	switch {
+	case strings.Contains(base, "huge"):
+		return "tracksLarge"
+	case strings.Contains(base, "big") || strings.Contains(base, "Large"):
+		return "tracksDouble"
+	default:
+		return "tracksSmall"
+	}
 }
 
 func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string, position resolv.Vector, rotation float64, isEnemy bool) *Tank {
@@ -76,6 +94,7 @@ func NewTank(g *Game, bodySpriteName, barrelSpriteName, bulletSpriteName string,
 		IsEnemy:        isEnemy,
 		ShootCooldown:  NewTimer(time.Millisecond*2500 + time.Millisecond*time.Duration(rand.Intn(1000))),
 		enemyOrbitSign: 1,
+		trackSprite:    trackSpriteForBody(bodySpriteName),
 	}
 
 	tank.Object.Rotate(rotation)

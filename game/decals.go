@@ -1,7 +1,6 @@
 package game
 
 import (
-	"math/rand"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -14,8 +13,6 @@ const (
 	trackCap      = 600  // maximum number of decals kept at once
 )
 
-var trackNames = []string{"tracksLarge", "tracksSmall", "tracksDouble"}
-
 // TrackDecal is a single faded tank-track imprint on the terrain.
 type TrackDecal struct {
 	x, y     float64
@@ -26,7 +23,7 @@ type TrackDecal struct {
 
 // leaveTracks may drop a track imprint behind the tank, but only on soft ground
 // (anything that is not a road). Each track sprite already shows both treads,
-// so a single decal centered on the tank (at its rotation) is enough.
+// and the sprite is chosen to match the tank body size.
 func (g *Game) leaveTracks(t *Tank) {
 	if g.playfield == nil {
 		return
@@ -37,7 +34,7 @@ func (g *Game) leaveTracks(t *Tank) {
 		return
 	}
 
-	spr := g.assets.GetSprite(trackNames[rand.Intn(len(trackNames))])
+	spr := g.assets.GetSprite(t.trackSprite)
 	if spr == nil {
 		return
 	}
