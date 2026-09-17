@@ -14,6 +14,7 @@ import (
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 var serveraddress = flag.String("addr", "", "http service address")
 var mapName = flag.String("map", "", "name of the map to load (default: random map)")
+var mapsDir = flag.String("mapsdir", "maps", "directory with runtime maps (for the editor)")
 
 func main() {
 	flag.Parse()
@@ -28,7 +29,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	g := game.NewGame(*serveraddress, *mapName)
+	g := game.NewGame(*serveraddress, *mapName, *mapsDir)
 	ebiten.SetFullscreen(true)
 	err := ebiten.RunGame(g)
 	if err != nil {

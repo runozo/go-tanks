@@ -6,6 +6,8 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 )
 
 //go:embed maps/*.json
@@ -36,9 +38,9 @@ type Map struct {
 	EnemySpawns []SpawnPoint      `json:"enemySpawns"`
 
 	// Derived fields (not serialized).
-	Width  int
-	Height int
-	Tiles  [][]string
+	Width  int        `json:"-"`
+	Height int        `json:"-"`
+	Tiles  [][]string `json:"-"`
 }
 
 // Parse validates and expands raw map json into a *Map. It checks that:
@@ -110,6 +112,39 @@ func All() ([]*Map, error) {
 		return nil, fmt.Errorf("no maps found")
 	}
 
+	return all, nil
+}
+
+// LoadDir loads and parses every *.json map in the given directory (a runtime
+// directory where authored/edited maps are stored). A missing directory is not
+// an error; it simply yields no maps.
+func LoadDir(dir string) ([]*Map, error) {
+	if dir == "" {
+		return nil, nil
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var all []*Map
+	for _, e := range entries {
+		if e.IsDir() || filepath.Ext(e.Name()) != ".json" {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, e.Name()))
+		if err != nil {
+			return nil, err
+		}
+		m, err := Parse(data, nil)
+		if err != nil {
+			return nil, fmt.Errorf("loading %s/%s: %w", dir, e.Name(), err)
+		}
+		all = append(all, m)
+	}
 	return all, nil
 }
 

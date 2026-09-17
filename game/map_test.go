@@ -32,7 +32,7 @@ func buildSpriteMap(t *testing.T) *assets.Assets {
 func TestMapsValid(t *testing.T) {
 	sprites := buildSpriteMap(t)
 
-	maps, err := loadMaps(sprites)
+	maps, err := loadMaps(sprites, "")
 	if err != nil {
 		t.Fatalf("loadMaps: %v", err)
 	}

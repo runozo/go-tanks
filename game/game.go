@@ -57,10 +57,12 @@ type Game struct {
 	Tanks         []*Tank
 	playfield     *Playfield
 	scoreLine     *ScoreLine
+	editor        *Editor
 	obstacles     []*Obstacle
 	fontMedium    *text.GoTextFace
 	fontSmall     *text.GoTextFace
 	serverAddress string
+	mapsDir       string
 	netClient     *NetClient
 	networkTanks  map[string]*Tank
 	netEnemies    map[string]*Tank // server-simulated enemies (multiplayer)
@@ -84,9 +86,10 @@ const (
 	HELP
 	OPTIONS
 	INTRO
+	EDITING
 )
 
-func NewGame(serverAddress, mapName string) *Game {
+func NewGame(serverAddress, mapName, mapsDir string) *Game {
 	// Load sprite sheet
 	spriteSheetData, err := assetsFS.ReadFile("assets/allSprites_default.png")
 	if err != nil {
@@ -103,7 +106,7 @@ func NewGame(serverAddress, mapName string) *Game {
 		jsonData,
 	)
 
-	mapsData, err := loadMaps(assets)
+	mapsData, err := loadMaps(assets, mapsDir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,6 +143,7 @@ func NewGame(serverAddress, mapName string) *Game {
 			Size:      fontSizeSmall,
 		},
 		serverAddress: serverAddress,
+		mapsDir:       mapsDir,
 		networkTanks:  make(map[string]*Tank),
 		netEnemies:    make(map[string]*Tank),
 		space:         resolv.NewSpace(screenWidth, screenHeight, cellWidth, cellHeight),
@@ -162,12 +166,20 @@ func NewGame(serverAddress, mapName string) *Game {
 	return g
 }
 
-// loadMaps reads every embedded map definition and validates it against the
-// available sprite map.
-func loadMaps(sprites *assets.Assets) ([]*Map, error) {
+// loadMaps reads the embedded maps plus any runtime maps in dir, validating
+// them against the available sprite map.
+func loadMaps(sprites *assets.Assets, dir string) ([]*Map, error) {
 	all, err := maps.All()
 	if err != nil {
 		return nil, err
+	}
+
+	if dir != "" {
+		runtimeMaps, err := maps.LoadDir(dir)
+		if err != nil {
+			return nil, fmt.Errorf("loading runtime maps: %w", err)
+		}
+		all = append(all, runtimeMaps...)
 	}
 
 	for _, m := range all {
@@ -183,12 +195,18 @@ func loadMaps(sprites *assets.Assets) ([]*Map, error) {
 }
 
 // pickMap returns the map selected by g.mapName if set, otherwise a random one.
+// For a named map, the last match wins so that runtime maps (appended after the
+// embedded ones) can override a built-in map with the same name.
 func (g *Game) pickMap() *Map {
 	if g.mapName != "" {
+		var found *Map
 		for _, m := range g.maps {
 			if m.Name == g.mapName {
-				return m
+				found = m
 			}
+		}
+		if found != nil {
+			return found
 		}
 		log.Fatalf("map %q not found", g.mapName)
 	}
@@ -197,6 +215,16 @@ func (g *Game) pickMap() *Map {
 
 func (g *Game) Update() error {
 	tps := float64(ebiten.TPS())
+
+	// Map editor toggle (single player).
+	if inpututil.IsKeyJustPressed(ebiten.KeyE) && g.netClient == nil && g.state != EDITING {
+		g.enterEditor()
+		return nil
+	}
+	if g.state == EDITING {
+		g.editor.Update(tps)
+		return nil
+	}
 
 	if g.netClient != nil {
 		g.processNetMessages()
@@ -285,6 +313,66 @@ func (g *Game) setupSinglePlayer() {
 	g.scoreLine = NewScoreLine(g)
 
 	g.state = PLAYING
+}
+
+// ---------------------------------------------------------------------------
+// Map editor
+// ---------------------------------------------------------------------------
+
+func (g *Game) enterEditor() {
+	if g.editor == nil {
+		g.editor = NewEditor(g)
+	}
+	if g.playfield != nil {
+		g.editor.LoadFromMap(g.playfield.mapData)
+	}
+	g.state = EDITING
+}
+
+// exitEditor leaves the editor; when play is true, it persists the edited map
+// and rebuilds the playfield so it can be played immediately.
+func (g *Game) exitEditor(play bool) {
+	m := g.editor.ToMap(g.editor.name)
+	g.upsertMap(m)
+	g.mapName = m.Name
+
+	if !play {
+		g.state = PLAYING
+		return
+	}
+
+	if g.mapsDir != "" {
+		if err := g.editor.Save(); err != nil {
+			log.Printf("save map: %v", err)
+		}
+	}
+
+	g.space.RemoveAll()
+	g.obstacles = []*Obstacle{}
+	g.Tanks = nil
+	g.playfield = NewPlayfield(g)
+	g.state = RENDERINGPLAYFIELD
+}
+
+// reloadRuntimeMaps re-reads embedded + runtime maps (used after a save).
+func (g *Game) reloadRuntimeMaps() {
+	all, err := loadMaps(g.assets, g.mapsDir)
+	if err != nil {
+		log.Printf("reload maps: %v", err)
+		return
+	}
+	g.maps = all
+}
+
+// upsertMap inserts the map into the in-memory list, replacing by name.
+func (g *Game) upsertMap(m *Map) {
+	for i, existing := range g.maps {
+		if existing.Name == m.Name {
+			g.maps[i] = m
+			return
+		}
+	}
+	g.maps = append(g.maps, m)
 }
 
 // ---------------------------------------------------------------------------
@@ -510,6 +598,10 @@ func (g *Game) sendLocalTransform() {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	if g.state == EDITING {
+		g.editor.Draw(screen)
+		return
+	}
 	if g.playfield != nil {
 		g.playfield.Draw(screen)
 	}
